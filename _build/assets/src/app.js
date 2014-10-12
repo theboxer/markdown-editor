@@ -127,6 +127,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         var fullscreenButton = Ext.get('fullscreen-button');
         var preview = Ext.get('preview-md');
         var content = Ext.get('content-md');
+        var wrapper = content.parent();
 
         var dropTarget = MODx.load({
             xtype: 'modx-treedrop',
@@ -158,12 +159,18 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         });
 
         fullscreenButton.addListener('click', function () {
-            if (fullscreenButton.child('i').hasClass('icon-expand')) {
-                fullscreenButton.child('i').removeClass('icon-expand');
-                fullscreenButton.child('i').addClass('icon-compress');
+            var icon = fullscreenButton.child('i');
+
+            if (icon.hasClass('icon-expand')) {
+                icon.removeClass('icon-expand');
+                icon.addClass('icon-compress');
+
+                wrapper.addClass('fullscreen');
             } else {
-                fullscreenButton.child('i').addClass('icon-expand');
-                fullscreenButton.child('i').removeClass('icon-compress');
+                icon.addClass('icon-expand');
+                icon.removeClass('icon-compress');
+
+                wrapper.removeClass('fullscreen');
             }
         });
 
