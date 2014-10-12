@@ -16,7 +16,10 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.textarea.setWidth(0);
         this.textarea.setHeight(0);
 
-        var wrapper = Ext.DomHelper.insertBefore(this.textarea, {tag: 'div'});
+        var wrapper = Ext.DomHelper.insertBefore(this.textarea, {
+            tag: 'div',
+            class: 'markdown-container'
+        });
 
         Ext.DomHelper.append(wrapper,{
             tag: 'div',

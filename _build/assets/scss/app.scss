@@ -1,6 +1,14 @@
-#preview-md {
-  width: 500px !important;
+.markdown-container {
+  position: relative;
+}
 
+#content-md,
+#preview-md {
+}
+
+#preview-md {
+//  width: 500px !important;
+  min-height: 252px;
   display: none;
 }
 

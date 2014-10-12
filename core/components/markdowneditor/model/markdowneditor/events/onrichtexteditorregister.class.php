@@ -5,4 +5,3 @@ class OnRichTextEditorRegister extends MarkdownEditorPlugin {
         return;
     }
 }
- 
