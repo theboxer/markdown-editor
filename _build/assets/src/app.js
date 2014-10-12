@@ -12,7 +12,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
     }
 
     ,buildUI: function() {
-        this.textarea.hide();
+        this.textarea.setDisplayed('none');
         this.textarea.setWidth(0);
         this.textarea.setHeight(0);
 
@@ -121,14 +121,14 @@ Ext.extend(MarkdownEditor,Ext.Component,{
 
         previewButton.addListener('click', function (a,b,c,d) {
             if (preview.isVisible()) {
-                preview.hide();
-                content.show();
+                preview.setDisplayed('none');
+                content.setDisplayed('block');
 
                 previewButton.child('i').removeClass('icon-toggle-on');
                 previewButton.child('i').addClass('icon-toggle-off');
             } else {
-                preview.show();
-                content.hide();
+                preview.setDisplayed('block');
+                content.setDisplayed('none');
 
                 previewButton.child('i').removeClass('icon-toggle-off');
                 previewButton.child('i').addClass('icon-toggle-on');
