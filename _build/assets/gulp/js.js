@@ -10,7 +10,7 @@ gulp.task('libjs', function () {
         return gulp.src([
                 'bower_components/ace-builds/src-noconflict/ace.js',
                 'bower_components/marked/lib/marked.js',
-                'bower_components/highlight/highlight.pack.js',
+                'src/vendor/highlight/highlight.pack.js',
                 'bower_components/ace-builds/src-noconflict/mode-markdown.js',
                 'bower_components/ace-builds/src-noconflict/theme-monokai.js'
             ])
