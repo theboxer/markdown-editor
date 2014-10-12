@@ -40,6 +40,10 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 tag: 'span',
                 id: 'preview-button',
                 html: '<i class="icon icon-toggle-off"></i> Preview'
+            },{
+                tag: 'span',
+                id: 'fullscreen-button',
+                html: '<i class="icon icon-expand"></i>'
             }]
         });
 
@@ -120,6 +124,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
 
 
         var previewButton = Ext.get('preview-button');
+        var fullscreenButton = Ext.get('fullscreen-button');
         var preview = Ext.get('preview-md');
         var content = Ext.get('content-md');
 
@@ -136,7 +141,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         });
         this.textarea.on('destroy', function() {dropTarget.destroy();});
 
-        previewButton.addListener('click', function (a,b,c,d) {
+        previewButton.addListener('click', function () {
             if (preview.isVisible()) {
                 preview.setDisplayed('none');
                 content.setDisplayed('block');
@@ -149,6 +154,16 @@ Ext.extend(MarkdownEditor,Ext.Component,{
 
                 previewButton.child('i').removeClass('icon-toggle-off');
                 previewButton.child('i').addClass('icon-toggle-on');
+            }
+        });
+
+        fullscreenButton.addListener('click', function () {
+            if (fullscreenButton.child('i').hasClass('icon-expand')) {
+                fullscreenButton.child('i').removeClass('icon-expand');
+                fullscreenButton.child('i').addClass('icon-compress');
+            } else {
+                fullscreenButton.child('i').addClass('icon-expand');
+                fullscreenButton.child('i').removeClass('icon-compress');
             }
         });
 
