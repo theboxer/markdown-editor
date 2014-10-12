@@ -1,0 +1,16 @@
+{
+    "name": "MarkdownEditor",
+    "lowCaseName": "markdowneditor",
+    "description": "Markdown editor",
+    "author": "John Peca",
+    "version": "0.1.0",
+    "package":{
+        "elements": {
+            "plugins": [{
+                "name": "MarkdownEditor",
+                "events": ["OnRichTextEditorRegister", "OnRichTextEditorInit", "OnRichTextBrowserInit", "OnManagerPageBeforeRender", "OnDocFormPrerender"]
+            }]
+        },
+        "systemSettings": []
+    }
+}

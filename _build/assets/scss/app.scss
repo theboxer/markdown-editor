@@ -1,0 +1,19 @@
+#preview-md {
+  width: 500px !important;
+
+  display: none;
+}
+
+#toolbox {
+  position: absolute;
+  z-index: 999;
+  right: 10px;
+  bottom: 25px;
+  background-color: #f0f0f0;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+#toolbox span {
+  cursor: pointer;
+}
