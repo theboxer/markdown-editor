@@ -52,7 +52,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor = ace.edit(Ext.DomQuery.selectNode('div#content-md'));
         this.editor.setOptions({
             maxLines: Infinity,
-            minLines: 15,
+            minLines: 25,
             showPrintMargin: false
         });
         this.editor.renderer.setShowGutter(false);
