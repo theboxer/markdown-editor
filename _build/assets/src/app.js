@@ -49,7 +49,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor = ace.edit(Ext.DomQuery.selectNode('div#content-md'));
         this.editor.setOptions({
             maxLines: Infinity,
-            minLines: 10,
+            minLines: 15,
             showPrintMargin: false
         });
         this.editor.renderer.setShowGutter(false);
@@ -118,6 +118,19 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         var previewButton = Ext.get('preview-button');
         var preview = Ext.get('preview-md');
         var content = Ext.get('content-md');
+
+        var dropTarget = MODx.load({
+            xtype: 'modx-treedrop',
+            target: content,
+            targetEl: content,
+            onInsert: (function(s){
+                this.insert(s);
+                this.focus();
+                return true;
+            }).bind(this.editor),
+            iframe: true
+        });
+        this.textarea.on('destroy', function() {dropTarget.destroy();});
 
         previewButton.addListener('click', function (a,b,c,d) {
             if (preview.isVisible()) {
