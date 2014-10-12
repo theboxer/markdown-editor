@@ -1,5 +1,45 @@
 .markdown-container {
   position: relative;
+
+    &.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+
+        #content-md,
+        #preview-md {
+            display: block;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            overflow: auto;
+        }
+        #content-md {
+            left: 0;
+            right: 50%;
+            height: auto !important;
+
+            .ace_scroller {
+                overflow: auto;
+            }
+            .ace_content {
+                height: auto !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        }
+        #preview-md {
+            left: 50%;
+            right: 0;
+            background: #ffffff;
+        }
+    }
 }
 
 #content-md,
