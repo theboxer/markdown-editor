@@ -29,7 +29,8 @@ Ext.extend(MarkdownEditor,Ext.Component,{
 
         Ext.DomHelper.append(wrapper,{
             tag: 'div',
-            id: 'preview-md'
+            id: 'preview-md',
+            class: 'markdown-body'
         });
 
         Ext.DomHelper.append(wrapper,{
