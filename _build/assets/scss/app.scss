@@ -8,6 +8,7 @@
         right: 0;
         bottom: 0;
         z-index: 9999;
+        overflow: hidden;
 
         #content-md,
         #preview-md {
@@ -15,24 +16,25 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            overflow: auto;
+            padding: 5px;
+//            overflow: auto;
         }
         #content-md {
             left: 0;
             right: 50%;
             height: auto !important;
 
-            .ace_scroller {
-                overflow: auto;
-            }
-            .ace_content {
-                height: auto !important;
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
+//            .ace_scroller {
+//                overflow: auto;
+//            }
+//            .ace_content {
+//                height: auto !important;
+//                position: absolute;
+//                top: 0;
+//                left: 0;
+//                right: 0;
+//                bottom: 0;
+//            }
         }
         #preview-md {
             left: 50%;

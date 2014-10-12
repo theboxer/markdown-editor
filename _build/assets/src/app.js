@@ -54,16 +54,21 @@ Ext.extend(MarkdownEditor,Ext.Component,{
     }
 
     ,registerAce: function() {
+        var mde = this;
         this.editor = ace.edit(Ext.DomQuery.selectNode('div#content-md'));
         this.editor.setOptions({
             maxLines: Infinity,
             minLines: 25,
-            showPrintMargin: false
+            showPrintMargin: false,
+            autoScrollEditorIntoView: true
         });
-        this.editor.renderer.setShowGutter(false);
+        this.editor.renderer.setShowGutter(true);
+        this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
         this.editor.getSession().setMode("ace/mode/markdown");
         this.editor.setTheme("ace/theme/monokai");
+
+        console.log('test');
     }
 
     ,languageOverrides: {
@@ -165,14 +170,28 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 icon.removeClass('icon-expand');
                 icon.addClass('icon-compress');
 
+                preview.setDisplayed('block');
+                content.setDisplayed('block');
+
+                previewButton.hide();
+
                 wrapper.addClass('fullscreen');
+
+                this.editor.setOption('maxLines', null);
             } else {
                 icon.addClass('icon-expand');
                 icon.removeClass('icon-compress');
 
+                preview.setDisplayed('none');
+                content.setDisplayed('block');
+
+                previewButton.show();
+
                 wrapper.removeClass('fullscreen');
+
+                this.editor.setOption('maxLines', Infinity);
             }
-        });
+        }, this);
 
         preview.update(marked(this.editor.getValue()));
         this.editor.getSession().on('change', function(){
