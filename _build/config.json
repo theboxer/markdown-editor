@@ -8,7 +8,7 @@
         "elements": {
             "plugins": [{
                 "name": "MarkdownEditor",
-                "events": ["OnRichTextEditorRegister", "OnRichTextEditorInit", "OnRichTextBrowserInit", "OnManagerPageBeforeRender", "OnDocFormPrerender"]
+                "events": ["OnRichTextEditorRegister", "OnRichTextEditorInit", "OnRichTextBrowserInit", "OnManagerPageBeforeRender", "OnDocFormPrerender", "OnBeforeDocFormSave"]
             }]
         },
         "systemSettings": []

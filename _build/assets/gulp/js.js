@@ -12,6 +12,7 @@ gulp.task('libjs', function () {
                 'bower_components/marked/lib/marked.js',
                 'src/vendor/highlight/highlight.pack.js',
                 'bower_components/ace-builds/src-noconflict/mode-markdown.js',
+                'bower_components/ace-builds/src-noconflict/ext-language_tools.js',
                 'bower_components/ace-builds/src-noconflict/theme-monokai.js'
             ])
             .pipe(plumber())

@@ -16,6 +16,17 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.textarea.setWidth(0);
         this.textarea.setHeight(0);
 
+        Ext.DomHelper.insertBefore(this.textarea, {
+            tag: 'textarea',
+            name: 'ta_markdown',
+            id: 'ta_markdown'
+        });
+
+        this.taMarkdown = Ext.get('ta_markdown');
+        this.taMarkdown.setDisplayed('none');
+        this.taMarkdown.setWidth(0);
+        this.taMarkdown.setHeight(0);
+
         var wrapper = Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'div',
             class: 'markdown-container'
@@ -59,16 +70,12 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor.setOptions({
             maxLines: Infinity,
             minLines: 25,
-            showPrintMargin: false,
-            autoScrollEditorIntoView: true
         });
         this.editor.renderer.setShowGutter(true);
         this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
         this.editor.getSession().setMode("ace/mode/markdown");
         this.editor.setTheme("ace/theme/monokai");
-
-        console.log('test');
     }
 
     ,languageOverrides: {
@@ -178,6 +185,8 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 wrapper.addClass('fullscreen');
 
                 this.editor.setOption('maxLines', null);
+                //this.editor.setAutoScrollEditorIntoView(false);
+
             } else {
                 icon.addClass('icon-expand');
                 icon.removeClass('icon-compress');
@@ -190,12 +199,23 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 wrapper.removeClass('fullscreen');
 
                 this.editor.setOption('maxLines', Infinity);
+                //this.editor.setAutoScrollEditorIntoView(true);
+
             }
+
+            this.editor.resize(true);
         }, this);
+
+        this.editor.setValue(MarkdownEditor_content.content);
+        this.editor.selection.clearSelection();
 
         preview.update(marked(this.editor.getValue()));
         this.editor.getSession().on('change', function(){
-            preview.update(marked(mde.editor.getValue()));
+            var parsed = marked(mde.editor.getValue());
+
+            mde.textarea.dom.value = parsed;
+            mde.taMarkdown.dom.value = mde.editor.getValue();
+            preview.update(parsed);
         });
     }
 });

@@ -1,5 +1,5 @@
 <?php
-class OnRichTextEditorInit extends MarkdownEditorPlugin {
+class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
 
     public function run() {
         if ($this->modx->getOption('use_editor', null, false) == false) return;

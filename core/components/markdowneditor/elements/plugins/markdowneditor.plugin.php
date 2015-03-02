@@ -17,11 +17,14 @@ $markdowneditor = $modx->getService(
     )
 );
 
-$modx->loadClass('MarkdownEditorPlugin', $markdowneditor->getOption('modelPath') . 'markdowneditor/events/', true, true);
-$modx->loadClass($modx->event->name, $markdowneditor->getOption('modelPath') . 'markdowneditor/events/', true, true);
+$className = 'MarkdownEditor' . $modx->event->name;
 
-if (class_exists($modx->event->name)) {
-    $handler = new $modx->event->name($modx, $scriptProperties);
+$modx->loadClass('MarkdownEditorPlugin', $markdowneditor->getOption('modelPath') . 'markdowneditor/events/', true, true);
+$modx->loadClass($className, $markdowneditor->getOption('modelPath') . 'markdowneditor/events/', true, true);
+
+if (class_exists($className)) {
+    /** @var MarkdownEditorPlugin $handler */
+    $handler = new $className($modx, $scriptProperties);
     $handler->run();
 }
 
