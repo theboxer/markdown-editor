@@ -1,6 +1,6 @@
 <?php
 class MarkdownEditorOnBeforeDocFormSave extends MarkdownEditorPlugin {
-    public function run() {
+    public function process() {
         /** @var modResource $resource */
         $resource = $this->scriptProperties['resource'];
 

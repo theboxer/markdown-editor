@@ -5,10 +5,20 @@ var MarkdownEditor = function(config) {
 Ext.override(MODx.panel.Resource, {});
 
 Ext.extend(MarkdownEditor,Ext.Component,{
-    initComponent: function() {
+    remarkable: ''
+    ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
         Ext.onReady(this.render, this);
+    }
+
+    ,parse: function(input) {
+        var output = this.remarkable.render(input);
+
+        output = output.replace(/%5B/g, '[');
+        output = output.replace(/%5D/g, ']');
+
+        return output;
     }
 
     ,buildUI: function() {
@@ -70,52 +80,56 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor.setOptions({
             maxLines: Infinity,
             minLines: 25,
+            enableBasicAutocompletion: true
         });
         this.editor.renderer.setShowGutter(true);
         this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
         this.editor.getSession().setMode("ace/mode/markdown");
         this.editor.setTheme("ace/theme/monokai");
-    }
 
-    ,languageOverrides: {
-        js: 'javascript'
-        ,html: 'xml'
+        var langTools = ace.require("ace/ext/language_tools");
+        var rhymeCompleter = {
+            getCompletions: function(editor, session, pos, prefix, callback) {
+                if (prefix.length === 0) { callback(null, []); return }
+                MODx.Ajax.request({
+                    url: MarkdownEditor_config.connectorUrl
+                    ,params: {
+                        action: 'mgr/resource/getlist'
+                        ,prefix: prefix
+                    },
+                    listeners: {
+                        'success': {
+                            fn: function(r) {
+                                callback(null, r.results);
+                            },
+                            scope: this
+                        }
+                    }
+                });
+
+            }
+        };
+        langTools.addCompleter(rhymeCompleter);
     }
 
     ,registerMarked: function() {
         var mde = this;
-        var renderer = new marked.Renderer();
-
-        renderer.code = function(code, lang, escaped) {
-            if (this.options.highlight) {
-                var out = this.options.highlight(code, lang);
-                if (out != null && out !== code) {
-                    escaped = true;
-                    code = out;
+        this.remarkable = new Remarkable({
+            html: true,
+            highlight: function (str, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(lang, str).value;
+                    } catch (err) {}
                 }
+
+                try {
+                    return hljs.highlightAuto(str).value;
+                } catch (err) {}
+
+                return ''; // use external default escaping
             }
-
-            if (!lang) {
-                return '<pre><code>'
-                + (escaped ? code : escape(code, true))
-                + '\n</code></pre>';
-            }
-
-            return '<pre><code class="hljs '
-            + this.options.langPrefix
-            + escape(lang, true)
-            + '">'
-            + (escaped ? code : escape(code, true))
-            + '\n</code></pre>\n';
-        };
-
-        marked.setOptions({
-            highlight: function(code, lang){
-                if(mde.languageOverrides[lang]) lang = mde.languageOverrides[lang];
-                return (hljs.listLanguages().indexOf(lang) != -1) ? hljs.highlight(lang, code).value : code;
-            },
-            renderer: renderer
         });
     }
 
@@ -209,9 +223,9 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor.setValue(MarkdownEditor_content.content);
         this.editor.selection.clearSelection();
 
-        preview.update(marked(this.editor.getValue()));
+        preview.update(this.parse(this.editor.getValue()));
         this.editor.getSession().on('change', function(){
-            var parsed = marked(mde.editor.getValue());
+            var parsed = mde.parse(mde.editor.getValue());
 
             mde.textarea.dom.value = parsed;
             mde.taMarkdown.dom.value = mde.editor.getValue();

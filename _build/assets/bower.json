@@ -15,7 +15,7 @@
     ],
     "dependencies": {
         "ace-builds": "",
-        "marked": "",
+        "remarkable": "",
         "github-markdown-css": ""
     }
 }

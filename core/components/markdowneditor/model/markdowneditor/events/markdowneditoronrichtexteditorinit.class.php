@@ -1,12 +1,21 @@
 <?php
 class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
 
-    public function run() {
-        if ($this->modx->getOption('use_editor', null, false) == false) return;
+    public function init()
+    {
+        if (isset($this->scriptProperties['resource'])) {
+            if (!$this->scriptProperties['resource']->richtext) return false;
+        }
 
-        $selectedRTE = isset($editor) ? $editor : $this->modx->getOption('which_editor', null, '');
-        if ($selectedRTE !== 'MarkdownEditor') return;
+        $useEditor = $this->modx->getOption('use_editor', false);
+        $whichEditor = $this->modx->getOption('which_editor', '');
 
+        if ($useEditor && $whichEditor == 'MarkdownEditor') return true;
+
+        return false;
+    }
+
+    public function process() {
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'dependencies.css');
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'app.css');
 

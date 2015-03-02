@@ -9,7 +9,7 @@ var sourcemaps = require('gulp-sourcemaps');
 gulp.task('libjs', function () {
         return gulp.src([
                 'bower_components/ace-builds/src-noconflict/ace.js',
-                'bower_components/marked/lib/marked.js',
+                'bower_components/remarkable/dist/remarkable.js',
                 'src/vendor/highlight/highlight.pack.js',
                 'bower_components/ace-builds/src-noconflict/mode-markdown.js',
                 'bower_components/ace-builds/src-noconflict/ext-language_tools.js',

@@ -16,5 +16,17 @@ abstract class MarkdownEditorPlugin {
         $this->markdowneditor = $this->modx->markdowneditor;
     }
 
-    abstract public function run();
+    public function run() {
+        $init = $this->init();
+        if ($init !== true) {
+            return;
+        }
+        $this->process();
+    }
+
+    public function init() {
+        return true;
+    }
+
+    abstract public function process();
 }

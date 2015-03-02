@@ -1,7 +1,6 @@
 <?php
 class MarkdownEditorOnRichTextEditorRegister extends MarkdownEditorPlugin {
-    public function run() {
+    public function process() {
         $this->modx->event->output('MarkdownEditor');
-        return;
     }
 }
