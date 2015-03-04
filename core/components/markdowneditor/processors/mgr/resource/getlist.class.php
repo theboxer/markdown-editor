@@ -27,7 +27,7 @@ class MarkdownEditorResourceGetListProcessor extends modObjectGetListProcessor {
             if (!empty($objectArray) && is_array($objectArray)) {
                 $resourceArray = array();
                 $resourceArray['caption'] = $objectArray['pagetitle'];
-                $resourceArray['snippet'] = '[[~' . $objectArray['id'] . ']]';
+                $resourceArray['snippet'] = '[' . $objectArray['pagetitle'] . ']([[~' . $objectArray['id'] . ']])';
                 $resourceArray['meta'] = 'Resources';
 
                 $list[] = $resourceArray;

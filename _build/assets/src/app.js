@@ -12,11 +12,39 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         Ext.onReady(this.render, this);
     }
 
+    ,parseRequest: ''
     ,parse: function(input) {
         var output = this.remarkable.render(input);
 
         output = output.replace(/%5B/g, '[');
         output = output.replace(/%5D/g, ']');
+
+        if (this.parseRequest) {
+            clearTimeout(this.parseRequest);
+        }
+
+        this.parseRequest = setTimeout(function(){
+            MODx.Ajax.request({
+                url: MarkdownEditor_config.connectorUrl
+                ,params: {
+                    action: 'mgr/editor/processcontent'
+                    ,content: output
+                    ,resource: MODx.request.id
+                },
+                isUpload : true,
+                listeners: {
+                    'success': {
+                        fn: function(r) {
+                            Ext.get('preview-md').update(r.data);
+                        },
+                        scope: this
+                    }
+                }
+            });
+        }, 150);
+
+        this.taMarkdown.dom.value = this.editor.getValue();
+        this.textarea.dom.value = output;
 
         return output;
     }
@@ -111,6 +139,55 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             }
         };
         langTools.addCompleter(rhymeCompleter);
+
+        this.editor.container.addEventListener("dragenter", this.catchAndDoNothing, false);
+        this.editor.container.addEventListener("dragover", this.catchAndDoNothing, false);
+        this.editor.container.addEventListener("drop", this.drop.bind(this), false);
+    }
+
+    ,catchAndDoNothing: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    ,drop: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        Ext.each(e.dataTransfer.files, function(file) {
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('action', 'mgr/editor/upload');
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', MarkdownEditor_config.connectorUrl);
+            xhr.setRequestHeader('Powered-By', 'MODx');
+            xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
+
+            //xhr.upload.onprogress = function (event) {
+            //    if (event.lengthComputable) {
+            //        var complete = (event.loaded / event.total * 100 | 0);
+            //        progress.value = progress.innerHTML = complete;
+            //    }
+            //};
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.success == true) {
+                        console.log(res);
+                        this.editor.insert('![' + res.name + '](' + res.path + ')');
+                    }
+                    console.log('all done: ' + xhr.status);
+                } else {
+                    console.log('Something went terribly wrong...');
+                }
+            }.bind(this);
+
+            xhr.send(formData);
+
+        }, this);
+
     }
 
     ,registerMarked: function() {
@@ -131,6 +208,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 return ''; // use external default escaping
             }
         });
+        this.remarkable.inline.ruler.disable([ 'backticks' ]);
     }
 
     ,render: function() {
@@ -224,12 +302,14 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor.selection.clearSelection();
 
         preview.update(this.parse(this.editor.getValue()));
-        this.editor.getSession().on('change', function(){
+
+        this.editor.getSession().on('change', function(e){
             var parsed = mde.parse(mde.editor.getValue());
 
-            mde.textarea.dom.value = parsed;
-            mde.taMarkdown.dom.value = mde.editor.getValue();
-            preview.update(parsed);
+
+            //mde.textarea.dom.value = parsed;
+            //mde.taMarkdown.dom.value = mde.editor.getValue();
+            //preview.update(parsed);
         });
     }
 });
