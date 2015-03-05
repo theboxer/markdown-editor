@@ -97,6 +97,12 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         });
 
         Ext.DomHelper.append(wrapper,{
+            tag: 'div',
+            id: 'status-bar',
+            html: 'Attach images by dragging & dropping,  selecting them, or pasting from the clipboard.'
+        });
+
+        Ext.DomHelper.append(wrapper,{
             tag: 'span',
             style: 'clear: both',
         });

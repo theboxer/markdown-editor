@@ -40,6 +40,7 @@
             left: 50%;
             right: 0;
             background: #ffffff;
+            overflow-y: auto;
         }
     }
 }
@@ -54,12 +55,17 @@
   display: none;
 }
 
+#content-md {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 #toolbox {
   position: absolute;
   z-index: 999;
 
   right: 10px;
-  bottom: 25px;
+  bottom: 35px;
 }
 
 #fullscreen-button,
@@ -80,4 +86,18 @@
     cursor: pointer;
     background: #ccc;
   }
+}
+
+#status-bar {
+  background: rgba(39, 40, 34, 0.78);
+  height: 25px;
+  position: relative;
+  top: -1px;
+  z-index: 999;
+  border: 1px solid #E4E4E4;
+  border-top: none;
+  color: #F0F0F0;
+  font-size: 12px;
+  line-height: 25px;
+  padding-left: 10px;
 }
