@@ -17,30 +17,27 @@
             top: 0;
             bottom: 0;
             padding: 5px;
-//            overflow: auto;
         }
+
         #content-md {
             left: 0;
             right: 50%;
+            bottom: 24px;
             height: auto !important;
-
-//            .ace_scroller {
-//                overflow: auto;
-//            }
-//            .ace_content {
-//                height: auto !important;
-//                position: absolute;
-//                top: 0;
-//                left: 0;
-//                right: 0;
-//                bottom: 0;
-//            }
         }
+
         #preview-md {
             left: 50%;
             right: 0;
             background: #ffffff;
             overflow-y: auto;
+        }
+        #status-bar {
+          position: absolute;
+          left: 0;
+          right: 50%;
+          bottom: -1px;
+          top: auto;
         }
     }
 }
@@ -50,7 +47,6 @@
 }
 
 #preview-md {
-//  width: 500px !important;
   min-height: 412px;
   display: none;
 }
@@ -100,4 +96,13 @@
   font-size: 12px;
   line-height: 25px;
   padding-left: 10px;
+}
+
+.markdown-body {
+  ul {
+    list-style: disc;
+  }
+  ol {
+    list-style: decimal;
+  }
 }
