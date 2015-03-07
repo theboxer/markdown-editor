@@ -5,7 +5,11 @@ var plumber = require('gulp-plumber');
 var concat = require('gulp-concat');
 
 gulp.task('libcss', function () {
-    return gulp.src(['src/vendor/highlight/styles/github.css', 'bower_components/github-markdown-css/github-markdown.css'])
+    return gulp.src([
+            'src/vendor/highlight/styles/github.css',
+            'bower_components/github-markdown-css/github-markdown.css',
+            'bower_components/cropper/dist/cropper.min.css'
+        ])
         .pipe(plumber())
         .pipe(concat('dependencies.css'))
         .pipe(gulp.dest('../../assets/components/markdowneditor/css'));

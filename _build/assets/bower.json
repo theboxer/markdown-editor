@@ -16,6 +16,7 @@
     "dependencies": {
         "ace-builds": "",
         "remarkable": "",
-        "github-markdown-css": ""
+        "github-markdown-css": "",
+        "cropper": ""
     }
 }

@@ -47,6 +47,7 @@
 }
 
 #preview-md {
+//  width: 500px !important;
   min-height: 412px;
   display: none;
 }
@@ -86,7 +87,7 @@
 
 #status-bar {
   background: rgba(39, 40, 34, 0.78);
-  height: 25px;
+  min-height: 25px;
   position: relative;
   top: -1px;
   z-index: 999;
@@ -96,6 +97,21 @@
   font-size: 12px;
   line-height: 25px;
   padding-left: 10px;
+}
+
+.image-upload-wrapper {
+  height: 364px;
+  width: 100%;
+  margin-top: 15px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,.25);
+  background-color: #fcfcfc;
+  overflow: hidden;
+}
+
+.image-upload-wrapper img {
+  display: block;
+  height: auto;
+  max-width: 100%;
 }
 
 .markdown-body {

@@ -13,7 +13,9 @@ gulp.task('libjs', function () {
                 'src/vendor/highlight/highlight.pack.js',
                 'bower_components/ace-builds/src-noconflict/mode-markdown.js',
                 'bower_components/ace-builds/src-noconflict/ext-language_tools.js',
-                'bower_components/ace-builds/src-noconflict/theme-monokai.js'
+                'bower_components/ace-builds/src-noconflict/theme-monokai.js',
+                'bower_components/jquery/dist/jquery.min.js',
+                'bower_components/cropper/dist/cropper.min.js'
             ])
             .pipe(plumber())
             .pipe(concat('dependencies.js'))

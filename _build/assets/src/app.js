@@ -5,7 +5,8 @@ var MarkdownEditor = function(config) {
 Ext.override(MODx.panel.Resource, {});
 
 Ext.extend(MarkdownEditor,Ext.Component,{
-    remarkable: ''
+    window: {}
+    ,remarkable: ''
     ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
@@ -161,14 +162,30 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         e.preventDefault();
 
         Ext.each(e.dataTransfer.files, function(file) {
-            var formData = new FormData();
-            formData.append('file', file);
-            formData.append('action', 'mgr/editor/upload');
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', MarkdownEditor_config.connectorUrl);
-            xhr.setRequestHeader('Powered-By', 'MODx');
-            xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
+            if (file.type == 'image/jpeg') {
+                MODx.load({
+                    xtype: 'markdowneditor-window-cropper'
+                    ,file: file
+                    ,md: this
+                }).show();
+
+                $('.image-upload-wrapper > img').cropper({
+                    aspectRatio: 1
+                });
+            } else {
+                console.log('not image');
+            }
+
+
+            //var formData = new FormData();
+            //formData.append('file', file);
+            //formData.append('action', 'mgr/editor/upload');
+            //
+            //var xhr = new XMLHttpRequest();
+            //xhr.open('POST', MarkdownEditor_config.connectorUrl);
+            //xhr.setRequestHeader('Powered-By', 'MODx');
+            //xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
 
             //xhr.upload.onprogress = function (event) {
             //    if (event.lengthComputable) {
@@ -177,20 +194,20 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             //    }
             //};
 
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var res = JSON.parse(xhr.responseText);
-                    if (res.success == true) {
-                        console.log(res);
-                        this.editor.insert('![' + res.name + '](' + res.path + ')');
-                    }
-                    console.log('all done: ' + xhr.status);
-                } else {
-                    console.log('Something went terribly wrong...');
-                }
-            }.bind(this);
-
-            xhr.send(formData);
+            //xhr.onload = function () {
+            //    if (xhr.status === 200) {
+            //        var res = JSON.parse(xhr.responseText);
+            //        if (res.success == true) {
+            //            console.log(res);
+            //            this.editor.insert('![' + res.name + '](' + res.path + ')');
+            //        }
+            //        console.log('all done: ' + xhr.status);
+            //    } else {
+            //        console.log('Something went terribly wrong...');
+            //    }
+            //}.bind(this);
+            //
+            //xhr.send(formData);
 
         }, this);
 

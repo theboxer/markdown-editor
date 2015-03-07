@@ -20,7 +20,8 @@ class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'app.css');
 
         $this->modx->regClientStartupScript($this->markdowneditor->getOption('jsUrl') . 'mgr/dependencies.js');
-        $this->modx->controller->addLastJavascript($this->markdowneditor->getOption('jsUrl') . 'mgr/app.js');
+        $this->modx->regClientStartupScript($this->markdowneditor->getOption('jsUrl') . 'mgr/app.js');
+        $this->modx->regClientStartupScript($this->markdowneditor->getOption('jsUrl') . 'mgr/extras/markdowneditor.window.js');
     }
 }
  
