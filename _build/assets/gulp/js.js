@@ -8,17 +8,25 @@ var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('libjs', function () {
         return gulp.src([
-                'bower_components/ace-builds/src-noconflict/ace.js',
+                'bower_components/ace-builds/src/ace.js',
                 'bower_components/remarkable/dist/remarkable.js',
                 'src/vendor/highlight/highlight.pack.js',
-                'bower_components/ace-builds/src-noconflict/mode-markdown.js',
-                'bower_components/ace-builds/src-noconflict/ext-language_tools.js',
-                'bower_components/ace-builds/src-noconflict/theme-monokai.js',
+                'bower_components/ace-builds/src/mode-markdown.js',
+                'bower_components/ace-builds/src/ext-language_tools.js',
                 'bower_components/jquery/dist/jquery.min.js',
                 'bower_components/cropper/dist/cropper.min.js'
             ])
             .pipe(plumber())
             .pipe(concat('dependencies.js'))
+            .pipe(gulp.dest('../../assets/components/markdowneditor/js/mgr'));
+});
+
+gulp.task('acethemes', function () {
+        return gulp.src([
+                'bower_components/ace-builds/src/theme-*.js'
+            ])
+            .pipe(plumber())
+            .pipe(concat('acethemes.js'))
             .pipe(gulp.dest('../../assets/components/markdowneditor/js/mgr'));
 });
 

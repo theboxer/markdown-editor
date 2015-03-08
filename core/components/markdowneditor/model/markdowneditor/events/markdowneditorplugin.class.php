@@ -24,8 +24,18 @@ abstract class MarkdownEditorPlugin {
         $this->process();
     }
 
-    public function init() {
-        return true;
+    public function init()
+    {
+        if (isset($this->scriptProperties['resource'])) {
+            if (!$this->scriptProperties['resource']->richtext) return false;
+        }
+
+        $useEditor = $this->modx->getOption('use_editor', false);
+        $whichEditor = $this->modx->getOption('which_editor', '');
+
+        if ($useEditor && $whichEditor == 'MarkdownEditor') return true;
+
+        return false;
     }
 
     abstract public function process();

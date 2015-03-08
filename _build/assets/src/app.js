@@ -121,7 +121,6 @@ Ext.extend(MarkdownEditor,Ext.Component,{
     }
 
     ,registerAce: function() {
-        var mde = this;
         this.editor = ace.edit(Ext.DomQuery.selectNode('div#content-md'));
         this.editor.setOptions({
             maxLines: Infinity,
@@ -132,7 +131,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
         this.editor.getSession().setMode("ace/mode/markdown");
-        this.editor.setTheme("ace/theme/monokai");
+        this.editor.setTheme("ace/theme/" + (MODx.config['markdowneditor.general.theme'] || 'monokai'));
 
         var langTools = ace.require("ace/ext/language_tools");
         var rhymeCompleter = {

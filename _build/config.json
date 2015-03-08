@@ -82,6 +82,11 @@
         "key": "resizer.height",
         "value": 0,
         "area": "markdowneditor.area.resizer"
+      },
+      {
+        "key": "general.theme",
+        "value": "monokai",
+        "area": "markdowneditor.area.general"
       }
     ]
   }

@@ -13,6 +13,7 @@ $_lang['area_markdowneditor.area.cropper'] = 'Cropper';
 $_lang['area_markdowneditor.area.lp'] = 'Live preview';
 $_lang['area_markdowneditor.area.upload'] = 'Upload';
 $_lang['area_markdowneditor.area.resizer'] = 'Resizer';
+$_lang['area_markdowneditor.area.general'] = 'General';
 
 $_lang['setting_markdowneditor.lp.parse_modx_tags'] = 'Parse MODX Tags';
 $_lang['setting_markdowneditor.lp.parse_modx_tags_desc'] = 'If set to yes, Markdown Editor will also parse MODX tags in preview. This option will send AJAX request to the server each time you update content.';
@@ -38,3 +39,5 @@ $_lang['setting_markdowneditor.resizer.width'] = 'Width';
 $_lang['setting_markdowneditor.resizer.width_desc'] = 'Width of resized image.';
 $_lang['setting_markdowneditor.resizer.height'] = 'Height';
 $_lang['setting_markdowneditor.resizer.height_desc'] = 'Height of resized image.';
+$_lang['setting_markdowneditor.general.theme'] = 'Editor\'s theme';
+$_lang['setting_markdowneditor.general.theme_desc'] = 'Available themes are same as in Ace editor. <a href="https://github.com/ajaxorg/ace/tree/master/lib/ace/theme">https://github.com/ajaxorg/ace/tree/master/lib/ace/theme</a>';
