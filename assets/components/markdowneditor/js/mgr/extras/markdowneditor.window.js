@@ -80,18 +80,27 @@ MarkdownEditor.window.Cropper = function(config) {
         ,listeners: {
             'show': {
                 fn: function() {
-                    $(config.cropperSelector).cropper({
-                        //aspectRatio: 1,
-                        crop: function (data) {
-                            this.imageData = [
-                                '{"x":' + data.x,
-                                '"y":' + data.y,
-                                '"height":' + data.height,
-                                '"width":' + data.width,
-                                '"rotate":' + data.rotate + '}'
-                            ].join();
-                        }.bind(this)
-                    });
+                    var cropperOptions = {};
+
+                    var ratio = MODx.config['markdowneditor.cropper.aspect_ratio'];
+                    if (ratio) {
+                        ratio.replace(/[^-:x()\d/*+.]/g, '');
+                        ratio = eval(ratio);
+
+                        cropperOptions.aspectRatio = ratio;
+                    }
+
+                    cropperOptions.crop = function (data) {
+                        this.imageData = [
+                            '{"x":' + data.x,
+                            '"y":' + data.y,
+                            '"height":' + data.height,
+                            '"width":' + data.width,
+                            '"rotate":' + data.rotate + '}'
+                        ].join();
+                    }.bind(this);
+
+                    $(config.cropperSelector).cropper(cropperOptions);
                 },
                 scope: this
             }
@@ -135,7 +144,7 @@ Ext.extend(MarkdownEditor.window.Cropper, Ext.Window,{
                 var res = JSON.parse(xhr.responseText);
                 if (res.success == true) {
                     uploader.remove();
-                    this.config.md.editor.insert('![' + res.name + '](' + res.path + ' "' + res.name + '")\n');
+                    this.config.md.editor.insert('![' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n');
                 }
             }
         }.bind(this);

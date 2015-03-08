@@ -46,9 +46,10 @@ class MarkdownEditor {
      * @param array $options An array of options that override local options.
      * @param mixed $default The default value returned if the option is not found locally or as a
      * namespaced system setting; by default this value is null.
+     * @param bool $skipEmpty
      * @return mixed The option value or the default value specified.
      */
-    public function getOption($key, $options = array(), $default = null) {
+    public function getOption($key, $options = array(), $default = null, $skipEmpty = false) {
         $option = $default;
         if (!empty($key) && is_string($key)) {
             if ($options != null && array_key_exists($key, $options)) {
@@ -56,7 +57,7 @@ class MarkdownEditor {
             } elseif (array_key_exists($key, $this->options)) {
                 $option = $this->options[$key];
             } elseif (array_key_exists("{$this->namespace}.{$key}", $this->modx->config)) {
-                $option = $this->modx->getOption("{$this->namespace}.{$key}");
+                $option = $this->modx->getOption("{$this->namespace}.{$key}", null, $default, $skipEmpty);
             }
         }
         return $option;

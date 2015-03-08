@@ -20,29 +20,35 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         output = output.replace(/%5B/g, '[');
         output = output.replace(/%5D/g, ']');
 
-        if (this.parseRequest) {
-            clearTimeout(this.parseRequest);
-        }
+        if (MODx.config['markdowneditor.lp.parse_modx_tags'] == 1) {
+            if (this.parseRequest) {
+                clearTimeout(this.parseRequest);
+            }
 
-        this.parseRequest = setTimeout(function(){
-            MODx.Ajax.request({
-                url: MarkdownEditor_config.connectorUrl
-                ,params: {
-                    action: 'mgr/editor/processcontent'
-                    ,content: output
-                    ,resource: MODx.request.id
-                },
-                isUpload : true,
-                listeners: {
-                    'success': {
-                        fn: function(r) {
-                            Ext.get('preview-md').update(r.data);
-                        },
-                        scope: this
+            var timeout = parseInt(MODx.config['markdowneditor.lp.parse_modx_tags_timeout'] || 300);
+
+            this.parseRequest = setTimeout(function(){
+                MODx.Ajax.request({
+                    url: MarkdownEditor_config.connectorUrl
+                    ,params: {
+                        action: 'mgr/editor/processcontent'
+                        ,content: output
+                        ,resource: MODx.request.id
+                    },
+                    isUpload : true,
+                    listeners: {
+                        'success': {
+                            fn: function(r) {
+                                Ext.get('preview-md').update(r.data);
+                            },
+                            scope: this
+                        }
                     }
-                }
-            });
-        }, 150);
+                });
+            }, timeout);
+        } else {
+            Ext.get('preview-md').update(output);
+        }
 
         this.taMarkdown.dom.value = this.editor.getValue();
         this.textarea.dom.value = output;
@@ -100,11 +106,12 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         Ext.DomHelper.append(wrapper,{
             tag: 'div',
             id: 'status-bar',
-            html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>Attach images by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.'
+            html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>Attach files by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.'
         });
 
         Ext.get('inputFile').on('change', function(e, input) {
             this.handleFiles(input.files);
+            input.value = "";
         }, this);
 
         Ext.DomHelper.append(wrapper,{
@@ -173,54 +180,64 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             var isImage = /^image\//.test(file.type);
 
             if (isImage) {
-                MODx.load({
-                    xtype: 'markdowneditor-window-cropper'
-                    ,file: file
-                    ,md: this
-                }).show();
+                if (MODx.config['markdowneditor.cropper.enable_cropper'] == 1) {
+                    MODx.load({
+                        xtype: 'markdowneditor-window-cropper'
+                        ,file: file
+                        ,md: this
+                    }).show();
+                } else {
+                    this.uploadFile(file, 'image');
+                }
             } else {
-                var sb = Ext.get('status-bar');
-                var uploader = Ext.DomHelper.insertFirst(sb,{
-                    tag: 'div',
-                    id: 'upload_progress',
-                    html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading file: ' + file.name
-                });
-
-                var formData = new FormData();
-                formData.append('file', file);
-                formData.append('action', 'mgr/editor/fileupload');
-                formData.append('name', file.name);
-
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', MarkdownEditor_config.connectorUrl);
-                xhr.setRequestHeader('Powered-By', 'MODx');
-                xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
-
-                xhr.upload.onprogress = function (event) {
-                    if (event.lengthComputable) {
-                        var complete = (event.loaded / event.total * 100 | 0);
-                        sb.child('.progress').setWidth(complete + '%');
-                    }
-                };
-
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        var res = JSON.parse(xhr.responseText);
-                        if (res.success == true) {
-                            uploader.remove();
-                            this.editor.insert('[' + res.name + '](' + res.path + ' "' + res.name + '")\n');
-                        }
-                    }
-                }.bind(this);
-
-                xhr.send(formData);
+                this.uploadFile(file, 'file');
             }
 
         }, this);
     }
 
+    ,uploadFile: function(file, type) {
+        if (!type) type = 'file';
+
+        var sb = Ext.get('status-bar');
+        var uploader = Ext.DomHelper.insertFirst(sb,{
+            tag: 'div',
+            id: 'upload_progress',
+            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading ' + type + ': ' + file.name
+        });
+
+        var formData = new FormData();
+        formData.append('file', file);
+        formData.append('action', 'mgr/editor/' + type + 'upload');
+        formData.append('name', file.name);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', MarkdownEditor_config.connectorUrl);
+        xhr.setRequestHeader('Powered-By', 'MODx');
+        xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
+
+        xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+                var complete = (event.loaded / event.total * 100 | 0);
+                sb.child('.progress').setWidth(complete + '%');
+            }
+        };
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var res = JSON.parse(xhr.responseText);
+                if (res.success == true) {
+                    uploader.remove();
+                    var imagePrefix = (type == 'image') ? '!' : '';
+                    this.editor.insert(imagePrefix + '[' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n');
+                }
+            }
+        }.bind(this);
+
+        xhr.send(formData);
+    }
+
     ,registerMarked: function() {
-        var mde = this;
         this.remarkable = new Remarkable({
             html: true,
             highlight: function (str, lang) {
@@ -252,6 +269,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         var fullscreenButton = Ext.get('fullscreen-button');
         var preview = Ext.get('preview-md');
         var content = Ext.get('content-md');
+        var statusBar = Ext.get('status-bar');
         var wrapper = content.parent();
 
         var dropTarget = MODx.load({
@@ -271,12 +289,14 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             if (preview.isVisible()) {
                 preview.setDisplayed('none');
                 content.setDisplayed('block');
+                statusBar.setDisplayed('block');
 
                 previewButton.child('i').removeClass('icon-toggle-on');
                 previewButton.child('i').addClass('icon-toggle-off');
             } else {
                 preview.setDisplayed('block');
                 content.setDisplayed('none');
+                statusBar.setDisplayed('none');
 
                 previewButton.child('i').removeClass('icon-toggle-off');
                 previewButton.child('i').addClass('icon-toggle-on');
@@ -298,7 +318,6 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 wrapper.addClass('fullscreen');
 
                 this.editor.setOption('maxLines', null);
-                //this.editor.setAutoScrollEditorIntoView(false);
 
             } else {
                 icon.addClass('icon-expand');
@@ -312,9 +331,9 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                 wrapper.removeClass('fullscreen');
 
                 this.editor.setOption('maxLines', Infinity);
-                //this.editor.setAutoScrollEditorIntoView(true);
-
             }
+
+            statusBar.setDisplayed('block');
 
             this.editor.resize(true);
         }, this);
@@ -327,12 +346,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         preview.update(this.parse(this.editor.getValue()));
 
         this.editor.getSession().on('change', function(e){
-            var parsed = mde.parse(mde.editor.getValue());
-
-
-            //mde.textarea.dom.value = parsed;
-            //mde.taMarkdown.dom.value = mde.editor.getValue();
-            //preview.update(parsed);
+            mde.parse(mde.editor.getValue());
         });
     }
 });

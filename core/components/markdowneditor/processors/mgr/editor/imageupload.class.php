@@ -26,11 +26,13 @@ class MarkdownEditorUploadImageProcessor extends modProcessor
 
         $this->setUploadPaths();
 
-        $rotate = $this->data['rotate'] * -1.0;
-        $this->img->rotate($rotate);
+        if (isset($this->data['rotate'])) {
+            $rotate = $this->data['rotate'] * -1.0;
+            $this->img->rotate($rotate);
+        }
 
-        $crop = $this->getProperty('crop', 1);
-        if ($crop == 1) {
+        $crop = $this->getProperty('crop', 0);
+        if ($crop == 1 && isset($this->data['width']) && isset($this->data['height'])) {
             $width = intval($this->data['width']);
             $height = intval($this->data['height']);
 
@@ -41,15 +43,23 @@ class MarkdownEditorUploadImageProcessor extends modProcessor
 
         $fileName = $this->generateUniqueFileName();
 
-        $this->img->resize(400, null, function ($constraint) {
-            /** @var \Intervention\Image\Constraint $constraint */
-            $constraint->aspectRatio();
-        });
+        $width = (int) $this->md->getOption('resizer.width', null, 0);
+        $width = (empty($width)) ? null : $width;
+
+        $height = (int) $this->md->getOption('resizer.height', null, 0);
+        $height = (empty($height)) ? null : $height;
+
+        if (($width != null) || ($height != null)) {
+            $this->img->resize($width, $height, function ($constraint) {
+                /** @var \Intervention\Image\Constraint $constraint */
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+        }
 
         $this->img->save($this->uploadPath . $fileName . $this->extension);
 
-        return $this->modx->toJSON(array(
-            'success' => true,
+        return $this->success('', array(
             'path' => $this->uploadURL . $fileName . $this->extension,
             'name' => $this->getOriginalName()
         ));
@@ -67,7 +77,7 @@ class MarkdownEditorUploadImageProcessor extends modProcessor
     {
         $imageData = $this->getProperty('imageData');
         if (empty($imageData)) {
-            return 'No data';
+            return true;
         }
 
         $imageData = $this->modx->fromJSON($imageData);
@@ -82,14 +92,14 @@ class MarkdownEditorUploadImageProcessor extends modProcessor
 
     private function setUploadPaths()
     {
-        $uploadPath = $this->md->getOption('image_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/');
+        $uploadPath = $this->md->getOption('upload.image_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
         $this->uploadPath = rtrim($uploadPath, '/') . '/';
 
         if (!is_dir($this->uploadPath)) {
             mkdir($this->uploadPath);
         }
 
-        $this->uploadURL = $this->md->getOption('image_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/');
+        $this->uploadURL = $this->md->getOption('upload.image_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
     }
 
     private function getOriginalName()

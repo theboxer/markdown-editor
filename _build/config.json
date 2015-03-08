@@ -1,16 +1,88 @@
 {
-    "name": "MarkdownEditor",
-    "lowCaseName": "markdowneditor",
-    "description": "Markdown editor",
-    "author": "John Peca",
-    "version": "0.1.0",
-    "package":{
-        "elements": {
-            "plugins": [{
-                "name": "MarkdownEditor",
-                "events": ["OnRichTextEditorRegister", "OnRichTextEditorInit", "OnDocFormPrerender", "OnBeforeDocFormSave"]
-            }]
-        },
-        "systemSettings": []
-    }
+  "name": "MarkdownEditor",
+  "lowCaseName": "markdowneditor",
+  "description": "Markdown editor",
+  "author": "John Peca",
+  "version": "1.0.0",
+  "package": {
+    "elements": {
+      "plugins": [
+        {
+          "name": "MarkdownEditor",
+          "events": [
+            "OnRichTextEditorRegister",
+            "OnRichTextEditorInit",
+            "OnDocFormPrerender",
+            "OnBeforeDocFormSave"
+          ]
+        }
+      ]
+    },
+    "systemSettings": [
+      {
+        "key": "lp.parse_modx_tags",
+        "value": false,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.lp"
+      },
+      {
+        "key": "lp.parse_modx_tags_timeout",
+        "value": 300,
+        "area": "markdowneditor.area.lp"
+      },
+      {
+        "key": "upload.image_upload_path",
+        "value": "",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.image_upload_url",
+        "value": "",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.file_upload_path",
+        "value": "",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.file_upload_url",
+        "value": "",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "cropper.enable_cropper",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.cropper"
+      },
+      {
+        "key": "cropper.aspect_ratio",
+        "value": "16/9",
+        "area": "markdowneditor.area.cropper"
+      },
+      {
+        "key": "resizer.aspect_ratio_constraint",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.resizer"
+      },
+      {
+        "key": "resizer.upsize_constraint",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.resizer"
+      },
+      {
+        "key": "resizer.width",
+        "value": 400,
+        "area": "markdowneditor.area.resizer"
+      },
+      {
+        "key": "resizer.height",
+        "value": 0,
+        "area": "markdowneditor.area.resizer"
+      }
+    ]
+  }
 }
