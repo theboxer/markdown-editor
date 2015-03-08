@@ -58,6 +58,12 @@
         "area": "markdowneditor.area.upload"
       },
       {
+        "key": "upload.delete_unused",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.upload"
+      },
+      {
         "key": "cropper.enable_cropper",
         "value": true,
         "type": "combo-boolean",

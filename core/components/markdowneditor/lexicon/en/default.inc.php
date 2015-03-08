@@ -43,3 +43,5 @@ $_lang['setting_markdowneditor.general.theme'] = 'Editor\'s theme';
 $_lang['setting_markdowneditor.general.theme_desc'] = 'Available themes are same as in Ace editor. <a href="https://github.com/ajaxorg/ace/tree/master/lib/ace/theme">https://github.com/ajaxorg/ace/tree/master/lib/ace/theme</a>';
 $_lang['setting_markdowneditor.upload.under_resource'] = 'Under resource';
 $_lang['setting_markdowneditor.upload.under_resource_desc'] = 'If enabled, all uploaded files will be stored under directory with name of resource ID.';
+$_lang['setting_markdowneditor.upload.delete_unused'] = 'Delete unused';
+$_lang['setting_markdowneditor.upload.delete_unused_desc'] = 'If enabled, unused images and files will be deleted from upload directory. <strong>Under resource</strong> setting has to be enabled.';
