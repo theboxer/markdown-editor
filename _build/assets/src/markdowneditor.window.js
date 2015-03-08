@@ -1,4 +1,4 @@
-MarkdownEditor.window.Cropper = function(config) {
+markdownEditor.window.Cropper = function(config) {
     config = config || {};
     config.cropperSelector = config.cropperSelector || '.image-upload-wrapper > img';
 
@@ -106,11 +106,11 @@ MarkdownEditor.window.Cropper = function(config) {
             }
         }
     });
-    MarkdownEditor.window.Cropper.superclass.constructor.call(this,config);
+    markdownEditor.window.Cropper.superclass.constructor.call(this,config);
     this.config = config;
 
 };
-Ext.extend(MarkdownEditor.window.Cropper, Ext.Window,{
+Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
     imageData: ''
     ,upload: function(button) {
         var sb = Ext.get('status-bar');
@@ -128,7 +128,7 @@ Ext.extend(MarkdownEditor.window.Cropper, Ext.Window,{
         formData.append('crop', button.crop);
 
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', MarkdownEditor_config.connectorUrl);
+        xhr.open('POST', markdownEditor.config.connectorUrl);
         xhr.setRequestHeader('Powered-By', 'MODx');
         xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
 
@@ -159,4 +159,4 @@ Ext.extend(MarkdownEditor.window.Cropper, Ext.Window,{
         $(this.config.cropperSelector).cropper(btn.action, btn.param);
     }
 });
-Ext.reg('markdowneditor-window-cropper',MarkdownEditor.window.Cropper);
+Ext.reg('markdowneditor-window-cropper',markdownEditor.window.Cropper);

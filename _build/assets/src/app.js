@@ -1,10 +1,19 @@
-var MarkdownEditor = function(config) {
+Ext.ns('MarkdownEditor');
+MarkdownEditor = function(config) {
     config = config || {};
     MarkdownEditor.superclass.constructor.call(this,config);
 };
-Ext.override(MODx.panel.Resource, {});
-
 Ext.extend(MarkdownEditor,Ext.Component,{
+    window:{},config: {}
+});
+Ext.reg('markdowneditor',MarkdownEditor);
+markdownEditor = new MarkdownEditor();
+
+markdownEditor.Editor = function(config) {
+    config = config || {};
+    markdownEditor.Editor.superclass.constructor.call(this,config);
+};
+Ext.extend(markdownEditor.Editor,Ext.Component,{
     window: {}
     ,remarkable: ''
     ,initComponent: function() {
@@ -29,7 +38,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
 
             this.parseRequest = setTimeout(function(){
                 MODx.Ajax.request({
-                    url: MarkdownEditor_config.connectorUrl
+                    url: markdownEditor.config.connectorUrl
                     ,params: {
                         action: 'mgr/editor/processcontent'
                         ,content: output
@@ -138,7 +147,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             getCompletions: function(editor, session, pos, prefix, callback) {
                 if (prefix.length === 0) { callback(null, []); return }
                 MODx.Ajax.request({
-                    url: MarkdownEditor_config.connectorUrl
+                    url: markdownEditor.config.connectorUrl
                     ,params: {
                         action: 'mgr/resource/getlist'
                         ,prefix: prefix
@@ -211,7 +220,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         formData.append('name', file.name);
 
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', MarkdownEditor_config.connectorUrl);
+        xhr.open('POST', markdownEditor.config.connectorUrl);
         xhr.setRequestHeader('Powered-By', 'MODx');
         xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
 
@@ -337,8 +346,8 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             this.editor.resize(true);
         }, this);
 
-        if (MarkdownEditor_content.content) {
-            this.editor.setValue(MarkdownEditor_content.content);
+        if (markdownEditor.content.content) {
+            this.editor.setValue(markdownEditor.content.content);
         }
         this.editor.selection.clearSelection();
 
@@ -349,4 +358,7 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         });
     }
 });
-MarkdownEditor = new MarkdownEditor();
+
+MODx.loadRTE = function(id) {
+    new markdownEditor.Editor();
+};

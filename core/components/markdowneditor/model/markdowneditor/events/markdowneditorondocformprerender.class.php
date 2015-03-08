@@ -11,8 +11,8 @@ class MarkdownEditorOnDocFormPrerender extends MarkdownEditorPlugin {
         $test = array('content' => $markdown);
 
         $this->modx->regClientStartupHTMLBlock('<script type="text/javascript">
-            MarkdownEditor_config = '.$this->modx->toJSON($this->markdowneditor->options).';
-            MarkdownEditor_content = ' . $this->modx->toJSON($test) . ';
+            markdownEditor.config = '.$this->modx->toJSON($this->markdowneditor->options).';
+            markdownEditor.content = ' . $this->modx->toJSON($test) . ';
         </script>');
 
 
