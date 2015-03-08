@@ -10,7 +10,6 @@ gulp.task('libjs', function () {
         return gulp.src([
                 'bower_components/ace-builds/src/ace.js',
                 'bower_components/remarkable/dist/remarkable.js',
-                'src/vendor/highlight/highlight.pack.js',
                 'bower_components/ace-builds/src/mode-markdown.js',
                 'bower_components/ace-builds/src/ext-language_tools.js',
                 'bower_components/jquery/dist/jquery.min.js',
@@ -28,6 +27,15 @@ gulp.task('acethemes', function () {
             .pipe(plumber())
             .pipe(concat('acethemes.js'))
             .pipe(gulp.dest('../../assets/components/markdowneditor/js/mgr'));
+});
+
+gulp.task('js-highlight', function () {
+        return gulp.src([
+            'src/vendor/highlight/highlight.pack.js'
+            ])
+            .pipe(plumber())
+            .pipe(concat('highlight.pack.js'))
+            .pipe(gulp.dest('../../assets/components/markdowneditor/js'));
 });
 
 gulp.task('js', function () {

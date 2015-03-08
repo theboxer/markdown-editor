@@ -92,6 +92,8 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
         $path = $this->uploadPath . $this->resource->id . '/';
         $uploadedFiles = array();
 
+        if (!is_dir($path)) return;
+
         foreach (new DirectoryIterator($path) as $file) {
             if ($file->isFile()) {
                 $uploadedFiles[] = $file->getFilename();

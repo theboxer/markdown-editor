@@ -6,7 +6,6 @@ var concat = require('gulp-concat');
 
 gulp.task('libcss', function () {
     return gulp.src([
-            'src/vendor/highlight/styles/github.css',
             'bower_components/cropper/dist/cropper.min.css'
         ])
         .pipe(plumber())
@@ -20,6 +19,15 @@ gulp.task('github-md', function () {
         ])
         .pipe(plumber())
         .pipe(concat('github-markdown.css'))
+        .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
+});
+
+gulp.task('css-highlight', function () {
+    return gulp.src([
+            'src/vendor/highlight/styles/github.css'
+        ])
+        .pipe(plumber())
+        .pipe(concat('highlight.css'))
         .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
 });
 

@@ -8,7 +8,7 @@ class MarkdownEditorOnBeforeDocFormSave extends MarkdownEditorPlugin {
 
         $resource->setProperty('markdown', $markdown, 'markdowneditor');
 
-
+        $resource->ta_markdown = '';
         return;
     }
 }

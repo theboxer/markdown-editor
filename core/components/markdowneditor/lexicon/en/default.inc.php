@@ -45,3 +45,7 @@ $_lang['setting_markdowneditor.upload.under_resource'] = 'Under resource';
 $_lang['setting_markdowneditor.upload.under_resource_desc'] = 'If enabled, all uploaded files will be stored under directory with name of resource ID.';
 $_lang['setting_markdowneditor.upload.delete_unused'] = 'Delete unused';
 $_lang['setting_markdowneditor.upload.delete_unused_desc'] = 'If enabled, unused images and files will be deleted from upload directory. <strong>Under resource</strong> setting has to be enabled.';
+$_lang['setting_markdowneditor.general.include_ghfmd'] = 'GitHub Flavoured MD CSS';
+$_lang['setting_markdowneditor.general.include_ghfmd_desc'] = 'If enabled, GitHub Flavoured Markdown CSS will be automatically included on frontend.<br />Styles will be applied only to element with class <strong>markdown-body</strong>.';
+$_lang['setting_markdowneditor.general.include_highlight'] = 'Highlight.js';
+$_lang['setting_markdowneditor.general.include_highlight_desc'] = 'If enabled, highlight.js will be automatically included on frontend.';
