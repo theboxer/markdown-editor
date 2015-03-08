@@ -81,6 +81,7 @@ markdownEditor.window.Cropper = function(config) {
             'show': {
                 fn: function() {
                     var cropperOptions = {};
+                    this.$cropperEl = $('#' + this.id + ' ' + config.cropperSelector);
 
                     var ratio = MODx.config['markdowneditor.cropper.aspect_ratio'];
                     if (ratio) {
@@ -100,7 +101,7 @@ markdownEditor.window.Cropper = function(config) {
                         ].join();
                     }.bind(this);
 
-                    $(config.cropperSelector).cropper(cropperOptions);
+                    this.$cropperEl.cropper(cropperOptions);
                 },
                 scope: this
             }
@@ -151,12 +152,17 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
 
         xhr.send(formData);
 
-        $(this.config.cropperSelector).cropper("destroy");
         this.close();
     }
 
     ,callCropperAction: function(btn) {
-        $(this.config.cropperSelector).cropper(btn.action, btn.param);
+        this.$cropperEl.cropper(btn.action, btn.param);
+    }
+
+    ,close: function() {
+        this.$cropperEl.cropper("destroy");
+
+        markdownEditor.window.Cropper.superclass.close.call(this);
     }
 });
 Ext.reg('markdowneditor-window-cropper',markdownEditor.window.Cropper);
