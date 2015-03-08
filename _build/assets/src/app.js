@@ -100,12 +100,16 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         Ext.DomHelper.append(wrapper,{
             tag: 'div',
             id: 'status-bar',
-            html: 'Attach images by dragging & dropping,  selecting them, or pasting from the clipboard.'
+            html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>Attach images by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.'
         });
+
+        Ext.get('inputFile').on('change', function(e, input) {
+            this.handleFiles(input.files);
+        }, this);
 
         Ext.DomHelper.append(wrapper,{
             tag: 'span',
-            style: 'clear: both',
+            style: 'clear: both'
         });
     }
 
@@ -161,56 +165,24 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         e.stopPropagation();
         e.preventDefault();
 
-        Ext.each(e.dataTransfer.files, function(file) {
+        this.handleFiles(e.dataTransfer.files);
+    }
 
-            if (file.type == 'image/jpeg') {
+    ,handleFiles: function(files) {
+        Ext.each(files, function(file) {
+            var isImage = /^image\//.test(file.type);
+
+            if (isImage) {
                 MODx.load({
                     xtype: 'markdowneditor-window-cropper'
                     ,file: file
                     ,md: this
                 }).show();
-
-                $('.image-upload-wrapper > img').cropper({
-                    aspectRatio: 1
-                });
             } else {
                 console.log('not image');
             }
 
-
-            //var formData = new FormData();
-            //formData.append('file', file);
-            //formData.append('action', 'mgr/editor/upload');
-            //
-            //var xhr = new XMLHttpRequest();
-            //xhr.open('POST', MarkdownEditor_config.connectorUrl);
-            //xhr.setRequestHeader('Powered-By', 'MODx');
-            //xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
-
-            //xhr.upload.onprogress = function (event) {
-            //    if (event.lengthComputable) {
-            //        var complete = (event.loaded / event.total * 100 | 0);
-            //        progress.value = progress.innerHTML = complete;
-            //    }
-            //};
-
-            //xhr.onload = function () {
-            //    if (xhr.status === 200) {
-            //        var res = JSON.parse(xhr.responseText);
-            //        if (res.success == true) {
-            //            console.log(res);
-            //            this.editor.insert('![' + res.name + '](' + res.path + ')');
-            //        }
-            //        console.log('all done: ' + xhr.status);
-            //    } else {
-            //        console.log('Something went terribly wrong...');
-            //    }
-            //}.bind(this);
-            //
-            //xhr.send(formData);
-
         }, this);
-
     }
 
     ,registerMarked: function() {
@@ -241,14 +213,6 @@ Ext.extend(MarkdownEditor,Ext.Component,{
         this.buildUI();
         this.registerAce();
         this.registerMarked();
-
-
-        // copy back to textarea on form submit...
-        //textarea.closest('form').submit(function () {
-        //    textarea.val(editor.getSession().getValue());
-        //});
-
-
 
         var previewButton = Ext.get('preview-button');
         var fullscreenButton = Ext.get('fullscreen-button');
@@ -321,7 +285,9 @@ Ext.extend(MarkdownEditor,Ext.Component,{
             this.editor.resize(true);
         }, this);
 
-        this.editor.setValue(MarkdownEditor_content.content);
+        if (MarkdownEditor_content.content) {
+            this.editor.setValue(MarkdownEditor_content.content);
+        }
         this.editor.selection.clearSelection();
 
         preview.update(this.parse(this.editor.getValue()));

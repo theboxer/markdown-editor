@@ -7,7 +7,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 9999;
+        z-index: 9002;
         overflow: hidden;
 
         #content-md,
@@ -38,6 +38,7 @@
           right: 50%;
           bottom: -1px;
           top: auto;
+          z-index: 10;
         }
     }
 }
@@ -90,10 +91,10 @@
   min-height: 25px;
   position: relative;
   top: -1px;
-  z-index: 999;
+//  z-index: 999;
   border: 1px solid #E4E4E4;
   border-top: none;
-  color: #F0F0F0;
+  color: #D0D0D0;
   font-size: 12px;
   line-height: 25px;
   padding-left: 10px;
@@ -121,4 +122,27 @@
   ol {
     list-style: decimal;
   }
+}
+
+.hidden {
+  display: none;
+}
+
+label.link {
+  cursor: pointer;
+  color: white;
+}
+
+label.link:hover {
+  cursor: pointer;
+  color: white;
+  text-decoration: underline;
+}
+
+.progress {
+  background: rgba(10, 158, 0, 0.41);
+  width: 0%;
+  height: 25px;
+  position: absolute;
+  left: 0;
 }

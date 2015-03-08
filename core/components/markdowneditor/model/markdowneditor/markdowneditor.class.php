@@ -36,6 +36,7 @@ class MarkdownEditor {
 
         $this->modx->addPackage('markdowneditor', $this->getOption('modelPath'));
         $this->modx->lexicon->load('markdowneditor:default');
+        $this->autoload();
     }
 
     /**
@@ -59,5 +60,10 @@ class MarkdownEditor {
             }
         }
         return $option;
+    }
+
+    protected function autoload()
+    {
+        require_once $this->getOption('modelPath') . 'vendor/autoload.php';
     }
 }
