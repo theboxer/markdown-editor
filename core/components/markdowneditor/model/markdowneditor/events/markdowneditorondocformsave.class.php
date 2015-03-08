@@ -26,11 +26,6 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
 
     }
 
-    private function updateResource()
-    {
-
-    }
-
     private function moveFilesUnderCorrectResource()
     {
         /** @var modResource $resource */
@@ -38,11 +33,17 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
 
         $md = $resource->getProperty('markdown', 'markdowneditor');
 
-        $matches = array();
-        preg_match_all('~/modx/assets/u/0/(?<file>[^ "\)]+)~', $md, $matches);
+        $uploadPath = $this->markdowneditor->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
+        $uploadPath = rtrim($uploadPath, '/') . '/';
 
-        $path = '/Users/theboxer/www/modx/pkgs/modx/assets/u/0/';
-        $correctPath = '/Users/theboxer/www/modx/pkgs/modx/assets/u/' . $resource->id . '/';
+        $uploadURL = $this->markdowneditor->getOption('upload.file_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
+        $uploadURL = rtrim($uploadURL, '/') . '/';
+
+        $matches = array();
+        preg_match_all('~' . $uploadURL . '0/(?<file>[^ "\)]+)~', $md, $matches);
+
+        $path = $uploadPath . '0/';
+        $correctPath = $uploadPath . $resource->id . '/';
 
         if (!is_dir($correctPath)) {
             mkdir($correctPath);
@@ -59,9 +60,9 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
                 rename($path . $file, $correctPath . $file);
             }
 
-            $md = str_replace('/modx/assets/u/0/', '/modx/assets/u/' . $resource->id . '/', $md);
+            $md = str_replace($uploadURL . '0/', $uploadURL . $resource->id . '/', $md);
 
-            $content = str_replace('/modx/assets/u/0/', '/modx/assets/u/' . $resource->id . '/', $resource->get('content'));
+            $content = str_replace($uploadURL . '0/', $uploadURL . $resource->id . '/', $resource->get('content'));
 
             $resource->setProperty('markdown', $md, 'markdowneditor');
             $resource->set('content', $content);

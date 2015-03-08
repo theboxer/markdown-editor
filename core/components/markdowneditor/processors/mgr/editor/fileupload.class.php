@@ -30,14 +30,15 @@ class MarkdownEditorUploadFileProcessor extends modProcessor
 
     private function setUploadPaths()
     {
-        $uploadPath = $this->md->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
-        $this->uploadPath = rtrim($uploadPath, '/') . '/';
+        $this->uploadPath = $this->md->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
+        $this->uploadPath = rtrim($this->uploadPath, '/') . '/';
 
         if (!is_dir($this->uploadPath)) {
             mkdir($this->uploadPath);
         }
 
         $this->uploadURL = $this->md->getOption('upload.file_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
+        $this->uploadURL = rtrim($this->uploadURL, '/') . '/';
 
         $underResource = $this->md->getOption('upload.under_resource', null, true);
         if ($underResource) {
