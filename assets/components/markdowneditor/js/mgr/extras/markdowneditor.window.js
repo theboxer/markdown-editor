@@ -1,5 +1,7 @@
 MarkdownEditor.window.Cropper = function(config) {
     config = config || {};
+    config.cropperSelector = config.cropperSelector || '.image-upload-wrapper > img';
+
     Ext.applyIf(config,{
         modal: false
         ,layout: 'auto'
@@ -78,7 +80,7 @@ MarkdownEditor.window.Cropper = function(config) {
         ,listeners: {
             'show': {
                 fn: function() {
-                    $('.image-upload-wrapper > img').cropper({
+                    $(config.cropperSelector).cropper({
                         //aspectRatio: 1,
                         crop: function (data) {
                             this.imageData = [
@@ -102,7 +104,6 @@ MarkdownEditor.window.Cropper = function(config) {
 Ext.extend(MarkdownEditor.window.Cropper, Ext.Window,{
     imageData: ''
     ,upload: function(button) {
-
         var sb = Ext.get('status-bar');
         var uploader = Ext.DomHelper.insertFirst(sb,{
             tag: 'div',
@@ -134,19 +135,19 @@ Ext.extend(MarkdownEditor.window.Cropper, Ext.Window,{
                 var res = JSON.parse(xhr.responseText);
                 if (res.success == true) {
                     uploader.remove();
-                    this.config.md.editor.insert('![' + res.name + '](' + res.path + ' "' + res.name + '")');
+                    this.config.md.editor.insert('![' + res.name + '](' + res.path + ' "' + res.name + '")\n');
                 }
             }
         }.bind(this);
 
         xhr.send(formData);
 
-        $('.image-upload-wrapper > img').cropper("destroy");
+        $(this.config.cropperSelector).cropper("destroy");
         this.close();
     }
 
     ,callCropperAction: function(btn) {
-        $('.image-upload-wrapper > img').cropper(btn.action, btn.param);
+        $(this.config.cropperSelector).cropper(btn.action, btn.param);
     }
 });
 Ext.reg('markdowneditor-window-cropper',MarkdownEditor.window.Cropper);

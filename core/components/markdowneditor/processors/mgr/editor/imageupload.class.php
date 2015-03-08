@@ -39,7 +39,7 @@ class MarkdownEditorUploadImageProcessor extends modProcessor
             }
         }
 
-        $fileName = date('YmdHis');
+        $fileName = $this->generateUniqueFileName();
 
         $this->img->resize(400, null, function ($constraint) {
             /** @var \Intervention\Image\Constraint $constraint */
@@ -99,6 +99,27 @@ class MarkdownEditorUploadImageProcessor extends modProcessor
         array_pop($name);
 
         return implode('.', $name);
+    }
+
+    private function generateUniqueFileName()
+    {
+        $fileName = $this->getFileName();
+
+        while (file_exists($this->uploadPath . $fileName . $this->extension)) {
+            $fileName = $this->getFileName();
+        }
+
+        return $fileName;
+    }
+
+    private function getFileName()
+    {
+        $fileName = strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
+        $fileName .= '-' . strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
+        $fileName .= '-' . strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
+        $fileName .= '-' . strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
+
+        return $fileName;
     }
 }
 

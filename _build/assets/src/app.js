@@ -179,7 +179,41 @@ Ext.extend(MarkdownEditor,Ext.Component,{
                     ,md: this
                 }).show();
             } else {
-                console.log('not image');
+                var sb = Ext.get('status-bar');
+                var uploader = Ext.DomHelper.insertFirst(sb,{
+                    tag: 'div',
+                    id: 'upload_progress',
+                    html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading file: ' + file.name
+                });
+
+                var formData = new FormData();
+                formData.append('file', file);
+                formData.append('action', 'mgr/editor/fileupload');
+                formData.append('name', file.name);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', MarkdownEditor_config.connectorUrl);
+                xhr.setRequestHeader('Powered-By', 'MODx');
+                xhr.setRequestHeader('modAuth', Ext.Ajax.defaultHeaders.modAuth);
+
+                xhr.upload.onprogress = function (event) {
+                    if (event.lengthComputable) {
+                        var complete = (event.loaded / event.total * 100 | 0);
+                        sb.child('.progress').setWidth(complete + '%');
+                    }
+                };
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        var res = JSON.parse(xhr.responseText);
+                        if (res.success == true) {
+                            uploader.remove();
+                            this.editor.insert('[' + res.name + '](' + res.path + ' "' + res.name + '")\n');
+                        }
+                    }
+                }.bind(this);
+
+                xhr.send(formData);
             }
 
         }, this);
