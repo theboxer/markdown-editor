@@ -125,6 +125,7 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
         formData.append('imageData', this.imageData);
         formData.append('name', this.config.file.name);
         formData.append('crop', button.crop);
+        formData.append('resource', this.config.md.config.resource);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', markdownEditor.config.connectorUrl);

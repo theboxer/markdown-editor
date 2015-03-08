@@ -13,7 +13,8 @@
             "OnRichTextEditorRegister",
             "OnRichTextEditorInit",
             "OnDocFormPrerender",
-            "OnBeforeDocFormSave"
+            "OnBeforeDocFormSave",
+            "OnDocFormSave"
           ]
         }
       ]
@@ -48,6 +49,12 @@
       {
         "key": "upload.file_upload_url",
         "value": "",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.under_resource",
+        "value": true,
+        "type": "combo-boolean",
         "area": "markdowneditor.area.upload"
       },
       {

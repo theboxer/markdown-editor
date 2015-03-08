@@ -41,3 +41,5 @@ $_lang['setting_markdowneditor.resizer.height'] = 'Height';
 $_lang['setting_markdowneditor.resizer.height_desc'] = 'Height of resized image.';
 $_lang['setting_markdowneditor.general.theme'] = 'Editor\'s theme';
 $_lang['setting_markdowneditor.general.theme_desc'] = 'Available themes are same as in Ace editor. <a href="https://github.com/ajaxorg/ace/tree/master/lib/ace/theme">https://github.com/ajaxorg/ace/tree/master/lib/ace/theme</a>';
+$_lang['setting_markdowneditor.upload.under_resource'] = 'Under resource';
+$_lang['setting_markdowneditor.upload.under_resource_desc'] = 'If enabled, all uploaded files will be stored under directory with name of resource ID.';

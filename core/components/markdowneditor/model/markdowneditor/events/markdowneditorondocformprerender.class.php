@@ -4,11 +4,13 @@ class MarkdownEditorOnDocFormPrerender extends MarkdownEditorPlugin {
         /** @var modResource $resource */
         $resource = $this->scriptProperties['resource'];
 
-        if (!$resource) return;
+        if ($resource) {
+            $markdown = $resource->getProperty('markdown', 'markdowneditor', '');
 
-        $markdown = $resource->getProperty('markdown', 'markdowneditor', '');
-
-        $test = array('content' => $markdown);
+            $test = array('content' => $markdown);
+        } else {
+            $test = array();
+        }
 
         $this->modx->regClientStartupHTMLBlock('<script type="text/javascript">
             markdownEditor.config = '.$this->modx->toJSON($this->markdowneditor->options).';

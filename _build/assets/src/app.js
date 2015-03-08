@@ -11,11 +11,12 @@ markdownEditor = new MarkdownEditor();
 
 markdownEditor.Editor = function(config) {
     config = config || {};
+    config.resource = MODx.request.id || 0;
     markdownEditor.Editor.superclass.constructor.call(this,config);
+    this.config = config;
 };
 Ext.extend(markdownEditor.Editor,Ext.Component,{
-    window: {}
-    ,remarkable: ''
+    remarkable: ''
     ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
@@ -330,6 +331,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         formData.append('file', file);
         formData.append('action', 'mgr/editor/' + type + 'upload');
         formData.append('name', file.name);
+        formData.append('resource', this.config.resource);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', markdownEditor.config.connectorUrl);

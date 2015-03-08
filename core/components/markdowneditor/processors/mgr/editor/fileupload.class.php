@@ -38,6 +38,27 @@ class MarkdownEditorUploadFileProcessor extends modProcessor
         }
 
         $this->uploadURL = $this->md->getOption('upload.file_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
+
+        $underResource = $this->md->getOption('upload.under_resource', null, true);
+        if ($underResource) {
+            $resource = $this->getProperty('resource', 0);
+            if ($resource != 0) {
+                $resource = $this->modx->getObject('modResource', $resource);
+                if ($resource) {
+                    $resource = $resource->id;
+                } else {
+                    $resource = 0;
+                }
+            }
+
+            $this->uploadPath .= $resource . '/';
+
+            if (!is_dir($this->uploadPath)) {
+                mkdir($this->uploadPath);
+            }
+
+            $this->uploadURL .= $resource . '/';
+        }
     }
 
     private function getOriginalName()
