@@ -113,8 +113,7 @@ markdownEditor.window.Cropper = function(config) {
 Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
     imageData: ''
     ,upload: function(button) {
-        var sb = Ext.get('status-bar');
-        var uploader = Ext.DomHelper.insertFirst(sb,{
+        var uploader = Ext.DomHelper.insertFirst(this.config.md.statusBar,{
             tag: 'div',
             id: 'upload_progress',
             html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading image: ' + this.config.file.name
@@ -135,9 +134,9 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
         xhr.upload.onprogress = function (event) {
             if (event.lengthComputable) {
                 var complete = (event.loaded / event.total * 100 | 0);
-                sb.child('.progress').setWidth(complete + '%');
+                this.config.md.statusBar.child('.progress').setWidth(complete + '%');
             }
-        };
+        }.bind(this);
 
         xhr.onload = function () {
             if (xhr.status === 200) {

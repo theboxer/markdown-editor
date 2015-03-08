@@ -22,47 +22,97 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         Ext.onReady(this.render, this);
     }
 
-    ,parseRequest: ''
-    ,parse: function(input) {
-        var output = this.remarkable.render(input);
+    ,render: function() {
+        this.textarea = Ext.get('ta');
 
-        output = output.replace(/%5B/g, '[');
-        output = output.replace(/%5D/g, ']');
+        this.buildUI();
+        this.registerAce();
+        this.registerMarked();
 
-        if (MODx.config['markdowneditor.lp.parse_modx_tags'] == 1) {
-            if (this.parseRequest) {
-                clearTimeout(this.parseRequest);
+        this.statusBar = Ext.get('status-bar');
+        this.preview = Ext.get('preview-md');
+
+        var previewButton = Ext.get('preview-button');
+        var fullscreenButton = Ext.get('fullscreen-button');
+        var content = Ext.get('content-md');
+        var wrapper = content.parent();
+
+        var dropTarget = MODx.load({
+            xtype: 'modx-treedrop',
+            target: content,
+            targetEl: content,
+            onInsert: (function(s){
+                this.insert(s);
+                this.focus();
+                return true;
+            }).bind(this.editor),
+            iframe: true
+        });
+        this.textarea.on('destroy', function() {dropTarget.destroy();});
+
+        previewButton.addListener('click', function () {
+            if (this.preview.isVisible()) {
+                this.preview.setDisplayed('none');
+                content.setDisplayed('block');
+                this.statusBar.setDisplayed('block');
+
+                previewButton.child('i').removeClass('icon-toggle-on');
+                previewButton.child('i').addClass('icon-toggle-off');
+            } else {
+                this.preview.setDisplayed('block');
+                content.setDisplayed('none');
+                this.statusBar.setDisplayed('none');
+
+                previewButton.child('i').removeClass('icon-toggle-off');
+                previewButton.child('i').addClass('icon-toggle-on');
+            }
+        }, this);
+
+        fullscreenButton.addListener('click', function () {
+            var icon = fullscreenButton.child('i');
+
+            if (icon.hasClass('icon-expand')) {
+                icon.removeClass('icon-expand');
+                icon.addClass('icon-compress');
+
+                this.preview.setDisplayed('block');
+                content.setDisplayed('block');
+
+                previewButton.hide();
+
+                wrapper.addClass('fullscreen');
+
+                this.editor.setOption('maxLines', null);
+
+            } else {
+                icon.addClass('icon-expand');
+                icon.removeClass('icon-compress');
+
+                this.preview.setDisplayed('none');
+                content.setDisplayed('block');
+
+                previewButton.show();
+
+                wrapper.removeClass('fullscreen');
+
+                this.editor.setOption('maxLines', Infinity);
             }
 
-            var timeout = parseInt(MODx.config['markdowneditor.lp.parse_modx_tags_timeout'] || 300);
+            this.statusBar.setDisplayed('block');
 
-            this.parseRequest = setTimeout(function(){
-                MODx.Ajax.request({
-                    url: markdownEditor.config.connectorUrl
-                    ,params: {
-                        action: 'mgr/editor/processcontent'
-                        ,content: output
-                        ,resource: MODx.request.id
-                    },
-                    isUpload : true,
-                    listeners: {
-                        'success': {
-                            fn: function(r) {
-                                Ext.get('preview-md').update(r.data);
-                            },
-                            scope: this
-                        }
-                    }
-                });
-            }, timeout);
-        } else {
-            Ext.get('preview-md').update(output);
+            this.editor.resize(true);
+        }, this);
+
+        if (markdownEditor.content.content) {
+            this.editor.setValue(markdownEditor.content.content);
         }
+        this.editor.selection.clearSelection();
 
-        this.taMarkdown.dom.value = this.editor.getValue();
-        this.textarea.dom.value = output;
+        this.preview.update(this.parse(this.editor.getValue()));
 
-        return output;
+        this.editor.getSession().on('change', function(e){
+            this.parse(this.editor.getValue());
+        }.bind(this));
     }
 
     ,buildUI: function() {
@@ -143,9 +193,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.setTheme("ace/theme/" + (MODx.config['markdowneditor.general.theme'] || 'monokai'));
 
         var langTools = ace.require("ace/ext/language_tools");
-        var rhymeCompleter = {
+        var resourcesCompleter = {
             getCompletions: function(editor, session, pos, prefix, callback) {
                 if (prefix.length === 0) { callback(null, []); return }
+
                 MODx.Ajax.request({
                     url: markdownEditor.config.connectorUrl
                     ,params: {
@@ -164,11 +215,73 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
             }
         };
-        langTools.addCompleter(rhymeCompleter);
+        langTools.addCompleter(resourcesCompleter);
 
         this.editor.container.addEventListener("dragenter", this.catchAndDoNothing, false);
         this.editor.container.addEventListener("dragover", this.catchAndDoNothing, false);
         this.editor.container.addEventListener("drop", this.drop.bind(this), false);
+    }
+
+    ,registerMarked: function() {
+        this.remarkable = new Remarkable({
+            html: true,
+            highlight: function (str, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(lang, str).value;
+                    } catch (err) {}
+                }
+
+                try {
+                    return hljs.highlightAuto(str).value;
+                } catch (err) {}
+
+                return '';
+            }
+        });
+        this.remarkable.inline.ruler.disable([ 'backticks' ]);
+    }
+
+    ,parse: function(input) {
+        var output = this.remarkable.render(input);
+
+        output = output.replace(/%5B/g, '[');
+        output = output.replace(/%5D/g, ']');
+
+        if (MODx.config['markdowneditor.lp.parse_modx_tags'] == 1) {
+            if (this.parseRequest) {
+                clearTimeout(this.parseRequest);
+            }
+
+            var timeout = parseInt(MODx.config['markdowneditor.lp.parse_modx_tags_timeout'] || 300);
+
+            this.parseRequest = setTimeout(function(){
+                MODx.Ajax.request({
+                    url: markdownEditor.config.connectorUrl
+                    ,params: {
+                        action: 'mgr/editor/processcontent'
+                        ,content: output
+                        ,resource: MODx.request.id
+                    },
+                    isUpload : true,
+                    listeners: {
+                        'success': {
+                            fn: function(r) {
+                                this.preview.update(r.data);
+                            },
+                            scope: this
+                        }
+                    }
+                });
+            }, timeout);
+        } else {
+            this.preview.update(output);
+        }
+
+        this.taMarkdown.dom.value = this.editor.getValue();
+        this.textarea.dom.value = output;
+
+        return output;
     }
 
     ,catchAndDoNothing: function(e) {
@@ -207,8 +320,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,uploadFile: function(file, type) {
         if (!type) type = 'file';
 
-        var sb = Ext.get('status-bar');
-        var uploader = Ext.DomHelper.insertFirst(sb,{
+        var uploader = Ext.DomHelper.insertFirst(this.statusBar,{
             tag: 'div',
             id: 'upload_progress',
             html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading ' + type + ': ' + file.name
@@ -227,9 +339,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         xhr.upload.onprogress = function (event) {
             if (event.lengthComputable) {
                 var complete = (event.loaded / event.total * 100 | 0);
-                sb.child('.progress').setWidth(complete + '%');
+                this.statusBar.child('.progress').setWidth(complete + '%');
             }
-        };
+        }.bind(this);
 
         xhr.onload = function () {
             if (xhr.status === 200) {
@@ -243,119 +355,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         }.bind(this);
 
         xhr.send(formData);
-    }
-
-    ,registerMarked: function() {
-        this.remarkable = new Remarkable({
-            html: true,
-            highlight: function (str, lang) {
-                if (lang && hljs.getLanguage(lang)) {
-                    try {
-                        return hljs.highlight(lang, str).value;
-                    } catch (err) {}
-                }
-
-                try {
-                    return hljs.highlightAuto(str).value;
-                } catch (err) {}
-
-                return ''; // use external default escaping
-            }
-        });
-        this.remarkable.inline.ruler.disable([ 'backticks' ]);
-    }
-
-    ,render: function() {
-        var mde = this;
-        this.textarea = Ext.get('ta');
-
-        this.buildUI();
-        this.registerAce();
-        this.registerMarked();
-
-        var previewButton = Ext.get('preview-button');
-        var fullscreenButton = Ext.get('fullscreen-button');
-        var preview = Ext.get('preview-md');
-        var content = Ext.get('content-md');
-        var statusBar = Ext.get('status-bar');
-        var wrapper = content.parent();
-
-        var dropTarget = MODx.load({
-            xtype: 'modx-treedrop',
-            target: content,
-            targetEl: content,
-            onInsert: (function(s){
-                this.insert(s);
-                this.focus();
-                return true;
-            }).bind(this.editor),
-            iframe: true
-        });
-        this.textarea.on('destroy', function() {dropTarget.destroy();});
-
-        previewButton.addListener('click', function () {
-            if (preview.isVisible()) {
-                preview.setDisplayed('none');
-                content.setDisplayed('block');
-                statusBar.setDisplayed('block');
-
-                previewButton.child('i').removeClass('icon-toggle-on');
-                previewButton.child('i').addClass('icon-toggle-off');
-            } else {
-                preview.setDisplayed('block');
-                content.setDisplayed('none');
-                statusBar.setDisplayed('none');
-
-                previewButton.child('i').removeClass('icon-toggle-off');
-                previewButton.child('i').addClass('icon-toggle-on');
-            }
-        });
-
-        fullscreenButton.addListener('click', function () {
-            var icon = fullscreenButton.child('i');
-
-            if (icon.hasClass('icon-expand')) {
-                icon.removeClass('icon-expand');
-                icon.addClass('icon-compress');
-
-                preview.setDisplayed('block');
-                content.setDisplayed('block');
-
-                previewButton.hide();
-
-                wrapper.addClass('fullscreen');
-
-                this.editor.setOption('maxLines', null);
-
-            } else {
-                icon.addClass('icon-expand');
-                icon.removeClass('icon-compress');
-
-                preview.setDisplayed('none');
-                content.setDisplayed('block');
-
-                previewButton.show();
-
-                wrapper.removeClass('fullscreen');
-
-                this.editor.setOption('maxLines', Infinity);
-            }
-
-            statusBar.setDisplayed('block');
-
-            this.editor.resize(true);
-        }, this);
-
-        if (markdownEditor.content.content) {
-            this.editor.setValue(markdownEditor.content.content);
-        }
-        this.editor.selection.clearSelection();
-
-        preview.update(this.parse(this.editor.getValue()));
-
-        this.editor.getSession().on('change', function(e){
-            mde.parse(mde.editor.getValue());
-        });
     }
 });
 
