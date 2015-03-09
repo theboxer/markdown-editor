@@ -249,6 +249,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         output = output.replace(/%5B/g, '[');
         output = output.replace(/%5D/g, ']');
 
+        var codeBlocks = output.match(/<code(.|\s)*<\/code>/g);
+        Ext.each(codeBlocks, function(item) {
+            var replacedItem = item.replace(/\[\[/g, '&#91;&#91;');
+            replacedItem = replacedItem.replace(/]]/g, '&#93;&#93;');
+
+            output = output.replace(item, replacedItem);
+        });
+
         if (MODx.config['markdowneditor.lp.parse_modx_tags'] == 1) {
             if (this.parseRequest) {
                 clearTimeout(this.parseRequest);
