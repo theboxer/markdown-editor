@@ -274,7 +274,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                         }
                     }
                 });
-            }, timeout);
+            }.bind(this), timeout);
         } else {
             this.preview.update(output);
         }
