@@ -163,16 +163,24 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }]
         });
 
-        Ext.DomHelper.append(wrapper,{
-            tag: 'div',
-            id: 'status-bar',
-            html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>Attach files by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.'
-        });
+        if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
+            Ext.DomHelper.append(wrapper,{
+                tag: 'div',
+                id: 'status-bar',
+                html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>Attach files by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.'
+            });
 
-        Ext.get('inputFile').on('change', function(e, input) {
-            this.handleFiles(input.files);
-            input.value = "";
-        }, this);
+            Ext.get('inputFile').on('change', function(e, input) {
+                this.handleFiles(input.files);
+                input.value = "";
+            }, this);
+        } else {
+            Ext.DomHelper.append(wrapper,{
+                tag: 'div',
+                id: 'status-bar',
+                html: 'Uploading files is disabled.'
+            });
+        }
 
         Ext.DomHelper.append(wrapper,{
             tag: 'span',
@@ -217,6 +225,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
         };
         langTools.addCompleter(resourcesCompleter);
+
 
         this.editor.container.addEventListener("dragenter", this.catchAndDoNothing, false);
         this.editor.container.addEventListener("dragover", this.catchAndDoNothing, false);
@@ -302,7 +311,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         e.stopPropagation();
         e.preventDefault();
 
-        this.handleFiles(e.dataTransfer.files);
+        if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
+            this.handleFiles(e.dataTransfer.files);
+        }
     }
 
     ,handleFiles: function(files) {
@@ -310,6 +321,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             var isImage = /^image\//.test(file.type);
 
             if (isImage) {
+                if (MODx.config['markdowneditor.upload.enable_image_upload'] == 0) return true;
+
                 if (MODx.config['markdowneditor.cropper.enable_cropper'] == 1) {
                     MODx.load({
                         xtype: 'markdowneditor-window-cropper'
@@ -320,6 +333,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     this.uploadFile(file, 'image');
                 }
             } else {
+                if (MODx.config['markdowneditor.upload.enable_file_upload'] == 0) return true;
+
                 this.uploadFile(file, 'file');
             }
 

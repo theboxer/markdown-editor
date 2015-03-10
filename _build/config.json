@@ -65,6 +65,18 @@
         "area": "markdowneditor.area.upload"
       },
       {
+        "key": "upload.enable_image_upload",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.enable_file_upload",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.upload"
+      },
+      {
         "key": "cropper.enable_cropper",
         "value": true,
         "type": "combo-boolean",

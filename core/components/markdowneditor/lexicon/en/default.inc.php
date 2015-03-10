@@ -49,3 +49,7 @@ $_lang['setting_markdowneditor.general.include_ghfmd'] = 'GitHub Flavoured MD CS
 $_lang['setting_markdowneditor.general.include_ghfmd_desc'] = 'If enabled, GitHub Flavoured Markdown CSS will be automatically included on frontend.<br />Styles will be applied only to element with class <strong>markdown-body</strong>.';
 $_lang['setting_markdowneditor.general.include_highlight'] = 'Highlight.js';
 $_lang['setting_markdowneditor.general.include_highlight_desc'] = 'If enabled, highlight.js will be automatically included on frontend.';
+$_lang['setting_markdowneditor.upload.enable_image_upload'] = 'Image upload';
+$_lang['setting_markdowneditor.upload.enable_image_upload_desc'] = 'If enabled, user will be able to upload images.';
+$_lang['setting_markdowneditor.upload.enable_file_upload'] = 'File upload';
+$_lang['setting_markdowneditor.upload.enable_file_upload_desc'] = 'If enabled, user will be able to upload non-image files.';
