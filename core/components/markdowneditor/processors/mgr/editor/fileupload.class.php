@@ -1,21 +1,12 @@
 <?php
-
-class MarkdownEditorUploadFileProcessor extends modProcessor
+require_once dirname(__FILE__) . '/upload.class.php';
+class MarkdownEditorUploadFileProcessor extends MarkdownEditorUploadProcessor
 {
-    /** @var MarkdownEditor $md */
-    private $md;
-    /** @var string $uploadPath */
-    private $uploadPath;
-    /** @var string $uploadURL */
-    private $uploadURL;
-    /** @var string $extension */
-    private $extension;
+    /** @var string $type */
+    protected $type = 'file';
 
     public function process()
     {
-        $this->md = $this->modx->markdowneditor;
-
-        $this->setUploadPaths();
         $originalName = $this->getOriginalName();
 
         $fileName = $this->generateUniqueFileName();
@@ -26,71 +17,6 @@ class MarkdownEditorUploadFileProcessor extends modProcessor
             'path' => $this->uploadURL . $fileName . $this->extension,
             'name' => $originalName
         ));
-    }
-
-    private function setUploadPaths()
-    {
-        $this->uploadPath = $this->md->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
-        $this->uploadPath = rtrim($this->uploadPath, '/') . '/';
-
-        if (!is_dir($this->uploadPath)) {
-            mkdir($this->uploadPath);
-        }
-
-        $this->uploadURL = $this->md->getOption('upload.file_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
-        $this->uploadURL = rtrim($this->uploadURL, '/') . '/';
-
-        $underResource = $this->md->getOption('upload.under_resource', null, true);
-        if ($underResource) {
-            $resource = $this->getProperty('resource', 0);
-            if ($resource != 0) {
-                $resource = $this->modx->getObject('modResource', $resource);
-                if ($resource) {
-                    $resource = $resource->id;
-                } else {
-                    $resource = 0;
-                }
-            }
-
-            $this->uploadPath .= $resource . '/';
-
-            if (!is_dir($this->uploadPath)) {
-                mkdir($this->uploadPath);
-            }
-
-            $this->uploadURL .= $resource . '/';
-        }
-    }
-
-    private function getOriginalName()
-    {
-        $name = $_FILES['file']['name'];
-        $name = explode('.', $name);
-
-        $this->extension = '.' . array_pop($name);
-
-        return implode('.', $name);
-    }
-
-    private function generateUniqueFileName()
-    {
-        $fileName = $this->getFileName();
-
-        while (file_exists($this->uploadPath . $fileName . $this->extension)) {
-            $fileName = $this->getFileName();
-        }
-
-        return $fileName;
-    }
-
-    private function getFileName()
-    {
-        $fileName = strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
-        $fileName .= '-' . strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
-        $fileName .= '-' . strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
-        $fileName .= '-' . strtr(base64_encode(openssl_random_pseudo_bytes(4)), "+/=", "XXX");
-
-        return $fileName;
     }
 }
 

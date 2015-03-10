@@ -77,6 +77,24 @@
         "area": "markdowneditor.area.upload"
       },
       {
+        "key": "upload.max_size",
+        "value": "2097152",
+        "type": "textfield",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.image_types",
+        "value": "jpg,jpeg,png,gif,bmp",
+        "type": "textfield",
+        "area": "markdowneditor.area.upload"
+      },
+      {
+        "key": "upload.file_types",
+        "value": "txt,html,htm,xml,js,css,zip,gz,rar,z,tgz,tar,mp3,mp4,aac,wav,au,wmv,avi,mpg,mpeg,pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,odb,odg,odf",
+        "type": "textfield",
+        "area": "markdowneditor.area.upload"
+      },
+      {
         "key": "cropper.enable_cropper",
         "value": true,
         "type": "combo-boolean",

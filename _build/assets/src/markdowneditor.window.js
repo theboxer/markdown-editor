@@ -114,11 +114,7 @@ markdownEditor.window.Cropper = function(config) {
 Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
     imageData: ''
     ,upload: function(button) {
-        var uploader = Ext.DomHelper.insertFirst(this.config.md.statusBar,{
-            tag: 'div',
-            id: 'upload_progress',
-            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading image: ' + this.config.file.name
-        });
+        var uploader = this.config.md.createUploader('image', this.config.file.name);
 
         var formData = new FormData();
         formData.append('file', this.config.file);
@@ -136,16 +132,19 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
         xhr.upload.onprogress = function (event) {
             if (event.lengthComputable) {
                 var complete = (event.loaded / event.total * 100 | 0);
-                this.config.md.statusBar.child('.progress').setWidth(complete + '%');
+                uploader.child('.progress').setWidth(complete + '%');
             }
         }.bind(this);
 
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var res = JSON.parse(xhr.responseText);
+
                 if (res.success == true) {
                     uploader.remove();
                     this.config.md.editor.insert('![' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n');
+                } else {
+                    this.config.md.failUploader(uploader, res.message);
                 }
             }
         }.bind(this);

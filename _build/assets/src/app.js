@@ -319,9 +319,17 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,handleFiles: function(files) {
         Ext.each(files, function(file) {
             var isImage = /^image\//.test(file.type);
+            var uploader;
 
             if (isImage) {
                 if (MODx.config['markdowneditor.upload.enable_image_upload'] == 0) return true;
+
+                if (file.size > parseInt(MODx.config['markdowneditor.upload.max_size'])) {
+                    uploader = this.createUploader('image', file.name);
+                    this.failUploader(uploader, 'File is too big.');
+
+                    return true;
+                }
 
                 if (MODx.config['markdowneditor.cropper.enable_cropper'] == 1) {
                     MODx.load({
@@ -335,6 +343,13 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             } else {
                 if (MODx.config['markdowneditor.upload.enable_file_upload'] == 0) return true;
 
+                if (file.size > parseInt(MODx.config['markdowneditor.upload.max_size'])) {
+                    uploader = this.createUploader('file', file.name);
+                    this.failUploader(uploader, 'File is too big.');
+
+                    return true;
+                }
+
                 this.uploadFile(file, 'file');
             }
 
@@ -344,11 +359,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,uploadFile: function(file, type) {
         if (!type) type = 'file';
 
-        var uploader = Ext.DomHelper.insertFirst(this.statusBar,{
-            tag: 'div',
-            id: 'upload_progress',
-            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> Uploading ' + type + ': ' + file.name
-        });
+        var uploader = this.createUploader();
 
         var formData = new FormData();
         formData.append('file', file);
@@ -364,7 +375,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         xhr.upload.onprogress = function (event) {
             if (event.lengthComputable) {
                 var complete = (event.loaded / event.total * 100 | 0);
-                this.statusBar.child('.progress').setWidth(complete + '%');
+                uploader.child('.progress').setWidth(complete + '%');
             }
         }.bind(this);
 
@@ -375,11 +386,36 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     uploader.remove();
                     var imagePrefix = (type == 'image') ? '!' : '';
                     this.editor.insert(imagePrefix + '[' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n');
+                } else {
+                    this.failUploader(uploader, res.message);
                 }
             }
         }.bind(this);
 
         xhr.send(formData);
+    }
+
+    ,createUploader: function(type, fileName) {
+        var uploader = Ext.DomHelper.insertFirst(this.statusBar,{
+            tag: 'div',
+            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> <span>Uploading ' + type + ': ' + fileName + '</span>'
+        });
+
+        return Ext.get(uploader);
+    }
+
+    ,failUploader: function(uploader, message) {
+        uploader.child('.progress').addClass('error');
+        uploader.child('.progress').setWidth('100%');
+
+        uploader.child('i').addClass('remove-message');
+        uploader.child('i').replaceClass('icon-spinner', 'icon-remove');
+        uploader.child('i').removeClass('icon-spin');
+
+        uploader.child('span').dom.innerHTML += ' failed. ' + message;
+        uploader.child('.remove-message').on('click', function() {
+            uploader.remove();
+        });
     }
 });
 

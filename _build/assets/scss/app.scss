@@ -146,3 +146,11 @@ label.link:hover {
   position: absolute;
   left: 0;
 }
+
+.progress.error {
+  background: rgba(255, 0, 0, 0.29);
+}
+
+.remove-message {
+  cursor: pointer;
+}
