@@ -142,7 +142,7 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
 
                 if (res.success == true) {
                     uploader.remove();
-                    this.config.md.editor.insert('![' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n');
+                    this.config.md.editor.insert('![' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n\n');
                 } else {
                     this.config.md.failUploader(uploader, res.message);
                 }
@@ -162,6 +162,7 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
         this.$cropperEl.cropper("destroy");
 
         markdownEditor.window.Cropper.superclass.close.call(this);
+        this.config.md.editor.focus();
     }
 });
 Ext.reg('markdowneditor-window-cropper',markdownEditor.window.Cropper);

@@ -360,6 +360,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     }).show();
                 } else {
                     this.uploadFile(file, 'image');
+                    this.editor.focus();
                 }
             } else {
                 if (MODx.config['markdowneditor.upload.enable_file_upload'] == 0) return true;
@@ -377,6 +378,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 }
 
                 this.uploadFile(file, 'file');
+                this.editor.focus();
             }
 
         }, this);
@@ -417,7 +419,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 if (res.success == true) {
                     uploader.remove();
                     var imagePrefix = (type == 'image') ? '!' : '';
-                    this.editor.insert(imagePrefix + '[' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")\n');
+                    var endLine = (type == 'image') ? '\n\n' : '\n';
+                    this.editor.insert(imagePrefix + '[' + res.object.name + '](' + res.object.path + ' "' + res.object.name + '")' + endLine);
                 } else {
                     this.failUploader(uploader, res.message);
                 }
