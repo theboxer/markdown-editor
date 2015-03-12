@@ -17,6 +17,7 @@ markdownEditor.Editor = function(config) {
 };
 Ext.extend(markdownEditor.Editor,Ext.Component,{
     remarkable: ''
+    ,fullScreen: false
     ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
@@ -57,6 +58,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 content.setDisplayed('block');
                 this.statusBar.setDisplayed('block');
 
+                this.editor.focus();
+
                 previewButton.child('i').removeClass('icon-toggle-on');
                 previewButton.child('i').addClass('icon-toggle-off');
             } else {
@@ -72,12 +75,15 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         fullscreenButton.addListener('click', function () {
             var icon = fullscreenButton.child('i');
 
-            if (icon.hasClass('icon-expand')) {
+            if (this.fullScreen == false) {
+                this.fullScreen = true;
                 icon.removeClass('icon-expand');
                 icon.addClass('icon-compress');
 
                 this.preview.setDisplayed('block');
                 content.setDisplayed('block');
+
+                this.editor.focus();
 
                 previewButton.hide();
 
@@ -86,11 +92,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 this.editor.setOption('maxLines', null);
 
             } else {
+                this.fullScreen = false;
                 icon.addClass('icon-expand');
                 icon.removeClass('icon-compress');
 
                 this.preview.setDisplayed('none');
                 content.setDisplayed('block');
+
+                this.editor.focus();
 
                 previewButton.show();
 
@@ -286,6 +295,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                         'success': {
                             fn: function(r) {
                                 this.preview.update(r.data);
+
+                                if (this.fullScreen == true) {
+                                    this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+                                }
                             },
                             scope: this
                         }
@@ -294,6 +307,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }.bind(this), timeout);
         } else {
             this.preview.update(output);
+
+            if (this.fullScreen == true) {
+                this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+            }
         }
 
         this.taMarkdown.dom.value = this.editor.getValue();
