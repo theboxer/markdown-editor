@@ -319,14 +319,18 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,handleFiles: function(files) {
         Ext.each(files, function(file) {
             var isImage = /^image\//.test(file.type);
-            var uploader;
 
             if (isImage) {
                 if (MODx.config['markdowneditor.upload.enable_image_upload'] == 0) return true;
 
+                if (!this.checkType(MODx.config['markdowneditor.upload.image_types'], file)){
+                    this.failMessage(file, 'image', _('markdowneditor.err.upload.unsupported_image'));
+
+                    return true;
+                }
+
                 if (file.size > parseInt(MODx.config['markdowneditor.upload.max_size'])) {
-                    uploader = this.createUploader('image', file.name);
-                    this.failUploader(uploader, 'File is too big.');
+                    this.failMessage(file, 'image', _('markdowneditor.err.upload.too_big'));
 
                     return true;
                 }
@@ -343,9 +347,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             } else {
                 if (MODx.config['markdowneditor.upload.enable_file_upload'] == 0) return true;
 
+                if (!this.checkType(MODx.config['markdowneditor.upload.file_types'], file)) {
+                    this.failMessage(file, 'file', _('markdowneditor.err.upload.unsupported_file'));
+
+                    return true;
+                }
+
                 if (file.size > parseInt(MODx.config['markdowneditor.upload.max_size'])) {
-                    uploader = this.createUploader('file', file.name);
-                    this.failUploader(uploader, 'File is too big.');
+                    this.failMessage(file, 'file', _('markdowneditor.err.upload.too_big'));
 
                     return true;
                 }
@@ -354,6 +363,12 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
 
         }, this);
+    }
+
+    ,checkType: function(allowedTypes, file) {
+        allowedTypes = allowedTypes.split(',');
+
+        return allowedTypes.indexOf(file.name.split('.').pop()) != -1;
     }
 
     ,uploadFile: function(file, type) {
@@ -416,6 +431,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         uploader.child('.remove-message').on('click', function() {
             uploader.remove();
         });
+    }
+
+    ,failMessage: function(file, type, message) {
+        var uploader = this.createUploader(type, file.name);
+        this.failUploader(uploader, message);
     }
 });
 

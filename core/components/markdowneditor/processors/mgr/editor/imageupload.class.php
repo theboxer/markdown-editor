@@ -9,9 +9,18 @@ class MarkdownEditorUploadImageProcessor extends MarkdownEditorUploadProcessor
     /** @var string $type */
     protected $type = 'image';
 
+    public function initialize()
+    {
+        $img = $this->setImage();
+        if ($img !== true) {
+            return $img;
+        }
+
+        return parent::initialize();
+    }
+
     public function process()
     {
-        $this->setImage();
         $data = $this->loadData();
         if ($data !== true) {
             return $this->failure($data);
@@ -48,20 +57,26 @@ class MarkdownEditorUploadImageProcessor extends MarkdownEditorUploadProcessor
             });
         }
 
-        $this->img->save($this->uploadPath . $fileName . $this->extension);
+        $this->img->save($this->uploadPath . $fileName . '.' . $this->extension);
 
         return $this->success('', array(
-            'path' => $this->uploadURL . $fileName . $this->extension,
-            'name' => $this->getOriginalName()
+            'path' => $this->uploadURL . $fileName . '.' . $this->extension,
+            'name' => $this->originalName
         ));
     }
 
     private function setImage()
     {
-        $this->img = Intervention\Image\ImageManagerStatic::make($_FILES['file']['tmp_name']);
+        try {
+            $this->img = Intervention\Image\ImageManagerStatic::make($_FILES['file']['tmp_name']);
+        } catch (Exception $e) {
+            return 'Not image.';
+        }
 
         $image = getimagesize($_FILES['file']['tmp_name']);
-        $this->extension = image_type_to_extension($image[2]);
+        $this->extension = image_type_to_extension($image[2], false);
+
+        return true;
     }
 
     private function loadData()
@@ -79,6 +94,18 @@ class MarkdownEditorUploadImageProcessor extends MarkdownEditorUploadProcessor
         $this->data = $imageData;
 
         return true;
+    }
+
+    protected function checkFileType()
+    {
+        $allowed = $this->md->getOption('upload.image_types');
+        if (empty($allowed)) return true;
+
+        $allowed = explode(',', $allowed);
+
+        if (in_array($this->extension, $allowed)) return true;
+
+        return $this->modx->lexicon('markdowneditor.err.upload.unsupported_image');
     }
 }
 

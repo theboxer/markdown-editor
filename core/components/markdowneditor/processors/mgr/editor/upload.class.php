@@ -11,14 +11,22 @@ abstract class MarkdownEditorUploadProcessor extends modProcessor
     protected $extension;
     /** @var string $type */
     protected $type = 'file';
+    /** @var string $originalName */
+    protected $originalName;
 
     public function initialize()
     {
         $this->md = $this->modx->markdowneditor;
+        $this->setOriginalName();
 
         $size = $this->checkSize();
         if ($size !== true) {
             return $size;
+        }
+
+        $fileType = $this->checkFileType();
+        if ($fileType !== true) {
+            return $fileType;
         }
 
         $this->setUploadPaths();
@@ -60,21 +68,21 @@ abstract class MarkdownEditorUploadProcessor extends modProcessor
         }
     }
 
-    protected function getOriginalName()
+    protected function setOriginalName()
     {
         $name = $_FILES['file']['name'];
         $name = explode('.', $name);
 
-        $this->extension = '.' . array_pop($name);
+        $this->extension = array_pop($name);
 
-        return implode('.', $name);
+        $this->originalName = implode('.', $name);
     }
 
     protected function generateUniqueFileName()
     {
         $fileName = $this->getFileName();
 
-        while (file_exists($this->uploadPath . $fileName . $this->extension)) {
+        while (file_exists($this->uploadPath . $fileName . '.' . $this->extension)) {
             $fileName = $this->getFileName();
         }
 
@@ -95,10 +103,12 @@ abstract class MarkdownEditorUploadProcessor extends modProcessor
     {
         $allowedSize = (int) $this->md->getOption('upload.max_size', null, "2097152");
 
-        if ($allowedSize < $_FILES['file']['size']) return 'File is too big.';
+        if ($allowedSize < $_FILES['file']['size']) return $this->modx->lexicon('markdowneditor.err.upload.too_big');
 
         return true;
     }
+
+    abstract protected function checkFileType();
 }
 
 return 'MarkdownEditorUploadFileProcessor';

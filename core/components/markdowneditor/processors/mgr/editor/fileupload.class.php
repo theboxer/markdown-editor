@@ -7,16 +7,26 @@ class MarkdownEditorUploadFileProcessor extends MarkdownEditorUploadProcessor
 
     public function process()
     {
-        $originalName = $this->getOriginalName();
-
         $fileName = $this->generateUniqueFileName();
 
-        move_uploaded_file($_FILES["file"]["tmp_name"], $this->uploadPath . $fileName . $this->extension);
+        move_uploaded_file($_FILES["file"]["tmp_name"], $this->uploadPath . $fileName . '.' . $this->extension);
 
         return $this->success('', array(
-            'path' => $this->uploadURL . $fileName . $this->extension,
-            'name' => $originalName
+            'path' => $this->uploadURL . $fileName . '.' . $this->extension,
+            'name' => $this->originalName
         ));
+    }
+
+    protected function checkFileType()
+    {
+        $allowed = $this->md->getOption('upload.file_types');
+        if (empty($allowed)) return true;
+
+        $allowed = explode(',', $allowed);
+
+        if (in_array($this->extension, $allowed)) return true;
+
+        return $this->modx->lexicon('markdowneditor.err.upload.unsupported_file');
     }
 }
 

@@ -2,6 +2,8 @@
 class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
 
     public function process() {
+        $this->modx->controller->addLexiconTopic('markdowneditor:default');
+
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'github-markdown.css');
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'highlight.css');
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'dependencies.css');
