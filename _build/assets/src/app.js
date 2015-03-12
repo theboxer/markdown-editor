@@ -155,7 +155,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             cn: [{
                 tag: 'span',
                 id: 'preview-button',
-                html: '<i class="icon icon-toggle-off"></i> Preview'
+                html: '<i class="icon icon-toggle-off"></i> ' + _('markdowneditor.toolbox.preview')
             },{
                 tag: 'span',
                 id: 'fullscreen-button',
@@ -167,7 +167,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             Ext.DomHelper.append(wrapper,{
                 tag: 'div',
                 id: 'status-bar',
-                html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>Attach files by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.'
+                html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>' + _('markdowneditor.status_bar_message')
             });
 
             Ext.get('inputFile').on('change', function(e, input) {
@@ -178,7 +178,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             Ext.DomHelper.append(wrapper,{
                 tag: 'div',
                 id: 'status-bar',
-                html: 'Uploading files is disabled.'
+                html: _('markdowneditor.status_bar_disabled')
             });
         }
 
@@ -413,7 +413,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,createUploader: function(type, fileName) {
         var uploader = Ext.DomHelper.insertFirst(this.statusBar,{
             tag: 'div',
-            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> <span>Uploading ' + type + ': ' + fileName + '</span>'
+            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> <span>' + _('markdowneditor.uploading_' + type) + fileName + '</span>'
         });
 
         return Ext.get(uploader);

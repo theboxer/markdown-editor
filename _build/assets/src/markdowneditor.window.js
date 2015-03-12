@@ -14,47 +14,47 @@ markdownEditor.window.Cropper = function(config) {
         ,autoScroll: true
         ,allowDrop: true
         ,width: 800
-        ,title: 'Crop the image'
+        ,title: _('markdowneditor.cropper.crop_image')
         ,cls: 'modx-window'
         ,html: '<div class="image-upload-wrapper"><img src="' + URL.createObjectURL(config.file) + '"></div>'
         ,tbar: [{
-            text: '<i class="icon icon-arrows"></i> Move'
+            text: '<i class="icon icon-arrows"></i> ' + _('markdowneditor.cropper.move')
             ,scope: this
             ,param: 'move'
             ,action: 'setDragMode'
             ,handler: this.callCropperAction
         },{
-            text: '<i class="icon icon-crop"></i> Crop'
+            text: '<i class="icon icon-crop"></i> ' + _('markdowneditor.cropper.crop')
             ,scope: this
             ,param: 'crop'
             ,action: 'setDragMode'
             ,handler: this.callCropperAction
         },{
-            text: '<i class="icon icon-search-plus"></i> Zoom In'
+            text: '<i class="icon icon-search-plus"></i> ' + _('markdowneditor.cropper.zoom_in')
             ,scope: this
             ,param: 0.1
             ,action: 'zoom'
             ,handler: this.callCropperAction
         },{
-            text: '<i class="icon icon-search-minus"></i> Zoom Out'
+            text: '<i class="icon icon-search-minus"></i> ' + _('markdowneditor.cropper.zoom_out')
             ,scope: this
             ,param: -0.1
             ,action: 'zoom'
             ,handler: this.callCropperAction
         },{
-            text: '<i class="icon icon-rotate-left"></i> Rotate left'
+            text: '<i class="icon icon-rotate-left"></i> ' + _('markdowneditor.cropper.rotate_left')
             ,scope: this
             ,param: -90
             ,action: 'rotate'
             ,handler: this.callCropperAction
         },{
-            text: '<i class="icon icon-rotate-right"></i> Rotate right'
+            text: '<i class="icon icon-rotate-right"></i> ' + _('markdowneditor.cropper.rotate_right')
             ,scope: this
             ,param: 90
             ,action: 'rotate'
             ,handler: this.callCropperAction
         },{
-            text: '<i class="icon icon-remove"></i> Clear cropper'
+            text: '<i class="icon icon-remove"></i> ' + _('markdowneditor.cropper.clear_cropper')
             ,scope: this
             ,param: null
             ,action: 'clear'
@@ -65,13 +65,13 @@ markdownEditor.window.Cropper = function(config) {
             ,scope: this
             ,handler: this.close
         },{
-            text: 'Upload'
+            text: _('markdowneditor.cropper.upload')
             ,cls: 'primary-button'
             ,scope: this
             ,crop: 0
             ,handler: this.upload
         },{
-            text: 'Crop & Upload'
+            text: _('markdowneditor.cropper.crop_upload')
             ,cls: 'primary-button'
             ,scope: this
             ,crop: 1

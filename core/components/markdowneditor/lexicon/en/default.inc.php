@@ -9,6 +9,23 @@
 $_lang['markdowneditor'] = 'MarkdownEditor';
 $_lang['setting_markdowneditor'] = 'MarkdownEditor';
 
+$_lang['markdowneditor.status_bar_message'] = 'Attach files by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.';
+$_lang['markdowneditor.status_bar_disabled'] = 'Uploading files is disabled.';
+$_lang['markdowneditor.uploading_image'] = 'Uploading image: ';
+$_lang['markdowneditor.uploading_file'] = 'Uploading file: ';
+$_lang['markdowneditor.cropper.crop_image'] = 'Crop the image';
+$_lang['markdowneditor.cropper.move'] = 'Move';
+$_lang['markdowneditor.cropper.crop'] = 'Crop';
+$_lang['markdowneditor.cropper.zoom_in'] = 'Zoom In';
+$_lang['markdowneditor.cropper.zoom_out'] = 'Zoom Out';
+$_lang['markdowneditor.cropper.rotate_left'] = 'Rotate left';
+$_lang['markdowneditor.cropper.rotate_right'] = 'Rotate right';
+$_lang['markdowneditor.cropper.clear_cropper'] = 'Clear cropper';
+$_lang['markdowneditor.cropper.upload'] = 'Upload';
+$_lang['markdowneditor.cropper.crop_upload'] = 'Crop & Upload';
+
+$_lang['markdowneditor.toolbox.preview'] = 'Preview';
+
 $_lang['area_markdowneditor.area.cropper'] = 'Cropper';
 $_lang['area_markdowneditor.area.lp'] = 'Live preview';
 $_lang['area_markdowneditor.area.upload'] = 'Upload';
