@@ -9,7 +9,7 @@
 $_lang['markdowneditor'] = 'MarkdownEditor';
 $_lang['setting_markdowneditor'] = 'MarkdownEditor';
 
-$_lang['markdowneditor.status_bar_message'] = 'Attach files by dragging & dropping or <label for="inputFile" class="link">selecting them</label>.';
+$_lang['markdowneditor.status_bar_message'] = 'Attach files by dragging & dropping or <label for="[[+id]]" class="link">selecting them</label>.';
 $_lang['markdowneditor.status_bar_disabled'] = 'Uploading files is disabled.';
 $_lang['markdowneditor.uploading_image'] = 'Uploading image: ';
 $_lang['markdowneditor.uploading_file'] = 'Uploading file: ';

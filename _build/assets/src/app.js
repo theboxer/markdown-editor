@@ -169,9 +169,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
             this.statusBar = Ext.get(Ext.DomHelper.append(wrapper,{
                 tag: 'div',
-                class: 'status-bar',
-                html: '<div class="upload-bar"> <input class="hidden" name="file" type="file" multiple>' + _('markdowneditor.status_bar_message') + "</div>"
+                class: 'status-bar'
             }));
+
+            this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple>' + _('markdowneditor.status_bar_message', {id: this.statusBar.id + '-file'}) + '</div>';
 
             this.statusBar.child('input').on('change', function(e, input) {
                 this.handleFiles(input.files);
