@@ -31,12 +31,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.registerAce();
         this.registerMarked();
 
-        this.statusBar = Ext.get('status-bar');
-        this.preview = Ext.get('preview-md');
-
-        var previewButton = Ext.get('preview-button');
-        var fullscreenButton = Ext.get('fullscreen-button');
-        var content = Ext.get('content-md');
+        var previewButton = this.toolBox.child('.preview-button');
+        var fullscreenButton = this.toolBox.child('.fullscreen-button');
+        var content = this.contentMD;
         var wrapper = content.parent();
 
         var dropTarget = MODx.load({
@@ -130,13 +127,12 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.textarea.setWidth(0);
         this.textarea.setHeight(0);
 
-        Ext.DomHelper.insertBefore(this.textarea, {
+        this.taMarkdown = Ext.get(Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'textarea',
             name: 'ta_markdown',
-            id: 'ta_markdown'
-        });
+            class: 'ta_markdown'
+        }));
 
-        this.taMarkdown = Ext.get('ta_markdown');
         this.taMarkdown.setDisplayed('none');
         this.taMarkdown.setWidth(0);
         this.taMarkdown.setHeight(0);
@@ -146,49 +142,47 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             class: 'markdown-container'
         });
 
-        Ext.DomHelper.append(wrapper,{
+        this.contentMD = Ext.get(Ext.DomHelper.append(wrapper,{
             tag: 'div',
-            id: 'content-md',
-            class: this.textarea.dom.className
-        });
+            class: this.textarea.dom.className + ' content-md'
+        }));
 
-        Ext.DomHelper.append(wrapper,{
+        this.preview = Ext.get(Ext.DomHelper.append(wrapper,{
             tag: 'div',
-            id: 'preview-md',
-            class: 'markdown-body'
-        });
+            class: 'markdown-body preview-md'
+        }));
 
-        Ext.DomHelper.append(wrapper,{
+        this.toolBox = Ext.get(Ext.DomHelper.append(wrapper,{
             tag: 'div',
-            id: 'toolbox',
+            class: 'toolbox',
             cn: [{
                 tag: 'span',
-                id: 'preview-button',
+                class: 'preview-button',
                 html: '<i class="icon icon-toggle-off"></i> ' + _('markdowneditor.toolbox.preview')
             },{
                 tag: 'span',
-                id: 'fullscreen-button',
+                class: 'fullscreen-button',
                 html: '<i class="icon icon-expand"></i>'
             }]
-        });
+        }));
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
-            Ext.DomHelper.append(wrapper,{
+            this.statusBar = Ext.get(Ext.DomHelper.append(wrapper,{
                 tag: 'div',
-                id: 'status-bar',
-                html: '<div class="upload-bar"> <input class="hidden" id="inputFile" name="file" type="file" multiple>' + _('markdowneditor.status_bar_message') + "</div>"
-            });
+                class: 'status-bar',
+                html: '<div class="upload-bar"> <input class="hidden" name="file" type="file" multiple>' + _('markdowneditor.status_bar_message') + "</div>"
+            }));
 
-            Ext.get('inputFile').on('change', function(e, input) {
+            this.statusBar.child('input').on('change', function(e, input) {
                 this.handleFiles(input.files);
                 input.value = "";
             }, this);
         } else {
-            Ext.DomHelper.append(wrapper,{
+            this.statusBar = Ext.get(Ext.DomHelper.append(wrapper,{
                 tag: 'div',
-                id: 'status-bar',
+                class: 'status-bar',
                 html: _('markdowneditor.status_bar_disabled')
-            });
+            }));
         }
 
         Ext.DomHelper.append(wrapper,{
@@ -198,7 +192,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     }
 
     ,registerAce: function() {
-        this.editor = ace.edit(Ext.DomQuery.selectNode('div#content-md'));
+        this.editor = ace.edit(Ext.DomQuery.selectNode('div.content-md'));
         this.editor.setOptions({
             maxLines: Infinity,
             minLines: 25,
