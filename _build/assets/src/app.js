@@ -433,7 +433,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,createUploader: function(type, fileName) {
         var uploader = Ext.DomHelper.insertFirst(this.statusBar,{
             tag: 'div',
-            html: '<div class="progress"></div><i class="icon icon-spinner icon-spin"></i> <span>' + _('markdowneditor.uploading_' + type) + fileName + '</span>'
+            html: '<div class="progress"><i class="icon icon-spinner icon-spin"></i> <span>' + _('markdowneditor.uploading_' + type) + fileName + '</span></div>'
         });
 
         return Ext.get(uploader);
