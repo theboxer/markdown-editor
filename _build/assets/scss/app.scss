@@ -97,7 +97,6 @@
   color: #D0D0D0;
   font-size: 12px;
   line-height: 25px;
-  padding-left: 10px;
 }
 
 .image-upload-wrapper {
@@ -139,15 +138,25 @@ label.link:hover {
   text-decoration: underline;
 }
 
+.upload-bar,
+.progress.error,
 .progress {
+  padding-left: 10px;
+}
+
+.progress {
+  box-sizing: border-box;
   background: rgba(10, 158, 0, 0.41);
   width: 0%;
   height: 25px;
-  position: absolute;
-  left: 0;
+
+  .icon {
+    margin-right: 2px;
+  }
 }
 
 .progress.error {
+  color: rgba(255, 255, 255, 0.8) !important;
   background: rgba(255, 0, 0, 0.29);
 }
 

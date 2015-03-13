@@ -176,7 +176,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             Ext.DomHelper.append(wrapper,{
                 tag: 'div',
                 id: 'status-bar',
-                html: '<input class="hidden" id="inputFile" name="file" type="file" multiple>' + _('markdowneditor.status_bar_message')
+                html: '<div class="upload-bar"> <input class="hidden" id="inputFile" name="file" type="file" multiple>' + _('markdowneditor.status_bar_message') + "</div>"
             });
 
             Ext.get('inputFile').on('change', function(e, input) {
