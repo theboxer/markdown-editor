@@ -70,6 +70,10 @@ $_lang['setting_markdowneditor.upload.enable_image_upload'] = 'Image upload';
 $_lang['setting_markdowneditor.upload.enable_image_upload_desc'] = 'If enabled, user will be able to upload images.';
 $_lang['setting_markdowneditor.upload.enable_file_upload'] = 'File upload';
 $_lang['setting_markdowneditor.upload.enable_file_upload_desc'] = 'If enabled, user will be able to upload non-image files.';
+$_lang['setting_markdowneditor.upload.image_types'] = 'Image types';
+$_lang['setting_markdowneditor.upload.image_types_desc'] = 'Define image types that can be upload.';
+$_lang['setting_markdowneditor.upload.file_types'] = 'File types';
+$_lang['setting_markdowneditor.upload.file_types_desc'] = 'Define files types that can be uploaded.';
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';
