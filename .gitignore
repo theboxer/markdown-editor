@@ -1,5 +1,11 @@
+# Bower & Node Modules #
+########################
 _build/assets/bower_components
 _build/assets/node_modules
+
+# Composer dependencies #
+#########################
+core/components/markdowneditor/model/vendor
 
 # Config files #
 ################
