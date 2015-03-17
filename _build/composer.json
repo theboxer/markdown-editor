@@ -1,0 +1,8 @@
+{
+  "config": {
+    "vendor-dir": "../core/components/markdowneditor/model/vendor"
+  },
+  "require": {
+    "intervention/image": "2.*"
+  }
+}
