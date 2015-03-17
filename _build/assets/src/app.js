@@ -199,6 +199,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             minLines: 25,
             enableBasicAutocompletion: true
         });
+        this.editor.getSession().setUseWrapMode(true);
+        this.editor.getSession().setWrapLimitRange();;
         this.editor.renderer.setShowGutter(true);
         this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
@@ -240,14 +242,25 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.remarkable = new Remarkable({
             html: true,
             highlight: function (str, lang) {
+                var value = '';
                 if (lang && hljs.getLanguage(lang)) {
                     try {
-                        return hljs.highlight(lang, str).value;
+                        value = hljs.highlight(lang, str).value;
+
+                        value = value.replace(/\[\[/g, '&#91;&#91;');
+                        value = value.replace(/]]/g, '&#93;&#93;');
+
+                        return value;
                     } catch (err) {}
                 }
 
                 try {
-                    return hljs.highlightAuto(str).value;
+                    value = hljs.highlightAuto(str).value;
+
+                    value = value.replace(/\[\[/g, '&#91;&#91;');
+                    value = value.replace(/]]/g, '&#93;&#93;');
+
+                    return value;
                 } catch (err) {}
 
                 return '';
@@ -261,14 +274,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         output = output.replace(/%5B/g, '[');
         output = output.replace(/%5D/g, ']');
-
-        var codeBlocks = output.match(/<code(.|\s)*<\/code>/g);
-        Ext.each(codeBlocks, function(item) {
-            var replacedItem = item.replace(/\[\[/g, '&#91;&#91;');
-            replacedItem = replacedItem.replace(/]]/g, '&#93;&#93;');
-
-            output = output.replace(item, replacedItem);
-        });
 
         if (MODx.config['markdowneditor.lp.parse_modx_tags'] == 1) {
             if (this.parseRequest) {
