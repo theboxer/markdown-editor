@@ -292,7 +292,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                                 this.preview.update(r.data);
 
                                 if (this.fullScreen == true) {
-                                    this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+                                    if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
+                                        this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+                                    }
                                 }
                             },
                             scope: this
@@ -304,7 +306,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.preview.update(output);
 
             if (this.fullScreen == true) {
-                this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
+                    this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+                }
             }
         }
 
