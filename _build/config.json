@@ -139,6 +139,17 @@
         "area": "markdowneditor.area.general"
       },
       {
+        "key": "general.include_ghfmd_manager",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.general"
+      },
+      {
+        "key": "general.custom_css_manager",
+        "value": "",
+        "area": "markdowneditor.area.general"
+      },
+      {
         "key": "general.include_highlight",
         "value": true,
         "type": "combo-boolean",

@@ -4,7 +4,16 @@ class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
     public function process() {
         $this->modx->controller->addLexiconTopic('markdowneditor:default');
 
-        $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'github-markdown.css');
+        $includeGFM = (int) $this->markdowneditor->getOption('general.include_ghfmd_manager', null, 1);
+        if ($includeGFM) {
+            $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'github-markdown.css');
+        }
+
+        $customCSS = $this->markdowneditor->getOption('general.custom_css_manager', null, '');
+        if (!empty($customCSS)) {
+            $this->modx->regClientCSS($customCSS);
+        }
+
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'highlight.css');
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'dependencies.css');
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'app.css');
