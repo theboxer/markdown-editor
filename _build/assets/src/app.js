@@ -198,7 +198,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.setOptions({
             maxLines: Infinity,
             minLines: 25,
-            enableBasicAutocompletion: true
+            enableBasicAutocompletion: true,
+            printMargin: false
         });
         this.editor.getSession().setUseWrapMode(true);
         this.editor.getSession().setWrapLimitRange();;
