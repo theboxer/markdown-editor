@@ -26,6 +26,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
     ,render: function() {
         this.textarea = Ext.get('ta');
+        if (!this.textarea) return;
 
         this.buildUI();
         this.registerAce();
