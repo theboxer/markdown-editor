@@ -199,11 +199,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             maxLines: Infinity,
             minLines: 25,
             enableBasicAutocompletion: true,
-            printMargin: false
+            printMargin: false,
+            showGutter: true
         });
         this.editor.getSession().setUseWrapMode(true);
-        this.editor.getSession().setWrapLimitRange();;
-        this.editor.renderer.setShowGutter(true);
+        this.editor.getSession().setWrapLimitRange();
         this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
         this.editor.getSession().setMode("ace/mode/markdown");
