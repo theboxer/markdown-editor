@@ -3,7 +3,7 @@
   "lowCaseName": "markdowneditor",
   "description": "Markdown editor",
   "author": "John Peca",
-  "version": "1.0.0-dev3",
+  "version": "1.0.0-dev4",
   "package": {
     "elements": {
       "plugins": [

@@ -14,6 +14,7 @@ markdownEditor.window.Cropper = function(config) {
         ,autoScroll: true
         ,allowDrop: true
         ,width: 800
+        ,mobile: 0
         ,title: _('markdowneditor.cropper.crop_image')
         ,cls: 'modx-window'
         ,html: '<div class="image-upload-wrapper"><img src="' + URL.createObjectURL(config.file) + '"></div>'
@@ -123,6 +124,7 @@ Ext.extend(markdownEditor.window.Cropper, Ext.Window,{
         formData.append('name', this.config.file.name);
         formData.append('crop', button.crop);
         formData.append('resource', this.config.md.config.resource);
+        formData.append('mobile', this.config.mobile);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', markdownEditor.config.connectorUrl);

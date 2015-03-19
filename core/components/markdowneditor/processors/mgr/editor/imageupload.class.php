@@ -26,6 +26,22 @@ class MarkdownEditorUploadImageProcessor extends MarkdownEditorUploadProcessor
             return $this->failure($data);
         }
 
+        $mobile = (int) $this->getProperty('mobile', 0);
+        if ($mobile == 1) {
+            $orientation = $this->img->exif('Orientation');
+            switch ($orientation) {
+                case 3:
+                    $this->img->rotate(180);
+                    break;
+                case 6:
+                    $this->img->rotate(-90);
+                    break;
+                case 8:
+                    $this->img->rotate(90);
+                    break;
+            }
+        }
+
         if (isset($this->data['rotate'])) {
             $rotate = $this->data['rotate'] * -1.0;
             $this->img->rotate($rotate);

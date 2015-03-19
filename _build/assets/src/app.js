@@ -173,10 +173,19 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 class: 'status-bar'
             }));
 
-            this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple>' + _('markdowneditor.status_bar_message', {id: this.statusBar.id + '-file'}) + '</div>';
+            if (this.isMobileDevice()) {
+                this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple /><input class="hidden" name="file-mobile" id="' + this.statusBar.id + '-file-mobile" type="file" accept="image/*" capture="camera" />' + _('markdowneditor.status_bar_message_mobile', {id: this.statusBar.id + '-file', id_mobile: this.statusBar.id + '-file-mobile'}) + '</div>';
+            } else {
+                this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple>' + _('markdowneditor.status_bar_message', {id: this.statusBar.id + '-file'}) + '</div>';
+            }
 
-            this.statusBar.child('input').on('change', function(e, input) {
+            this.statusBar.child('#' + this.statusBar.id + '-file').on('change', function(e, input) {
                 this.handleFiles(input.files);
+                input.value = "";
+            }, this);
+
+            this.statusBar.child('#' + this.statusBar.id + '-file-mobile').on('change', function(e, input) {
+                this.handleFiles(input.files, 1);
                 input.value = "";
             }, this);
         } else {
@@ -339,7 +348,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         }
     }
 
-    ,handleFiles: function(files) {
+    ,handleFiles: function(files, mobile) {
+        mobile = mobile || 0;
+
         Ext.each(files, function(file) {
             var isImage = /^image\//.test(file.type);
 
@@ -363,9 +374,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                         xtype: 'markdowneditor-window-cropper'
                         ,file: file
                         ,md: this
+                        ,mobile: mobile
                     }).show();
                 } else {
-                    this.uploadFile(file, 'image');
+                    this.uploadFile(file, 'image', mobile);
                     this.editor.focus();
                 }
             } else {
@@ -396,8 +408,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         return allowedTypes.indexOf(file.name.split('.').pop()) != -1;
     }
 
-    ,uploadFile: function(file, type) {
-        if (!type) type = 'file';
+    ,uploadFile: function(file, type, mobile) {
+        type = type || 'file';
+        mobile = mobile || 0;
 
         var uploader = this.createUploader();
 
@@ -406,6 +419,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         formData.append('action', 'mgr/editor/' + type + 'upload');
         formData.append('name', file.name);
         formData.append('resource', this.config.resource);
+        formData.append('mobile', mobile);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', markdownEditor.config.connectorUrl);
@@ -462,6 +476,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,failMessage: function(file, type, message) {
         var uploader = this.createUploader(type, file.name);
         this.failUploader(uploader, message);
+    }
+
+    ,isMobileDevice: function() {
+        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
     }
 });
 
