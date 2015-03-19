@@ -53,6 +53,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         var previewButton = this.toolBox.child('.preview-button');
         var fullscreenButton = this.toolBox.child('.fullscreen-button');
         var splitscreenButton = this.toolBox.child('.splitscreen-button');
+
+
+
         var content = this.contentMD;
         var wrapper = content.parent();
 
@@ -101,7 +104,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 splitscreenButton.child('i').addClass('icon-stop');
 
                 if (this.fullScreen == true) {
-                    previewButton.show();
+                    previewButton.hide();
                 }
             } else {
 
@@ -109,7 +112,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 splitscreenButton.child('i').addClass('icon-pause');
 
                 if (this.fullScreen == true) {
-                    previewButton.hide();
+                    previewButton.show();
                 }
             }
         }, this);
@@ -121,6 +124,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 this.fullScreen = true;
                 icon.removeClass('icon-expand');
                 icon.addClass('icon-compress');
+
+                splitscreenButton.child('i').removeClass('icon-pause');
+                splitscreenButton.child('i').addClass('icon-stop');
 
                 this.preview.setDisplayed('block');
                 content.setDisplayed('block');
