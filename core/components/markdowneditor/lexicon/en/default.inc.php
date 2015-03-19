@@ -81,6 +81,10 @@ $_lang['setting_markdowneditor.general.include_ghfmd_manager'] = 'GFM CSS in Man
 $_lang['setting_markdowneditor.general.include_ghfmd_manager_desc'] = 'If enabled, GitHub Flavoured Markdown CSS will be automatically included in Manager, when creating/updating Resources.';
 $_lang['setting_markdowneditor.general.custom_css_manager'] = 'Custom CSS in Manager';
 $_lang['setting_markdowneditor.general.custom_css_manager_desc'] = 'If set, specified CSS file will be automatically included in Manager, when creating/updating Resources. All definition must be prefixed with class <strong>preview-md</strong> to be applied on preview panel.';
+$_lang['setting_markdowneditor.general.font_size'] = 'Font size';
+$_lang['setting_markdowneditor.general.font_size_desc'] = 'Font size for Markdown editor. Default is 12.';
+$_lang['setting_markdowneditor.general.show_gutter'] = 'Show gutter';
+$_lang['setting_markdowneditor.general.show_gutter_desc'] = 'If enabled, gutter will be displayed in the editor.';
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';

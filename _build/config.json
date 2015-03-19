@@ -133,6 +133,17 @@
         "area": "markdowneditor.area.general"
       },
       {
+        "key": "general.font_size",
+        "value": "12",
+        "area": "markdowneditor.area.general"
+      },
+      {
+        "key": "general.show_gutter",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.general"
+      },
+      {
         "key": "general.include_ghfmd",
         "value": true,
         "type": "combo-boolean",

@@ -175,19 +175,20 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
             if (this.isMobileDevice()) {
                 this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple /><input class="hidden" name="file-mobile" id="' + this.statusBar.id + '-file-mobile" type="file" accept="image/*" capture="camera" />' + _('markdowneditor.status_bar_message_mobile', {id: this.statusBar.id + '-file', id_mobile: this.statusBar.id + '-file-mobile'}) + '</div>';
+
+                this.statusBar.child('#' + this.statusBar.id + '-file-mobile').on('change', function(e, input) {
+                    this.handleFiles(input.files, 1);
+                    input.value = "";
+                }, this);
             } else {
                 this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple>' + _('markdowneditor.status_bar_message', {id: this.statusBar.id + '-file'}) + '</div>';
+
+                this.statusBar.child('#' + this.statusBar.id + '-file').on('change', function(e, input) {
+                    this.handleFiles(input.files);
+                    input.value = "";
+                }, this);
             }
 
-            this.statusBar.child('#' + this.statusBar.id + '-file').on('change', function(e, input) {
-                this.handleFiles(input.files);
-                input.value = "";
-            }, this);
-
-            this.statusBar.child('#' + this.statusBar.id + '-file-mobile').on('change', function(e, input) {
-                this.handleFiles(input.files, 1);
-                input.value = "";
-            }, this);
         } else {
             this.statusBar = Ext.get(Ext.DomHelper.append(wrapper,{
                 tag: 'div',
@@ -209,7 +210,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             minLines: 25,
             enableBasicAutocompletion: true,
             printMargin: false,
-            showGutter: true
+            showGutter: parseInt(MODx.config['markdowneditor.general.show_gutter'] || 1) == 1,
+            fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12
         });
         this.editor.getSession().setUseWrapMode(true);
         this.editor.getSession().setWrapLimitRange();
