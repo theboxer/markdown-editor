@@ -32,10 +32,36 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.registerAce();
         this.registerMarked();
 
+        this.toolBox = Ext.get(Ext.DomHelper.append(this.contentMD,{
+            tag: 'div',
+            class: 'toolbox',
+            cn: [{
+                tag: 'div',
+                class: 'preview-button',
+                html: '<i class="icon icon-eye icon-large"></i>'
+            },{
+                tag: 'div',
+                class: 'splitscreen-button',
+                html: '<i class="icon icon-pause icon-large"></i>'
+            },{
+                tag: 'div',
+                class: 'fullscreen-button',
+                html: '<i class="icon icon-expand icon-large"></i>'
+            }]
+        }));
+
         var previewButton = this.toolBox.child('.preview-button');
         var fullscreenButton = this.toolBox.child('.fullscreen-button');
+        var splitscreenButton = this.toolBox.child('.splitscreen-button');
         var content = this.contentMD;
         var wrapper = content.parent();
+
+        var previewButtonOff = Ext.get(Ext.DomHelper.append(wrapper,{
+            tag: 'div',
+            class: 'preview-button-off',
+            html: '<i class="icon icon-eye-slash icon-large"></i>',
+            hidden: true
+        }));
 
         var dropTarget = MODx.load({
             xtype: 'modx-treedrop',
@@ -51,22 +77,40 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.textarea.on('destroy', function() {dropTarget.destroy();});
 
         previewButton.addListener('click', function () {
-            if (this.preview.isVisible()) {
-                this.preview.setDisplayed('none');
-                content.setDisplayed('block');
-                this.statusBar.setDisplayed('block');
+            this.preview.setDisplayed('block');
+            content.setDisplayed('none');
+            this.statusBar.setDisplayed('none');
 
-                this.editor.focus();
+            previewButtonOff.show()
+        }, this);
 
-                previewButton.child('i').removeClass('icon-toggle-on');
-                previewButton.child('i').addClass('icon-toggle-off');
+        previewButtonOff.addListener('click', function () {
+            this.preview.setDisplayed('none');
+            content.setDisplayed('block');
+            this.statusBar.setDisplayed('block');
+
+            this.editor.focus();
+
+            previewButtonOff.hide();
+        }, this);
+
+        splitscreenButton.addListener('click', function () {
+            if (splitscreenButton.child('i').hasClass('icon-pause')) {
+
+                splitscreenButton.child('i').removeClass('icon-pause');
+                splitscreenButton.child('i').addClass('icon-stop');
+
+                if (this.fullScreen == true) {
+                    previewButton.show();
+                }
             } else {
-                this.preview.setDisplayed('block');
-                content.setDisplayed('none');
-                this.statusBar.setDisplayed('none');
 
-                previewButton.child('i').removeClass('icon-toggle-off');
-                previewButton.child('i').addClass('icon-toggle-on');
+                splitscreenButton.child('i').removeClass('icon-stop');
+                splitscreenButton.child('i').addClass('icon-pause');
+
+                if (this.fullScreen == true) {
+                    previewButton.hide();
+                }
             }
         }, this);
 
@@ -151,20 +195,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.preview = Ext.get(Ext.DomHelper.append(wrapper,{
             tag: 'div',
             class: 'markdown-body preview-md'
-        }));
-
-        this.toolBox = Ext.get(Ext.DomHelper.append(wrapper,{
-            tag: 'div',
-            class: 'toolbox',
-            cn: [{
-                tag: 'span',
-                class: 'preview-button',
-                html: '<i class="icon icon-toggle-off"></i> ' + _('markdowneditor.toolbox.preview')
-            },{
-                tag: 'span',
-                class: 'fullscreen-button',
-                html: '<i class="icon icon-expand"></i>'
-            }]
         }));
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {

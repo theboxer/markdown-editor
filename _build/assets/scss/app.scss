@@ -54,32 +54,30 @@
   border-bottom-right-radius: 0;
 }
 
-.toolbox {
+.toolbox,
+.preview-button-off{
   position: absolute;
   z-index: 999;
 
   right: 10px;
-  bottom: 35px;
+  bottom: 0px;
 }
 
 .fullscreen-button,
-.preview-button {
-  background-color: #f0f0f0;
-  padding: 5px;
-  margin-left: 5px;
-  border-radius: 10px;
-
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+.splitscreen-button,
+.preview-button,
+.preview-button-off{
+  margin-bottom: 5px;
 
   &:hover {
     cursor: pointer;
-    background: #ccc;
+    opacity: 0.6;
   }
+}
+
+.preview-button {
+  position: relative;
+  right: 1px;
 }
 
 .status-bar {
