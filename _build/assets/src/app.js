@@ -31,30 +31,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.buildUI();
         this.registerAce();
         this.registerMarked();
-
-        this.toolBox = Ext.get(Ext.DomHelper.append(this.contentMD,{
-            tag: 'div',
-            class: 'toolbox',
-            cn: [{
-                tag: 'div',
-                class: 'preview-button',
-                html: '<i class="icon icon-eye icon-large"></i>'
-            },{
-                tag: 'div',
-                class: 'splitscreen-button',
-                html: '<i class="icon icon-pause icon-large"></i>'
-            },{
-                tag: 'div',
-                class: 'fullscreen-button',
-                html: '<i class="icon icon-expand icon-large"></i>'
-            }]
-        }));
+        this.buildToolbox();
 
         var previewButton = this.toolBox.child('.preview-button');
         var fullscreenButton = this.toolBox.child('.fullscreen-button');
         var splitscreenButton = this.toolBox.child('.splitscreen-button');
-
-
 
         var content = this.contentMD;
         var wrapper = content.parent();
@@ -100,29 +81,22 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         splitscreenButton.addListener('click', function () {
             if (splitscreenButton.child('i').hasClass('icon-pause')) {
 
-                splitscreenButton.child('i').removeClass('icon-pause');
-                splitscreenButton.child('i').addClass('icon-stop');
+                splitscreenButton.turnOn();
 
-                previewButton.show();
             } else {
 
-                splitscreenButton.child('i').removeClass('icon-stop');
-                splitscreenButton.child('i').addClass('icon-pause');
+                splitscreenButton.turnOff();
 
-                previewButton.show();
             }
         }, this);
 
         fullscreenButton.addListener('click', function () {
-            var icon = fullscreenButton.child('i');
-
             if (this.fullScreen == false) {
                 this.fullScreen = true;
-                icon.removeClass('icon-expand');
-                icon.addClass('icon-compress');
+                fullscreenButton.turnOn();
 
-                splitscreenButton.child('i').removeClass('icon-pause');
-                splitscreenButton.child('i').addClass('icon-stop');
+                splitscreenButton.turnOn();
+
 
                 this.preview.setDisplayed('block');
                 content.setDisplayed('block');
@@ -135,8 +109,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
             } else {
                 this.fullScreen = false;
-                icon.addClass('icon-expand');
-                icon.removeClass('icon-compress');
+                fullscreenButton.turnOff();
 
                 this.preview.setDisplayed('none');
                 content.setDisplayed('block');
@@ -229,6 +202,46 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             tag: 'span',
             style: 'clear: both'
         });
+    }
+
+    ,buildToolbox: function(){
+        this.toolBox = Ext.get(Ext.DomHelper.append(this.contentMD,{
+            tag: 'div',
+            class: 'toolbox',
+            cn: [{
+                tag: 'div',
+                class: 'preview-button',
+                html: '<i class="icon icon-eye icon-large"></i>'
+            },{
+                tag: 'div',
+                class: 'splitscreen-button',
+                html: '<i class="icon icon-pause icon-large"></i>'
+            },{
+                tag: 'div',
+                class: 'fullscreen-button',
+                html: '<i class="icon icon-expand icon-large"></i>'
+            }]
+        }));
+
+        this.toolBox.child('.splitscreen-button').turnOn = function() {
+            this.child('i').removeClass('icon-pause');
+            this.child('i').addClass('icon-stop');
+        };
+
+        this.toolBox.child('.splitscreen-button').turnOff = function() {
+            this.child('i').addClass('icon-pause');
+            this.child('i').removeClass('icon-stop');
+        };
+
+        this.toolBox.child('.fullscreen-button').turnOn = function() {
+            this.child('i').removeClass('icon-expand');
+            this.child('i').addClass('icon-compress');
+        };
+
+        this.toolBox.child('.fullscreen-button').turnOff = function() {
+            this.child('i').addClass('icon-expand');
+            this.child('i').removeClass('icon-compress');
+        };
     }
 
     ,registerAce: function() {
