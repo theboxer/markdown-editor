@@ -136,6 +136,10 @@
         "key": "general.font_size",
         "value": "12",
         "area": "markdowneditor.area.general"
+      },{
+        "key": "general.font_family",
+        "value": "",
+        "area": "markdowneditor.area.general"
       },
       {
         "key": "general.show_gutter",

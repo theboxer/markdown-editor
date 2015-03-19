@@ -211,7 +211,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             enableBasicAutocompletion: true,
             printMargin: false,
             showGutter: parseInt(MODx.config['markdowneditor.general.show_gutter'] || 1) == 1,
-            fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12
+            fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12,
+            fontFamily: MODx.config['markdowneditor.general.font_family'] || ''
         });
         this.editor.getSession().setUseWrapMode(true);
         this.editor.getSession().setWrapLimitRange();

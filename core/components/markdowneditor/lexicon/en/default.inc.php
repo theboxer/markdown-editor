@@ -85,6 +85,8 @@ $_lang['setting_markdowneditor.general.font_size'] = 'Font size';
 $_lang['setting_markdowneditor.general.font_size_desc'] = 'Font size for Markdown editor. Default is 12.';
 $_lang['setting_markdowneditor.general.show_gutter'] = 'Show gutter';
 $_lang['setting_markdowneditor.general.show_gutter_desc'] = 'If enabled, gutter will be displayed in the editor.';
+$_lang['setting_markdowneditor.general.font_family'] = 'Font family';
+$_lang['setting_markdowneditor.general.font_family_desc'] = 'Font family which will be used for editor.';
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';
