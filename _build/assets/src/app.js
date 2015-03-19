@@ -103,17 +103,13 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 splitscreenButton.child('i').removeClass('icon-pause');
                 splitscreenButton.child('i').addClass('icon-stop');
 
-                if (this.fullScreen == true) {
-                    previewButton.hide();
-                }
+                previewButton.show();
             } else {
 
                 splitscreenButton.child('i').removeClass('icon-stop');
                 splitscreenButton.child('i').addClass('icon-pause');
 
-                if (this.fullScreen == true) {
-                    previewButton.show();
-                }
+                previewButton.show();
             }
         }, this);
 
@@ -133,8 +129,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
                 this.editor.focus();
 
-                previewButton.hide();
-
                 wrapper.addClass('fullscreen');
 
                 this.editor.setOption('maxLines', null);
@@ -148,8 +142,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 content.setDisplayed('block');
 
                 this.editor.focus();
-
-                previewButton.show();
 
                 wrapper.removeClass('fullscreen');
 
