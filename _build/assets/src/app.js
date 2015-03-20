@@ -42,9 +42,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         var splitscreenButton = this.toolBox.child('.splitscreen-button');
 
         var content = this.contentMD;
-        var wrapper = content.parent();
 
-        var previewButtonOff = Ext.get(Ext.DomHelper.append(wrapper,{
+        var previewButtonOff = Ext.get(Ext.DomHelper.append(content.parent(),{
             tag: 'div',
             class: 'preview-button-off',
             html: '<i class="icon icon-eye-slash icon-large"></i>',
@@ -64,17 +63,21 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         });
         this.textarea.on('destroy', function() {dropTarget.destroy();});
 
+        var defaultSplit = parseInt(MODx.config['markdowneditor.general.split'] || 0);
+        if (defaultSplit == 1) {
+            this.splitEditorOn();
+        }
         previewButton.addListener('click', function () {
-            this.preview.setDisplayed('block');
-            content.setDisplayed('none');
+            this.showPreview();
+            this.hideContent();
             this.statusBar.setDisplayed('none');
 
             previewButtonOff.show()
         }, this);
 
         previewButtonOff.addListener('click', function () {
-            this.preview.setDisplayed('none');
-            content.setDisplayed('block');
+            this.hidePreview();
+            this.showContent();
             this.statusBar.setDisplayed('block');
 
             this.editor.focus();
@@ -82,53 +85,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             previewButtonOff.hide();
         }, this);
 
-        splitscreenButton.addListener('click', function () {
-            if (splitscreenButton.child('i').hasClass('icon-pause')) {
+        splitscreenButton.addListener('click', this.splitEditor, this);
 
-                splitscreenButton.turnOn();
-
-            } else {
-
-                splitscreenButton.turnOff();
-
-            }
-        }, this);
-
-        fullscreenButton.addListener('click', function () {
-            if (this.fullScreen == false) {
-                this.fullScreen = true;
-                fullscreenButton.turnOn();
-
-                splitscreenButton.turnOn();
-
-
-                this.preview.setDisplayed('block');
-                content.setDisplayed('block');
-
-                this.editor.focus();
-
-                wrapper.addClass('fullscreen');
-
-                this.editor.setOption('maxLines', null);
-
-            } else {
-                this.fullScreen = false;
-                fullscreenButton.turnOff();
-
-                this.preview.setDisplayed('none');
-                content.setDisplayed('block');
-
-                this.editor.focus();
-
-                wrapper.removeClass('fullscreen');
-
-                this.editor.setOption('maxLines', Infinity);
-            }
-
-            this.statusBar.setDisplayed('block');
-
-            this.editor.resize(true);
-        }, this);
+        fullscreenButton.addListener('click', this.fullScreenEditor.createDelegate(this, [fullscreenButton], false), this);
 
         if (markdownEditor.content[this.mdElementName]) {
             this.editor.setValue(markdownEditor.content[this.mdElementName]);
@@ -140,6 +99,94 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.getSession().on('change', function(e){
             this.parse(this.editor.getValue());
         }.bind(this));
+    }
+
+    ,splitEditor: function(){
+        var button = this.toolBox.child('.splitscreen-button');
+        if (button.child('i').hasClass('icon-pause')) {
+
+            this.splitEditorOn();
+        } else {
+
+            this.splitEditorOff();
+        }
+    }
+
+    ,splitEditorOn: function(){
+        var button = this.toolBox.child('.splitscreen-button');
+        button.turnOn();
+    }
+
+    ,splitEditorOff: function(){
+        var button = this.toolBox.child('.splitscreen-button');
+        button.turnOff();
+    }
+
+    ,fullScreenEditor: function(button){
+        var defaultSplit;
+
+        if (this.fullScreen == false) {
+            this.fullScreen = true;
+
+            defaultSplit = parseInt(MODx.config['markdowneditor.general.split_fullscreen'] || 1);
+            if (defaultSplit == 1) {
+                this.splitEditorOn();
+            } else {
+                this.splitEditorOff();
+            }
+
+            button.turnOn();
+
+            this.showPreview();
+            this.showContent();
+
+            this.editor.focus();
+
+            this.contentMD.parent().addClass('fullscreen');
+
+            this.editor.setOption('maxLines', null);
+
+        } else {
+            this.fullScreen = false;
+
+            defaultSplit = parseInt(MODx.config['markdowneditor.general.split'] || 0);
+            if (defaultSplit == 1) {
+                this.splitEditorOn();
+            } else {
+                this.splitEditorOff();
+            }
+
+            button.turnOff();
+
+            this.hidePreview();
+            this.showContent();
+
+            this.editor.focus();
+
+            this.contentMD.parent().removeClass('fullscreen');
+
+            this.editor.setOption('maxLines', Infinity);
+        }
+
+        this.statusBar.setDisplayed('block');
+
+        this.editor.resize(true);
+    }
+
+    ,showContent: function(){
+        this.contentMD.setDisplayed('block');
+    }
+
+    ,hideContent: function(){
+        this.contentMD.setDisplayed('none');
+    }
+
+    ,showPreview: function(){
+        this.preview.setDisplayed('block');
+    }
+
+    ,hidePreview: function(){
+        this.preview.setDisplayed('none');
     }
 
     ,buildUI: function() {
@@ -290,7 +337,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
         };
         langTools.addCompleter(resourcesCompleter);
-
 
         this.editor.container.addEventListener("dragenter", this.catchAndDoNothing, false);
         this.editor.container.addEventListener("dragover", this.catchAndDoNothing, false);
