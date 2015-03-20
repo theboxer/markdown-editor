@@ -87,6 +87,10 @@ $_lang['setting_markdowneditor.general.show_gutter'] = 'Show gutter';
 $_lang['setting_markdowneditor.general.show_gutter_desc'] = 'If enabled, gutter will be displayed in the editor.';
 $_lang['setting_markdowneditor.general.font_family'] = 'Font family';
 $_lang['setting_markdowneditor.general.font_family_desc'] = 'Font family which will be used for editor.';
+$_lang['setting_markdowneditor.general.split'] = 'Split editor';
+$_lang['setting_markdowneditor.general.split_desc'] = 'If enabled, editor will be in split mode by default.';
+$_lang['setting_markdowneditor.general.split_fullscreen'] = 'Split editor full screen';
+$_lang['setting_markdowneditor.general.split_fullscreen_desc'] = 'If enabled, editor will be in split mode by default when entering full screen.';
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';
