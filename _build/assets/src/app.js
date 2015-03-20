@@ -21,11 +21,15 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
-        Ext.onReady(this.render, this);
+        if (this.mdElementId){
+            Ext.onReady(this.render, this);
+        }
     }
 
-    ,render: function() {
-        this.textarea = Ext.get('ta');
+    ,render: function(container, position) {
+        this.textarea = Ext.get(this.mdElementId);
+        this.mdElementName = this.textarea.dom.name;
+
         if (!this.textarea) return;
 
         this.buildUI();
@@ -126,8 +130,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.editor.resize(true);
         }, this);
 
-        if (markdownEditor.content.content) {
-            this.editor.setValue(markdownEditor.content.content);
+        if (markdownEditor.content[this.mdElementName]) {
+            this.editor.setValue(markdownEditor.content[this.mdElementName]);
         }
         this.editor.selection.clearSelection();
 
@@ -145,8 +149,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.taMarkdown = Ext.get(Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'textarea',
-            name: 'ta_markdown',
-            class: 'ta_markdown'
+            name: this.mdElementName + '_markdown',
+            class: this.mdElementName + '_markdown'
         }));
 
         this.taMarkdown.setDisplayed('none');
@@ -160,7 +164,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.contentMD = Ext.get(Ext.DomHelper.append(wrapper,{
             tag: 'div',
-            class: this.textarea.dom.className + ' content-md'
+            class: this.textarea.dom.className + ' content-md ' + this.mdElementName + '_markdown'
         }));
 
         this.preview = Ext.get(Ext.DomHelper.append(wrapper,{
@@ -175,14 +179,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }));
 
             if (this.isMobileDevice()) {
-                this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple /><input class="hidden" name="file-mobile" id="' + this.statusBar.id + '-file-mobile" type="file" accept="image/*" capture="camera" />' + _('markdowneditor.status_bar_message_mobile', {id: this.statusBar.id + '-file', id_mobile: this.statusBar.id + '-file-mobile'}) + '</div>';
+                this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="md_file_'+ this.statusBar.id +'" id="' + this.statusBar.id + '-file" type="file" multiple /><input class="hidden" name="md_file_'+ this.statusBar.id +'-mobile" id="' + this.statusBar.id + '-file-mobile" type="file" accept="image/*" capture="camera" />' + _('markdowneditor.status_bar_message_mobile', {id: this.statusBar.id + '-file', id_mobile: this.statusBar.id + '-file-mobile'}) + '</div>';
 
                 this.statusBar.child('#' + this.statusBar.id + '-file-mobile').on('change', function(e, input) {
                     this.handleFiles(input.files, 1);
                     input.value = "";
                 }, this);
             } else {
-                this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="file" id="' + this.statusBar.id + '-file" type="file" multiple>' + _('markdowneditor.status_bar_message', {id: this.statusBar.id + '-file'}) + '</div>';
+                this.statusBar.dom.innerHTML = '<div class="upload-bar"> <input class="hidden" name="md_file_'+ this.statusBar.id +'" id="' + this.statusBar.id + '-file" type="file" multiple>' + _('markdowneditor.status_bar_message', {id: this.statusBar.id + '-file'}) + '</div>';
 
                 this.statusBar.child('#' + this.statusBar.id + '-file').on('change', function(e, input) {
                     this.handleFiles(input.files);
@@ -245,7 +249,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     }
 
     ,registerAce: function() {
-        this.editor = ace.edit(Ext.DomQuery.selectNode('div.content-md'));
+        this.editor = ace.edit(Ext.DomQuery.selectNode('div.' + this.mdElementName + '_markdown'));
         this.editor.setOptions({
             maxLines: Infinity,
             minLines: 25,
@@ -528,5 +532,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 });
 
 MODx.loadRTE = function(id) {
-    new markdownEditor.Editor();
+    new markdownEditor.Editor({
+        mdElementId: id
+    });
 };

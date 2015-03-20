@@ -7,10 +7,10 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
     private $uploadURL;
     /** @var modResource $resource */
     private $resource;
+    /** @var array $uploadedFiles */
+    private $uploadedFiles = array();
 
     public function process() {
-        $mode = $this->scriptProperties['mode'];
-
         $this->uploadPath = $this->markdowneditor->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
         $this->uploadPath = rtrim($this->uploadPath, '/') . '/';
 
@@ -19,43 +19,22 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
 
         $this->resource = $this->scriptProperties['resource'];
 
-        switch ($mode) {
-            case modSystemEvent::MODE_NEW:
-                $this->newResource();
-                break;
-            case modSystemEvent::MODE_UPD:
-                $this->updateResource();
-                break;
-            default:
-                return;
-        }
+        $this->saveMarkdown();
 
         return;
     }
 
-    private function newResource()
+    private function newResource(&$content, $field)
     {
         $underResource = (int) $this->markdowneditor->getOption('upload.under_resource', null, 1);
         if ($underResource) {
-            $this->moveFilesUnderCorrectResource();
+            $this->moveFilesUnderCorrectResource($content, $field);
         }
 
     }
 
-    private function updateResource()
+    private function moveFilesUnderCorrectResource(&$md, $field)
     {
-        $deleteUnused = (int) $this->markdowneditor->getOption('upload.delete_unused', null, 1);
-        $underResource = (int) $this->markdowneditor->getOption('upload.under_resource', null, 1);
-
-        if ($deleteUnused && $underResource) {
-            $this->deleteUnusedFiles();
-        }
-    }
-
-    private function moveFilesUnderCorrectResource()
-    {
-        $md = $this->resource->getProperty('markdown', 'markdowneditor');
-
         $matches = array();
         preg_match_all('~' . $this->uploadURL . '0/(?<file>[^ "\)]+)~', $md, $matches);
 
@@ -79,15 +58,94 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
 
             $md = str_replace($this->uploadURL . '0/', $this->uploadURL . $this->resource->id . '/', $md);
 
-            $content = str_replace($this->uploadURL . '0/', $this->uploadURL . $this->resource->id . '/', $this->resource->get('content'));
+            if (strpos($field, 'tv')) {
+                $tvID = str_replace('tv', '', $field);
 
-            $this->resource->setProperty('markdown', $md, 'markdowneditor');
-            $this->resource->set('content', $content);
-            $this->resource->save();
+                $content = str_replace($this->uploadURL . '0/', $this->uploadURL . $this->resource->id . '/', $this->resource->getTVValue($tvID));
+                $this->resource->setTVValue($tvID, $content);
+            } else {
+                if ($field == 'ta') $field = 'content';
+
+                $content = str_replace($this->uploadURL . '0/', $this->uploadURL . $this->resource->id . '/', $this->resource->get($field));
+
+                $this->resource->set($field, $content);
+                $this->resource->save();
+            }
         }
     }
 
-    private function deleteUnusedFiles()
+    private function unsetUnusedFiles($md)
+    {
+        $matches = array();
+
+        preg_match_all('~' . $this->uploadURL . $this->resource->id . '/(?<file>[^ "\)]+)~', $md, $matches);
+
+        if (isset($matches['file'])) {
+            foreach ($matches['file'] as $file) {
+                if (isset($this->uploadedFiles[$file])) {
+                    unset($this->uploadedFiles[$file]);
+                }
+            }
+        }
+    }
+
+    private function saveMarkdown()
+    {
+        $resourceArray = $this->resource->toArray();
+        $mode = $this->scriptProperties['mode'];
+        $deleteUnused = (int) $this->markdowneditor->getOption('upload.delete_unused', null, 1);
+        $underResource = (int) $this->markdowneditor->getOption('upload.under_resource', null, 1);
+
+        if ($mode == modSystemEvent::MODE_UPD) {
+            if ($deleteUnused && $underResource) {
+                $this->uploadedFiles();
+            }
+        }
+
+        foreach ($resourceArray as $field => $value) {
+            if (!strpos($field, '_markdown')) continue;
+            $fieldName = str_replace('_markdown', '', $field);
+
+            $content = $this->modx->getObject('MarkdownEditorContent', array(
+                'object_id' => $this->resource->id,
+                'element_name' => $fieldName,
+                'namespace' => 'core',
+            ));
+
+            if (empty($content)) {
+                $content = $this->modx->newObject('MarkdownEditorContent');
+                $content->set('object_id', $this->resource->id);
+                $content->set('element_name', $fieldName);
+                $content->set('namespace', 'core');
+            }
+
+            if ($mode == modSystemEvent::MODE_NEW) {
+                if ($underResource) {
+                    $this->moveFilesUnderCorrectResource($value, $fieldName);
+                }
+            }
+
+            if ($mode == modSystemEvent::MODE_UPD) {
+                if ($deleteUnused && $underResource) {
+                    $this->unsetUnusedFiles($value);
+                }
+            }
+
+            $content->set('content', $value);
+
+            $content->save();
+
+            $this->resource->{$field} = '';
+        }
+
+        if ($mode == modSystemEvent::MODE_UPD) {
+            if ($deleteUnused && $underResource) {
+                $this->deleteUnusedFiles();
+            }
+        }
+    }
+
+    private function uploadedFiles()
     {
         $path = $this->uploadPath . $this->resource->id . '/';
         $uploadedFiles = array();
@@ -100,22 +158,14 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
             }
         }
 
-        $uploadedFiles = array_flip($uploadedFiles);
+        $this->uploadedFiles = array_flip($uploadedFiles);
+    }
 
-        $md = $this->resource->getProperty('markdown', 'markdowneditor');
-        $matches = array();
+    private function deleteUnusedFiles()
+    {
+        $path = $this->uploadPath . $this->resource->id . '/';
 
-        preg_match_all('~' . $this->uploadURL . $this->resource->id . '/(?<file>[^ "\)]+)~', $md, $matches);
-
-        if (isset($matches['file'])) {
-            foreach ($matches['file'] as $file) {
-                if (isset($uploadedFiles[$file])) {
-                    unset($uploadedFiles[$file]);
-                }
-            }
-        }
-
-        foreach ($uploadedFiles as $file => $v) {
+        foreach ($this->uploadedFiles as $file => $v) {
             unlink($path . $file);
         }
     }

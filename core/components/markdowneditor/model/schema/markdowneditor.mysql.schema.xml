@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="markdowneditor" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="markdowneditor">
+    <object class="MarkdownEditorContent" table="markdowneditor_content" extends="xPDOObject">
+        <field key="object_id" dbtype="int" attributes="unsigned" precision="10" phptype="integer" null="false" index="pk" />
+        <field key="element_name" dbtype="varchar" precision="100" phptype="string" null="false" index="pk" />
+        <field key="namespace" dbtype="varchar" precision="40" phptype="string" null="false" index="pk" />
+
+        <field key="content" dbtype="mediumtext" phptype="string" null="false" default="" />
+
+        <index alias="PRIMARY" name="PRIMARY" primary="true" unique="true" type="BTREE">
+            <column key="object_id" length="" collation="A" null="false" />
+            <column key="element_name" length="" collation="A" null="false" />
+            <column key="namespace" length="" collation="A" null="false" />
+        </index>
+    </object>
+</model>

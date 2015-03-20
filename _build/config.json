@@ -136,7 +136,8 @@
         "key": "general.font_size",
         "value": "12",
         "area": "markdowneditor.area.general"
-      },{
+      },
+      {
         "key": "general.font_family",
         "value": "",
         "area": "markdowneditor.area.general"
@@ -171,6 +172,9 @@
         "area": "markdowneditor.area.general"
       }
     ]
+  },
+  "database": {
+    "tables": ["MarkdownEditorContent"]
   },
   "build": {
     "resolver": {
