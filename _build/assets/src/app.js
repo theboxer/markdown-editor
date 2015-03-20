@@ -65,7 +65,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         var defaultSplit = parseInt(MODx.config['markdowneditor.general.split'] || 0);
         if (defaultSplit == 1) {
-            this.splitEditorOn();
+            splitscreenButton.turnOn();
         }
         previewButton.addListener('click', function () {
             this.showPreview();
@@ -85,9 +85,25 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             previewButtonOff.hide();
         }, this);
 
-        splitscreenButton.addListener('click', this.splitEditor, this);
+        splitscreenButton.addListener('click', function(){
+            if (splitscreenButton.child('i').hasClass('icon-pause')) {
+                splitscreenButton.turnOn();
+            } else {
+                splitscreenButton.turnOff();
+            }
+        }, this);
 
-        fullscreenButton.addListener('click', this.fullScreenEditor.createDelegate(this, [fullscreenButton], false), this);
+        fullscreenButton.addListener('click', function(){
+            if (this.fullScreen == false) {
+                fullscreenButton.turnOn();
+            } else {
+                fullscreenButton.turnOff();
+            }
+
+            this.statusBar.setDisplayed('block');
+            this.editor.resize(true);
+
+        }, this);
 
         if (markdownEditor.content[this.mdElementName]) {
             this.editor.setValue(markdownEditor.content[this.mdElementName]);
@@ -99,78 +115,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.getSession().on('change', function(e){
             this.parse(this.editor.getValue());
         }.bind(this));
-    }
-
-    ,splitEditor: function(){
-        var button = this.toolBox.child('.splitscreen-button');
-        if (button.child('i').hasClass('icon-pause')) {
-
-            this.splitEditorOn();
-        } else {
-
-            this.splitEditorOff();
-        }
-    }
-
-    ,splitEditorOn: function(){
-        var button = this.toolBox.child('.splitscreen-button');
-        button.turnOn();
-    }
-
-    ,splitEditorOff: function(){
-        var button = this.toolBox.child('.splitscreen-button');
-        button.turnOff();
-    }
-
-    ,fullScreenEditor: function(button){
-        var defaultSplit;
-
-        if (this.fullScreen == false) {
-            this.fullScreen = true;
-
-            defaultSplit = parseInt(MODx.config['markdowneditor.general.split_fullscreen'] || 1);
-            if (defaultSplit == 1) {
-                this.splitEditorOn();
-            } else {
-                this.splitEditorOff();
-            }
-
-            button.turnOn();
-
-            this.showPreview();
-            this.showContent();
-
-            this.editor.focus();
-
-            this.contentMD.parent().addClass('fullscreen');
-
-            this.editor.setOption('maxLines', null);
-
-        } else {
-            this.fullScreen = false;
-
-            defaultSplit = parseInt(MODx.config['markdowneditor.general.split'] || 0);
-            if (defaultSplit == 1) {
-                this.splitEditorOn();
-            } else {
-                this.splitEditorOff();
-            }
-
-            button.turnOff();
-
-            this.hidePreview();
-            this.showContent();
-
-            this.editor.focus();
-
-            this.contentMD.parent().removeClass('fullscreen');
-
-            this.editor.setOption('maxLines', Infinity);
-        }
-
-        this.statusBar.setDisplayed('block');
-
-        this.editor.resize(true);
     }
 
     ,showContent: function(){
@@ -274,6 +218,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }]
         }));
 
+        var that = this;
+
         this.toolBox.child('.splitscreen-button').turnOn = function() {
             this.child('i').removeClass('icon-pause');
             this.child('i').addClass('icon-stop');
@@ -287,11 +233,45 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.toolBox.child('.fullscreen-button').turnOn = function() {
             this.child('i').removeClass('icon-expand');
             this.child('i').addClass('icon-compress');
+
+            that.fullScreen = true;
+
+            if (parseInt(MODx.config['markdowneditor.general.split_fullscreen'] || 1) == 1) {
+                that.toolBox.child('.splitscreen-button').turnOn();
+            } else {
+                that.toolBox.child('.splitscreen-button').turnOff();
+            }
+
+            that.showPreview();
+            that.showContent();
+
+            that.editor.focus();
+
+            that.contentMD.parent().addClass('fullscreen');
+
+            that.editor.setOption('maxLines', null);
         };
 
         this.toolBox.child('.fullscreen-button').turnOff = function() {
             this.child('i').addClass('icon-expand');
             this.child('i').removeClass('icon-compress');
+
+            that.fullScreen = false;
+
+            if (parseInt(MODx.config['markdowneditor.general.split'] || 0) == 1) {
+                that.toolBox.child('.splitscreen-button').turnOn();
+            } else {
+                that.toolBox.child('.splitscreen-button').turnOff();
+            }
+
+            that.hidePreview();
+            that.showContent();
+
+            that.editor.focus();
+
+            that.contentMD.parent().removeClass('fullscreen');
+
+            that.editor.setOption('maxLines', Infinity);
         };
     }
 
