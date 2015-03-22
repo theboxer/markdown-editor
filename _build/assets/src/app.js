@@ -9,6 +9,8 @@ Ext.extend(MarkdownEditor,Ext.Component,{
 Ext.reg('markdowneditor',MarkdownEditor);
 markdownEditor = new MarkdownEditor();
 
+markdownEditor.loadedElements = {};
+
 markdownEditor.Editor = function(config) {
     config = config || {};
     config.resource = MODx.request.id || 0;
@@ -24,6 +26,19 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         if (this.mdElementId){
             Ext.onReady(this.render, this);
         }
+    }
+
+    ,destroy: function(){
+        this.editor.destroy();
+
+        this.mdContainer.remove();
+        this.taMarkdown.remove();
+
+        this.textarea.dom.style.display = null;
+        this.textarea.dom.style.width = null;
+        this.textarea.dom.style.height = null;
+
+        MarkdownEditor.superclass.destroy.call(this);
     }
 
     ,render: function(container, position) {
@@ -153,12 +168,12 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.taMarkdown.setWidth(0);
         this.taMarkdown.setHeight(0);
 
-        var container = Ext.DomHelper.insertBefore(this.textarea, {
+        this.mdContainer = Ext.get(Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'div',
             class: 'markdown-container'
-        });
+        }));
 
-        var wrapper = Ext.get(Ext.DomHelper.append(container,{
+        var wrapper = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
             tag: 'div',
             class: 'markdown-wrapper'
         }));
@@ -181,7 +196,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         };
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
-            this.statusBar = Ext.get(Ext.DomHelper.append(container,{
+            this.statusBar = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
                 tag: 'div',
                 class: 'status-bar'
             }));
@@ -203,14 +218,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
 
         } else {
-            this.statusBar = Ext.get(Ext.DomHelper.append(container,{
+            this.statusBar = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
                 tag: 'div',
                 class: 'status-bar',
                 html: _('markdowneditor.status_bar_disabled')
             }));
         }
 
-        Ext.DomHelper.append(container,{
+        Ext.DomHelper.append(this.mdContainer.dom,{
             tag: 'span',
             style: 'clear: both'
         });
@@ -586,5 +601,36 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 MODx.loadRTE = function(id) {
     new markdownEditor.Editor({
         mdElementId: id
+    });
+};
+
+MODx.afterTVLoad = function() {
+    var els = Ext.query('textarea.modx-richtext');
+
+    Ext.each(els, function(element){
+        element = Ext.get(element);
+        if (!element) return true;
+
+        if (markdownEditor.loadedElements[element.id]) return true;
+
+        markdownEditor.loadedElements[element.id] = new markdownEditor.Editor({
+            mdElementId: element.id
+        });
+
+    });
+
+};
+
+MODx.unloadTVRTE = function() {
+    var els = Ext.query('.modx-richtext');
+
+    Ext.each(els, function(element){
+        element = Ext.get(element);
+        if (!element) return true;
+
+        if (!markdownEditor.loadedElements[element.id]) return true;
+
+        markdownEditor.loadedElements[element.id].destroy();
+
     });
 };
