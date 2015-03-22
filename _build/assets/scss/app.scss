@@ -21,27 +21,44 @@
 
         .content-md {
             left: 0;
-            right: 50%;
+            right: 0;
             bottom: 24px;
             height: auto !important;
         }
 
         .preview-md {
-            left: 50%;
-            right: 0;
+            display: none !important;
             background: #ffffff;
             overflow-y: auto;
         }
         .status-bar {
           position: absolute;
           left: 0;
-          right: 50%;
+          right: 0;
           bottom: -1px;
           top: auto;
           z-index: 10;
         }
+
+        &.split {
+          .content-md {
+            right: 50%;
+            width: auto;
+          }
+          .preview-md {
+            left: 50%;
+            right: 0;
+            width: auto;
+          }
+          .status-bar {
+            right: 50%;
+          }
+        }
     }
     &.split {
+      .markdown-wrapper {
+        display: inline-block;
+      }
       .content-md {
         float: left;
         width: 48%;
@@ -50,6 +67,10 @@
         float: right;
         width: 48%;
         overflow: scroll;
+        display: block !important;
+      }
+      .status-bar {
+        top: -6px;
       }
     }
 }
