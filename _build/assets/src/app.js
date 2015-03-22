@@ -72,6 +72,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.hideContent();
             this.statusBar.setDisplayed('none');
 
+            this.contentMD.parent().parent().addClass('preview');
+
             previewButtonOff.show()
         }, this);
 
@@ -79,6 +81,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.hidePreview();
             this.showContent();
             this.statusBar.setDisplayed('block');
+
+            this.contentMD.parent().parent().removeClass('preview');
 
             this.editor.focus();
 
