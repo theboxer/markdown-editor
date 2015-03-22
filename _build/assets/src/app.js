@@ -116,15 +116,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.preview.update(this.parse(this.editor.getValue()));
 
-        setTimeout(function(){
-            this.preview.setHeight(this.contentMD.getHeight());
-        }.bind(this), 50);
+        this.preview.fixHeight();
         this.editor.getSession().on('change', function(e){
             this.parse(this.editor.getValue());
-
-            setTimeout(function(){
-                this.preview.setHeight(this.contentMD.getHeight());
-            }.bind(this), 50);
         }.bind(this));
     }
 
@@ -178,6 +172,13 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             tag: 'div',
             class: 'markdown-body preview-md'
         }));
+
+        var that = this;
+        this.preview.fixHeight = function () {
+            setTimeout(function(){
+                this.setHeight(that.contentMD.getHeight());
+            }.bind(this), 50);
+        };
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
             this.statusBar = Ext.get(Ext.DomHelper.append(container,{
@@ -292,6 +293,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             that.contentMD.parent().parent().removeClass('fullscreen');
 
             that.editor.setOption('maxLines', Infinity);
+
+            that.preview.fixHeight();
         };
     }
 
@@ -401,11 +404,13 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                             fn: function(r) {
                                 this.preview.update(r.data);
 
-                                if (this.fullScreen == true) {
+                                //if (this.fullScreen == true) {
                                     if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
                                         this.preview.dom.scrollTop = this.preview.dom.scrollHeight
                                     }
-                                }
+                                //}
+
+                                this.preview.fixHeight();
                             },
                             scope: this
                         }
@@ -415,11 +420,12 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         } else {
             this.preview.update(output);
 
-            if (this.fullScreen == true) {
+            //if (this.fullScreen == true) {
                 if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
                     this.preview.dom.scrollTop = this.preview.dom.scrollHeight
                 }
-            }
+            //}
+            this.preview.fixHeight();
         }
 
         this.taMarkdown.dom.value = this.editor.getValue();
