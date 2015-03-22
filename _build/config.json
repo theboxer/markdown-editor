@@ -102,7 +102,7 @@
       },
       {
         "key": "cropper.aspect_ratio",
-        "value": "16/9",
+        "value": "",
         "area": "markdowneditor.area.cropper"
       },
       {
