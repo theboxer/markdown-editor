@@ -148,10 +148,15 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.taMarkdown.setWidth(0);
         this.taMarkdown.setHeight(0);
 
-        var wrapper = Ext.DomHelper.insertBefore(this.textarea, {
+        var container = Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'div',
             class: 'markdown-container'
         });
+
+        var wrapper = Ext.get(Ext.DomHelper.append(container,{
+            tag: 'div',
+            class: 'markdown-wrapper'
+        }));
 
         this.contentMD = Ext.get(Ext.DomHelper.append(wrapper,{
             tag: 'div',
@@ -164,7 +169,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         }));
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
-            this.statusBar = Ext.get(Ext.DomHelper.append(wrapper,{
+            this.statusBar = Ext.get(Ext.DomHelper.append(container,{
                 tag: 'div',
                 class: 'status-bar'
             }));
@@ -186,14 +191,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
 
         } else {
-            this.statusBar = Ext.get(Ext.DomHelper.append(wrapper,{
+            this.statusBar = Ext.get(Ext.DomHelper.append(container,{
                 tag: 'div',
                 class: 'status-bar',
                 html: _('markdowneditor.status_bar_disabled')
             }));
         }
 
-        Ext.DomHelper.append(wrapper,{
+        Ext.DomHelper.append(container,{
             tag: 'span',
             style: 'clear: both'
         });
@@ -247,7 +252,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
             that.editor.focus();
 
-            that.contentMD.parent().addClass('fullscreen');
+            that.contentMD.parent().parent().addClass('fullscreen');
 
             that.editor.setOption('maxLines', null);
         };
@@ -269,7 +274,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
             that.editor.focus();
 
-            that.contentMD.parent().removeClass('fullscreen');
+            that.contentMD.parent().parent().removeClass('fullscreen');
 
             that.editor.setOption('maxLines', Infinity);
         };
