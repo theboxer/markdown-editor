@@ -41,6 +41,17 @@
           z-index: 10;
         }
     }
+    &.split {
+      .content-md {
+        float: left;
+        width: 48%;
+      }
+      .preview-md {
+        float: right;
+        width: 48%;
+        overflow: scroll;
+      }
+    }
 }
 
 .preview-md {
