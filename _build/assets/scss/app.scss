@@ -44,13 +44,17 @@
           .content-md {
             right: 50%;
             width: auto;
+            float: none;
           }
           .preview-md {
+            float: none;
             left: 50%;
             right: 0;
             width: auto;
+            height: auto !important;
           }
           .status-bar {
+            top: auto;
             right: 50%;
           }
         }
