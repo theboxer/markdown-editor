@@ -175,9 +175,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         var that = this;
         this.preview.fixHeight = function () {
-            setTimeout(function(){
-                this.setHeight(that.contentMD.getHeight());
-            }.bind(this), 50);
+            var height = that.editor.getSession().getDocument().getLength() * that.editor.renderer.lineHeight + that.editor.renderer.scrollBar.getWidth()  + 32;
+
+            this.setHeight(height);
         };
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
