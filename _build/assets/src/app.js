@@ -228,11 +228,15 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.toolBox.child('.splitscreen-button').turnOn = function() {
             this.child('i').removeClass('icon-pause');
             this.child('i').addClass('icon-stop');
+
+            that.contentMD.parent().parent().addClass('split');
         };
 
         this.toolBox.child('.splitscreen-button').turnOff = function() {
             this.child('i').addClass('icon-pause');
             this.child('i').removeClass('icon-stop');
+
+            that.contentMD.parent().parent().removeClass('split');
         };
 
         this.toolBox.child('.fullscreen-button').turnOn = function() {
