@@ -116,11 +116,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.preview.update(this.parse(this.editor.getValue()));
 
-        this.preview.setHeight(this.contentMD.getHeight() + 4);
+        this.preview.setHeight(this.contentMD.getHeight());
         this.editor.getSession().on('change', function(e){
             this.parse(this.editor.getValue());
 
-            this.preview.setHeight(this.contentMD.getHeight() + 4);
+            this.preview.setHeight(this.contentMD.getHeight());
         }.bind(this));
     }
 
