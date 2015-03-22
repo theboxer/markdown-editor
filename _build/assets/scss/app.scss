@@ -58,6 +58,15 @@
             right: 50%;
           }
         }
+        &.preview {
+          .content-md {
+            display: none !important;
+          }
+          .preview-md {
+            display: block !important;
+            left: 0;
+          }
+        }
     }
     &.split {
       .markdown-wrapper {
@@ -75,6 +84,14 @@
       }
       .status-bar {
         top: -6px;
+      }
+    }
+    &.preview {
+      .content-md {
+        display: none;
+      }
+      .preview-md {
+        display: block !important;
       }
     }
 }
