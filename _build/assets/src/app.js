@@ -356,6 +356,16 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
         });
 
+        this.editor.commands.addCommand({
+            name: "Exit fullscreen",
+            bindKey: {win: "Esc", mac: "Esc"},
+            exec: function(editor) {
+                if (this.fullScreen) {
+                    this.toolBox.child('.fullscreen-button').turnOff();
+                }
+            }.bind(this)
+        });
+
         var langTools = ace.require("ace/ext/language_tools");
         var resourcesCompleter = {
             getCompletions: function(editor, session, pos, prefix, callback) {
