@@ -1,5 +1,7 @@
 .markdown-container {
   position: relative;
+  border-radius: 3px;
+  overflow: hidden;
 
     &.fullscreen {
         position: fixed;
@@ -9,6 +11,7 @@
         bottom: 0;
         z-index: 9002;
         overflow: hidden;
+        border-radius: 0;
 
         .content-md,
         .preview-md {
@@ -84,7 +87,7 @@
         display: block !important;
       }
       .status-bar {
-        top: -6px;
+        top: -5px;
       }
     }
     &.preview {
@@ -107,8 +110,8 @@
 }
 
 .content-md {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  border: 0;
+  border-radius: 0;
 }
 
 .toolbox,
@@ -141,9 +144,8 @@
   background: rgba(39, 40, 34, 0.78);
   min-height: 25px;
   position: relative;
-  top: -1px;
-//  z-index: 999;
-  border: 1px solid #E4E4E4;
+  top: 0;
+  border: 0;
   border-top: none;
   color: #D0D0D0;
   font-size: 12px;
