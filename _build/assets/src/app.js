@@ -132,7 +132,18 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.preview.update(this.parse(this.editor.getValue()));
 
         this.preview.fixHeight();
+        window.editor = this.editor;
         this.editor.getSession().on('change', function(e){
+            if (e.data.action == 'insertText' && this.editor.getSession().getDocument().isNewLine(e.data.text)) {
+                var session = this.editor.getSession();
+                var document = session.getDocument();
+
+                if (/^\s*(?:[*+-]|\d+\.)\s*$/.exec(document.getLine(e.data.range.start.row)) != null) {
+                    document.removeLines(e.data.range.start.row, e.data.range.start.row);
+                    this.editor.insert(document.getNewLineCharacter());
+                }
+            }
+
             this.parse(this.editor.getValue());
         }.bind(this));
     }
@@ -328,8 +339,22 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.getSession().setWrapLimitRange();
         this.editor.renderer.setScrollMargin(10, 10);
         this.editor.getSession().setValue(this.textarea.getValue());
-        this.editor.getSession().setMode("ace/mode/markdown");
+        this.editor.getSession().setMode("ace/mode/markdowneditor");
         this.editor.setTheme("ace/theme/" + (MODx.config['markdowneditor.general.theme'] || 'monokai'));
+
+        this.editor.commands.addCommand({
+            name: "Indent list",
+            bindKey: {win: "Tab", mac: "Tab"},
+            exec: function(editor) {
+                var line = editor.session.getLine(editor.getCursorPosition().row);
+                var match = /^(\s*)(?:([-+*])|(\d+)\.)(\s+)/.exec(line);
+                if (match) {
+                    editor.session.indentRows(editor.getCursorPosition().row, editor.getCursorPosition().row, '\t');
+                } else {
+                    editor.indent();
+                }
+            }
+        });
 
         var langTools = ace.require("ace/ext/language_tools");
         var resourcesCompleter = {

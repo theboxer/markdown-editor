@@ -11,6 +11,7 @@ gulp.task('libjs', function () {
                 'bower_components/ace-builds/src/ace.js',
                 'bower_components/remarkable/dist/remarkable.js',
                 'bower_components/ace-builds/src/mode-markdown.js',
+                'src/mode/mode-markdowneditor.js',
                 'bower_components/ace-builds/src/ext-language_tools.js',
                 'bower_components/jquery/dist/jquery.min.js',
                 'bower_components/cropper/dist/cropper.min.js'
