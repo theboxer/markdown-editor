@@ -155,8 +155,7 @@
 
 .image-upload-wrapper {
   height: 364px;
-  width: 100%;
-  margin-top: 15px;
+  width: 750px;
   box-shadow: inset 0 0 5px rgba(0,0,0,.25);
   background-color: #fcfcfc;
   overflow: hidden;
@@ -216,4 +215,36 @@ label.link:hover {
 
 .remove-message {
   cursor: pointer;
+}
+
+.markdowneditor-cropper-window {
+  .x-window-body {
+    padding: 0 !important;
+  }
+
+  .markdowneditor-toolbar {
+    background-color: #4d4d4d;
+    width: 50px !important;
+    height: 364px;
+
+    .x-panel-body {
+      width: 50px !important;
+    }
+
+    .x-btn {
+      border: none;
+      border-radius: 0;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+      width: 10px !important;
+      background-color: inherit;
+      color: #e5e5e5;
+      padding-bottom: 10px;
+    }
+  }
+
+  .markdowneditor-cropper {
+    margin-left: 0 !important;
+    width: 750px !important;
+  }
 }

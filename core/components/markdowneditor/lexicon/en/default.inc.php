@@ -47,8 +47,6 @@ $_lang['setting_markdowneditor.upload.file_upload_url'] = 'File upload URL';
 $_lang['setting_markdowneditor.upload.file_upload_url_desc'] = 'URL to the file upload directory.';
 $_lang['setting_markdowneditor.cropper.enable_cropper'] = 'Enable Cropper';
 $_lang['setting_markdowneditor.cropper.enable_cropper_desc'] = 'If enabled, pop-up window with Cropper will show before each image upload.';
-$_lang['setting_markdowneditor.cropper.aspect_ratio'] = 'Aspect ratio';
-$_lang['setting_markdowneditor.cropper.aspect_ratio_desc'] = 'Aspect ratio used for cropping images. Example: 16/9';
 $_lang['setting_markdowneditor.resizer.aspect_ratio_constraint'] = 'Aspect ratio constraint';
 $_lang['setting_markdowneditor.resizer.aspect_ratio_constraint_desc'] = 'If enabled, image will keep their aspect ratio when resizing.';
 $_lang['setting_markdowneditor.resizer.upsize_constraint'] = 'Upsize constraint';
@@ -91,6 +89,8 @@ $_lang['setting_markdowneditor.general.split'] = 'Split editor';
 $_lang['setting_markdowneditor.general.split_desc'] = 'If enabled, editor will be in split mode by default.';
 $_lang['setting_markdowneditor.general.split_fullscreen'] = 'Split editor full screen';
 $_lang['setting_markdowneditor.general.split_fullscreen_desc'] = 'If enabled, editor will be in split mode by default when entering full screen.';
+$_lang['setting_markdowneditor.cropper.profiles'] = 'Profiles';
+$_lang['setting_markdowneditor.cropper.profiles_desc'] = 'List of profiles that user can select from in Cropper window.<br /> Each profile is JSON object with required <strong>name</strong> property. {"name": "Profile name", "width": 100, "height": 100, "ratio": "1/1"}';
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';

@@ -4,7 +4,7 @@ MarkdownEditor = function(config) {
     MarkdownEditor.superclass.constructor.call(this,config);
 };
 Ext.extend(MarkdownEditor,Ext.Component,{
-    window:{},config: {}
+    window:{},combo:{},config: {}
 });
 Ext.reg('markdowneditor',MarkdownEditor);
 markdownEditor = new MarkdownEditor();

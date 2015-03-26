@@ -65,6 +65,23 @@ class MarkdownEditorUploadImageProcessor extends MarkdownEditorUploadProcessor
         $height = (int) $this->md->getOption('resizer.height', null, 0);
         $height = (empty($height)) ? null : $height;
 
+        $profileName = $this->getProperty('profile', '');
+        if (!empty($profileName) && $crop == 1) {
+            $profiles = $this->modx->fromJSON($this->md->getOption('cropper.profiles', '[]'));
+
+            foreach ($profiles as $profile) {
+                if (!isset($profile['name']) || $profile['name'] != $profileName) continue;
+
+                $profileWidth = (int) $profile['width'];
+                $profileHeight = (int) $profile['height'];
+
+                $width = (empty($profileWidth)) ? $width : $profileWidth;
+                $height = (empty($profileHeight)) ? $height : $profileHeight;
+
+                break;
+            }
+        }
+
         if (($width != null) || ($height != null)) {
             $this->img->resize($width, $height, function ($constraint) {
                 /** @var \Intervention\Image\Constraint $constraint */

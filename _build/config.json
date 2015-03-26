@@ -101,8 +101,8 @@
         "area": "markdowneditor.area.cropper"
       },
       {
-        "key": "cropper.aspect_ratio",
-        "value": "",
+        "key": "cropper.profiles",
+        "value": "[{\"name\": \"Free form\"},{\"name\": \"Square\",\"ratio\": \"1/1\"},{\"name\": \"4x6 wide\",\"ratio\": \"6/4\"},{\"name\": \"5x7 wide\",\"ratio\": \"7/5\"},{\"name\": \"1920x1080 HD\",\"width\": 1920,\"height\": 1080}]",
         "area": "markdowneditor.area.cropper"
       },
       {
