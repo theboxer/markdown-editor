@@ -91,6 +91,9 @@ $_lang['setting_markdowneditor.general.split_fullscreen'] = 'Split editor full s
 $_lang['setting_markdowneditor.general.split_fullscreen_desc'] = 'If enabled, editor will be in split mode by default when entering full screen.';
 $_lang['setting_markdowneditor.cropper.profiles'] = 'Profiles';
 $_lang['setting_markdowneditor.cropper.profiles_desc'] = 'List of profiles that user can select from in Cropper window.<br /> Each profile is JSON object with required <strong>name</strong> property. {"name": "Profile name", "width": 100, "height": 100, "ratio": "1/1"}';
+$_lang['setting_markdowneditor.cropper.show_description'] = 'Profiles description';
+$_lang['setting_markdowneditor.cropper.show_description_desc'] = 'If enabled, profiles select box will also contains profile\'s description.';
+
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';
