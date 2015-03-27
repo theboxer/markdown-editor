@@ -181,8 +181,22 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.mdContainer = Ext.get(Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'div',
-            class: 'markdown-container'
+            class: 'markdown-container ace-' + (MODx.config['markdowneditor.general.theme'] || 'monokai').toLowerCase()
         }));
+
+        var fullScreenHeader = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
+            tag: 'div',
+            class: 'fullscreen-header ace_gutter'
+        }));
+
+        var pageTitle = Ext.getCmp('modx-resource-pagetitle');
+        if (pageTitle) {
+            fullScreenHeader.dom.innerHTML = pageTitle.getValue();
+
+            pageTitle.on('change', function(field,value){
+                fullScreenHeader.dom.innerHTML = value;
+            });
+        }
 
         var wrapper = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
             tag: 'div',
@@ -209,7 +223,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
             this.statusBar = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
                 tag: 'div',
-                class: 'status-bar'
+                class: 'status-bar ace_gutter'
             }));
 
             if (this.isMobileDevice()) {

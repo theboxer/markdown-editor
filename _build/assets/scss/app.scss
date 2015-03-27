@@ -3,6 +3,17 @@
   border-radius: 3px;
   overflow: hidden;
   background-color: white;
+    .fullscreen-header {
+      display: none;
+      height: 50px;
+      position: initial;
+      font-size: 24px;
+      padding: 10px 0 10px 32px;
+    }
+
+    .markdown-wrapper {
+      background-color: white;
+    }
 
     &.fullscreen {
         position: fixed;
@@ -14,11 +25,15 @@
         overflow: hidden;
         border-radius: 0;
 
+        .fullscreen-header {
+          display: block;
+        }
+
         .content-md,
         .preview-md {
             display: block;
             position: absolute;
-            top: 0;
+            top: 50px;
             bottom: 0;
             padding: 5px;
         }
@@ -59,7 +74,7 @@
           }
           .status-bar {
             top: auto;
-            right: 50%;
+            //right: 50%;
           }
         }
         &.preview {
@@ -142,13 +157,11 @@
 }
 
 .status-bar {
-  background: rgba(39, 40, 34, 0.78);
   min-height: 25px;
   position: relative;
   top: 0;
   border: 0;
   border-top: none;
-  color: #D0D0D0;
   font-size: 12px;
   line-height: 25px;
 }
