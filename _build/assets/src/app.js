@@ -331,7 +331,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             minLines: 25,
             enableBasicAutocompletion: true,
             printMargin: false,
-            showGutter: parseInt(MODx.config['markdowneditor.general.show_gutter'] || 1) == 1,
+            showGutter: true,
+            showLineNumbers: false,
             fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12,
             fontFamily: MODx.config['markdowneditor.general.font_family'] || ''
         });
