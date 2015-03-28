@@ -191,10 +191,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         var pageTitle = Ext.getCmp('modx-resource-pagetitle');
         if (pageTitle) {
-            fullScreenHeader.dom.innerHTML = pageTitle.getValue();
+            fullScreenHeader.update(pageTitle.getValue());
 
             pageTitle.on('change', function(field,value){
-                fullScreenHeader.dom.innerHTML = value;
+                fullScreenHeader.update(value);
             });
         }
 
