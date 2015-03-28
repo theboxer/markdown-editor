@@ -215,7 +215,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         var that = this;
         this.preview.fixHeight = function () {
-            var height = that.editor.getSession().getDocument().getLength() * that.editor.renderer.lineHeight + that.editor.renderer.scrollBar.getWidth()  + 32;
+            var height = that.editor.getSession().getScreenLength() * that.editor.renderer.lineHeight + that.editor.renderer.scrollBar.getWidth()  + 30;
 
             this.setHeight(height);
         };
@@ -347,7 +347,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             printMargin: false,
             showGutter: true,
             useSoftTabs: true,
-            autoIndent: true,
             showFoldWidgets: false,
             showLineNumbers: false,
             fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12,
@@ -472,11 +471,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                             fn: function(r) {
                                 this.preview.update(r.data);
 
-                                //if (this.fullScreen == true) {
-                                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
+                                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
                                     this.preview.dom.scrollTop = this.preview.dom.scrollHeight
                                 }
-                                //}
 
                                 this.preview.fixHeight();
                             },
@@ -488,11 +485,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         } else {
             this.preview.update(output);
 
-            //if (this.fullScreen == true) {
-            if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
+            if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
+                console.log('scroll');
                 this.preview.dom.scrollTop = this.preview.dom.scrollHeight
             }
-            //}
+
             this.preview.fixHeight();
         }
 

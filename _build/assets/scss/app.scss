@@ -98,10 +98,11 @@
       width: 48%;
     }
     .preview-md {
-      float: right;
-      width: 48%;
+      //float: right;
+      //width: 48%;
       overflow: scroll;
       display: block !important;
+      padding-left: 20px;
     }
     .status-bar {
       //top: -5px;
