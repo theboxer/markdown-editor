@@ -346,6 +346,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             enableBasicAutocompletion: true,
             printMargin: false,
             showGutter: true,
+            useSoftTabs: true,
+            autoIndent: true,
+            showFoldWidgets: false,
             showLineNumbers: false,
             fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12,
             fontFamily: MODx.config['markdowneditor.general.font_family'] || ''
@@ -470,9 +473,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                                 this.preview.update(r.data);
 
                                 //if (this.fullScreen == true) {
-                                    if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
-                                        this.preview.dom.scrollTop = this.preview.dom.scrollHeight
-                                    }
+                                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
+                                    this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+                                }
                                 //}
 
                                 this.preview.fixHeight();
@@ -486,9 +489,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.preview.update(output);
 
             //if (this.fullScreen == true) {
-                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
-                    this.preview.dom.scrollTop = this.preview.dom.scrollHeight
-                }
+            if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getScreenLength()) {
+                this.preview.dom.scrollTop = this.preview.dom.scrollHeight
+            }
             //}
             this.preview.fixHeight();
         }
