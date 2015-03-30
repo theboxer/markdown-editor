@@ -25,6 +25,24 @@
     overflow: hidden;
     border-radius: 0;
 
+    .toolbox {
+      position: fixed;
+      right: 10px;
+      top: 15px;
+
+      div {
+        display: inline;
+        padding: 5px;
+      }
+    }
+
+    .preview-button-off {
+      position: fixed;
+      right: 10px;
+      top: 15px;
+      color: inherit;
+    }
+
     .fullscreen-header {
       display: block;
     }
