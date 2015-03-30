@@ -51,7 +51,7 @@
       overflow-y: auto;
     }
     .status-bar {
-      position: absolute;
+      position: absolute !important;
       left: 0;
       right: 0;
       bottom: -1px;
@@ -166,7 +166,7 @@
 
 .status-bar {
   min-height: 25px;
-  position: relative;
+  position: relative !important;
   top: 0;
   border: 0;
   border-top: none;
