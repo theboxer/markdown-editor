@@ -9,6 +9,15 @@
     position: initial;
     font-size: 24px;
     padding: 10px 0 10px 37px;
+
+    input {
+      width: 70%;
+      background-color: initial;
+      color: inherit;
+      border: none;
+      font-family: inherit;
+      font-size: inherit;
+    }
   }
 
   .markdown-wrapper {

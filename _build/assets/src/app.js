@@ -186,15 +186,21 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         var fullScreenHeader = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
             tag: 'div',
-            class: 'fullscreen-header ace_gutter'
+            class: 'fullscreen-header ace_gutter',
+            html: '<input type="text" />'
         }));
 
         var pageTitle = Ext.getCmp('modx-resource-pagetitle');
         if (pageTitle) {
-            fullScreenHeader.update(pageTitle.getValue());
+            var headerInput = fullScreenHeader.child('input');
+            headerInput.dom.value = pageTitle.getValue();
+
+            headerInput.on('change', function(){
+                pageTitle.setValue(this.dom.value);
+            });
 
             pageTitle.on('change', function(field,value){
-                fullScreenHeader.update(value);
+                headerInput.dom.value = value;
             });
         }
 
@@ -486,7 +492,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.preview.update(output);
 
             if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
-                console.log('scroll');
                 this.preview.dom.scrollTop = this.preview.dom.scrollHeight
             }
 
