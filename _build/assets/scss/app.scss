@@ -287,3 +287,17 @@ label.link:hover {
     width: 750px !important;
   }
 }
+
+#modx-action-buttons.markdowneditor-fullscreen {
+  z-index: 9999;
+  top: -4px;
+  right: 0;
+  background: none;
+
+  #modx-abtn-duplicate,
+  #modx-abtn-delete,
+  #modx-abtn-cancel,
+  #modx-abtn-help{
+    display: none;
+  }
+}

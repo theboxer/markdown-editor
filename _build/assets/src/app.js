@@ -301,6 +301,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.child('i').removeClass('icon-expand');
             this.child('i').addClass('icon-compress');
 
+            var modxButtons = Ext.get('modx-action-buttons');
+            if (modxButtons) {
+                modxButtons.addClass('markdowneditor-fullscreen');
+            }
+
             that.fullScreen = true;
 
             if (parseInt(MODx.config['markdowneditor.general.split_fullscreen'] || 1) == 1) {
@@ -322,6 +327,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.toolBox.child('.fullscreen-button').turnOff = function() {
             this.child('i').addClass('icon-expand');
             this.child('i').removeClass('icon-compress');
+
+            var modxButtons = Ext.get('modx-action-buttons');
+            if (modxButtons) {
+                modxButtons.removeClass('markdowneditor-fullscreen');
+            }
 
             that.fullScreen = false;
 
