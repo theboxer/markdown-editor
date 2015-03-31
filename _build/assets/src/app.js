@@ -533,7 +533,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     return true;
                 }
 
-                if (file.size > parseInt(MODx.config['markdowneditor.upload.max_size'])) {
+
+                if (!this.checkSize(file.size)) {
                     this.failMessage(file, 'image', _('markdowneditor.err.upload.too_big'));
 
                     return true;
@@ -559,7 +560,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     return true;
                 }
 
-                if (file.size > parseInt(MODx.config['markdowneditor.upload.max_size'])) {
+                if (!this.checkSize(file.size)) {
                     this.failMessage(file, 'file', _('markdowneditor.err.upload.too_big'));
 
                     return true;
@@ -570,6 +571,17 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
 
         }, this);
+    }
+
+    ,checkSize: function(size){
+        var maxSize = MODx.config['markdowneditor.upload.max_size'];
+        if (!maxSize || maxSize == '') maxSize = (MODx.config['upload_maxsize'] || '2097152');
+
+        maxSize = parseInt(maxSize);
+
+        if (maxSize == 0) return true;
+
+        return size <= maxSize;
     }
 
     ,checkType: function(allowedTypes, file) {

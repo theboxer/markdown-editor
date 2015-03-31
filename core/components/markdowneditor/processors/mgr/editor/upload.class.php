@@ -101,7 +101,15 @@ abstract class MarkdownEditorUploadProcessor extends modProcessor
 
     protected function checkSize()
     {
-        $allowedSize = (int) $this->md->getOption('upload.max_size', null, "2097152");
+        $allowedSize = $this->md->getOption('upload.max_size', null, "");
+
+        if ($allowedSize == '') {
+            $allowedSize = $this->modx->getOption('upload_maxsize', null, "2097152");
+        }
+
+        if ($allowedSize == '0') return true;
+
+        $allowedSize = intval($allowedSize);
 
         if ($allowedSize < $_FILES['file']['size']) return $this->modx->lexicon('markdowneditor.err.upload.too_big');
 
