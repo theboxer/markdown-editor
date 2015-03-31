@@ -3,6 +3,7 @@
   border-radius: 3px;
   overflow: hidden;
   background-color: white;
+
   .fullscreen-header {
     display: none;
     height: 50px;
@@ -33,24 +34,6 @@
     z-index: 9002;
     overflow: hidden;
     border-radius: 0;
-
-    .toolbox {
-      position: fixed;
-      right: 10px;
-      top: 15px;
-
-      div {
-        display: inline;
-        padding: 5px;
-      }
-    }
-
-    .preview-button-off {
-      position: fixed;
-      right: 10px;
-      top: 15px;
-      color: inherit;
-    }
 
     .fullscreen-header {
       display: block;
@@ -173,6 +156,14 @@
   right: 10px;
   bottom: 0;
 }
+
+.toolbox {
+  div {
+    display: inline;
+    padding: 5px;
+  }
+}
+
 
 .fullscreen-button,
 .splitscreen-button,

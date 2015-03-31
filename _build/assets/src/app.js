@@ -263,7 +263,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     }
 
     ,buildToolbox: function(){
-        this.toolBox = Ext.get(Ext.DomHelper.append(this.contentMD,{
+        this.toolBox = Ext.get(Ext.DomHelper.append(this.statusBar,{
             tag: 'div',
             class: 'toolbox',
             cn: [{
