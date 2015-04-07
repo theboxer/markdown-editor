@@ -132,15 +132,14 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.preview.update(this.parse(this.editor.getValue()));
 
         this.preview.fixHeight();
-        window.editor = this.editor;
-        this.editor.getSession().on('change', function(e){
+
+        this.editor.getSession().on('change', function(e,b,c,d){
             if (e.data.action == 'insertText' && this.editor.getSession().getDocument().isNewLine(e.data.text)) {
                 var session = this.editor.getSession();
                 var document = session.getDocument();
 
                 if (/^\s*(?:[*+-]|\d+\.)\s*$/.exec(document.getLine(e.data.range.start.row)) != null) {
                     document.removeLines(e.data.range.start.row, e.data.range.start.row);
-                    this.editor.insert(document.getNewLineCharacter());
                 }
             }
 
