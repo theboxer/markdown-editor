@@ -12,6 +12,10 @@
     }
   }
 
+  .ace_gutter-active-line {
+    background-color: inherit !important;
+  }
+
   .fullscreen-header {
     display: none;
     height: 50px;
