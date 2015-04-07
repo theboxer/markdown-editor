@@ -4,6 +4,14 @@
   overflow: hidden;
   background-color: white;
 
+  .ace_gutter {
+    overflow: visible !important;
+
+    .ace_gutter-layer {
+      overflow: visible !important;
+    }
+  }
+
   .fullscreen-header {
     display: none;
     height: 50px;
@@ -299,5 +307,25 @@ label.link:hover {
   #modx-abtn-cancel,
   #modx-abtn-help{
     display: none;
+  }
+}
+
+.ace_gutter-cell {
+  > i {
+    cursor: pointer;
+    position: relative;
+    right: 3px;
+  }
+}
+.inline-toolbar {
+  position: relative;
+  left: 20px;
+  top: -15px;
+  width: 54px;
+  visibility: hidden;
+
+  i {
+    padding-right: 8px;
+    cursor: pointer;
   }
 }

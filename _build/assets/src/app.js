@@ -502,11 +502,23 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             getText: function(session, row, cell) {
                 if (this.editor.getCursorPosition().row == row && session.doc.$lines[row] == "") {
                     var gutter = Ext.get(cell.element);
-                    gutter.update('<i class="icon icon-heart"></i><div class="inline-toolbar"><i class="icon icon-upload"></i><i class="icon icon-camera"></i></div>');
+                    gutter.update('<i class="icon icon-heart icon-large"></i><div class="inline-toolbar"><i class="icon icon-upload icon-large"></i><i class="icon icon-camera icon-large"></i></div>');
 
                     gutter.child('i').on('click', function(){
-                        gutter.child('i').removeClass('icon-heart');
-                        gutter.child('i').addClass('icon-close');
+                        var switcher = gutter.child('i');
+                        var inlineToolbar = gutter.child('.inline-toolbar');
+
+                        if(switcher.hasClass('icon-heart')) {
+                            switcher.addClass('icon-close');
+                            switcher.removeClass('icon-heart');
+
+                            inlineToolbar.show();
+                        } else {
+                            switcher.addClass('icon-heart');
+                            switcher.removeClass('icon-close');
+
+                            inlineToolbar.hide();
+                        }
                     });
 
                 } else {
