@@ -376,10 +376,13 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.getSession().setMode("ace/mode/markdowneditor");
         this.editor.setTheme("ace/theme/" + (MODx.config['markdowneditor.general.theme'] || 'monokai'));
 
-        this.editor.selection.on('changeCursor', function (a, selection) {
+        this.editor.selection.on('changeCursor', function (e, selection) {
             if (this.gutterToolbar) {
                 this.gutterToolbar.update('');
             }
+
+            var range = selection.getRange();
+            if (range.start.row != range.end.row) return;
 
             if (selection.session.doc.$lines[this.editor.getCursorPosition().row] == "") {
                 var node = Ext.DomQuery.selectNode('.' + this.mdElementName + '_markdown .ace_gutter-cell:nth-child(' + (this.editor.getCursorPosition().row + 1) + ')');
