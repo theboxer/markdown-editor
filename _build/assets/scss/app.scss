@@ -314,18 +314,36 @@ label.link:hover {
   > i {
     cursor: pointer;
     position: relative;
-    right: 3px;
+    left: -12px;
+    top: -3px;
+    opacity: 0.5;
+  }
+
+  > i:hover {
+    opacity: 1;
   }
 }
 .inline-toolbar {
   position: relative;
   left: 20px;
-  top: -15px;
-  width: 54px;
+  top: -28px;
+  width: 100px;
   visibility: hidden;
 
   i {
-    padding-right: 8px;
+    padding-right: 15px;
     cursor: pointer;
+    opacity: 0.5;
   }
+
+  i:hover {
+    opacity: 1;
+  }
+}
+
+.md-icon-rotate-45 {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.5);
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
 }

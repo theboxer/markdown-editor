@@ -460,25 +460,31 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
     ,addGutterToolbar: function(cell){
         this.gutterToolbar = Ext.get(cell);
-        this.gutterToolbar.update('<i class="icon icon-heart icon-large"></i><div class="inline-toolbar"><i class="icon icon-upload icon-large"></i><i class="icon icon-camera icon-large"></i></div>');
+
+        //if (this.isMobileDevice()) {
+            this.gutterToolbar.update('<i class="icon icon-plus-circle icon-2x"></i>' +
+            '<div class="inline-toolbar">' +
+                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-2x"></i></label>' +
+                '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-2x"></i></label>' +
+            '</div>');
+        //} else {
+        //    this.gutterToolbar.update('<i class="icon icon-plus-circle icon-2x"></i>' +
+        //    '<div class="inline-toolbar">' +
+        //        '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-2x"></i></label>' +
+        //    '</div>');
+        //}
 
         this.gutterToolbar.child('i').on('click', function(){
             var switcher = this.gutterToolbar.child('i');
             var inlineToolbar = this.gutterToolbar.child('.inline-toolbar');
 
-            var uploadButton = inlineToolbar.child('i.icon-upload');
-            uploadButton.on('click', function () {
 
-            });
-
-            if(switcher.hasClass('icon-heart')) {
-                switcher.addClass('icon-close');
-                switcher.removeClass('icon-heart');
+            if(!switcher.hasClass('md-icon-rotate-45')) {
+                switcher.addClass('md-icon-rotate-45');
 
                 inlineToolbar.show();
             } else {
-                switcher.addClass('icon-heart');
-                switcher.removeClass('icon-close');
+                switcher.removeClass('md-icon-rotate-45');
 
                 inlineToolbar.hide();
             }
