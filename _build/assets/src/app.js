@@ -220,7 +220,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         var that = this;
         this.preview.fixHeight = function () {
-            var height = that.editor.getSession().getScreenLength() * that.editor.renderer.lineHeight + that.editor.renderer.scrollBar.getWidth()  + 30;
+            var height = that.editor.getSession().getScreenLength() * that.editor.renderer.lineHeight + that.editor.renderer.scrollBar.getWidth()  + 25;
 
             this.setHeight(height);
         };
