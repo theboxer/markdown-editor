@@ -2,15 +2,8 @@
   "config": {
     "vendor-dir": "../core/components/markdowneditor/model/vendor"
   },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/essence/essence"
-    }
-  ],
   "require": {
     "intervention/image": "2.*",
-    "essence/essence": "dev-master",
-    "embed/embed": "2.*"
+    "essence/essence": "2.*"
   }
 }
