@@ -277,6 +277,9 @@ label.link:hover {
   .x-window-body {
     padding: 0 !important;
   }
+  .x-panel-nofooter {
+    display: none;
+  }
 
   .markdowneditor-toolbar {
     background-color: #4d4d4d;
@@ -349,14 +352,18 @@ label.link:hover {
     }
   }
 
-  &.status-bar .toolbox i {
-    border: 0;
-    padding: 0;
-    margin: 0;
-    background: transparent;
-    line-height: 25px;
-    font-size: 1.33333em;
-    opacity: 1;
+  &.status-bar  {
+    
+    .toolbox i,
+    .progress i {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      line-height: 25px;
+      font-size: 1.33333em;
+      opacity: 1;
+    }
   }
 
   .inline-toolbar {
