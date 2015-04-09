@@ -465,10 +465,10 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.gutterToolbar = Ext.get(cell);
 
         //if (this.isMobileDevice()) {
-            this.gutterToolbar.update('<i class="icon icon-plus-circle icon-2x"></i>' +
+            this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
             '<div class="inline-toolbar">' +
-                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-2x"></i></label>' +
-                '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-2x"></i></label>' +
+                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
+                '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-fixed-width"></i></label>' +
             '</div>');
         //} else {
         //    this.gutterToolbar.update('<i class="icon icon-plus-circle icon-2x"></i>' +
