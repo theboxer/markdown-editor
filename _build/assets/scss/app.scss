@@ -346,16 +346,16 @@ label.link:hover {
       opacity: 1;
       transition: all 0.15s ease;
     }
+  }
 
-    &.status-bar .toolbox i {
-      border: 0;
-      padding: 0;
-      margin: 0;
-      background: transparent;
-      line-height: 25px;
-      font-size: 1.33333em;
-      opacity: 1;
-    }
+  &.status-bar .toolbox i {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    line-height: 25px;
+    font-size: 1.33333em;
+    opacity: 1;
   }
 
   .inline-toolbar {
