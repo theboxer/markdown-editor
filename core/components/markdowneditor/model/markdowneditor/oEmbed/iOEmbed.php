@@ -17,4 +17,11 @@ interface iOEmbed {
      * @return array
      */
     public function getCSS();
+
+    /**
+     * Loads custom HTML
+     *
+     * @return array
+     */
+    public function getHTML();
 }

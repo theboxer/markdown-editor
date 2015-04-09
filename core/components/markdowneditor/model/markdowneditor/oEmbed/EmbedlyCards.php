@@ -1,7 +1,7 @@
 <?php
 namespace MarkdownEditor\oEmbed;
 
-final class Essence implements iOEmbed
+final class EmbedlyCards implements iOEmbed
 {
     /** @var \modX */
     private $modx;
@@ -22,17 +22,7 @@ final class Essence implements iOEmbed
      */
     public function extract($url)
     {
-        $essence = \Essence\Essence::instance( );
-        $media = $essence->embed($url, array(
-            'maxwidth' => $this->getMaxWidth(),
-            'maxheight' => $this->getMaxHeight()
-        ));
-
-        if (!$media) {
-            throw new \Exception();
-        }
-
-        return $media->html;
+        return '<a href="' . $url . '" class="embedly-card">' . $url . '</a>';
     }
 
     /**
@@ -51,6 +41,7 @@ final class Essence implements iOEmbed
         return intval($this->md->getOption('oembed.max_height', array(), 800));
     }
 
+
     /**
      * Loads custom CSS
      *
@@ -58,6 +49,17 @@ final class Essence implements iOEmbed
      */
     public function getCSS()
     {
+        return array();
+    }
+
+    /**
+     * Loads custom JS
+     *
+     * @return array
+     */
+    public function getJS()
+    {
+        return array();
     }
 
     /**
@@ -67,6 +69,19 @@ final class Essence implements iOEmbed
      */
     public function getHTML()
     {
-        return array();
+        return array(
+            "<script>
+              (function(w, d){
+               var id='embedly-platform', n = 'script';
+               if (!d.getElementById(id)){
+                 w.embedly = w.embedly || function() {(w.embedly.q = w.embedly.q || []).push(arguments);};
+                 var e = d.createElement(n); e.id = id; e.async=1;
+                 e.src = ('https:' === document.location.protocol ? 'https' : 'http') + '://cdn.embedly.com/widgets/platform.js';
+                 var s = d.getElementsByTagName(n)[0];
+                 s.parentNode.insertBefore(e, s);
+               }
+              })(window, document);
+            </script>"
+        );
     }
 }

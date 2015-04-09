@@ -82,4 +82,14 @@ final class Noembed implements iOEmbed
     {
         return array($this->md->getOption('cssUrl') . 'noembed.css');
     }
+
+    /**
+     * Loads custom HTML
+     *
+     * @return array
+     */
+    public function getHTML()
+    {
+        return array();
+    }
 }

@@ -28,6 +28,11 @@ class MarkdownEditorOnWebPageInit extends MarkdownEditorPlugin {
             }
         }
 
+        $oEmbedHTML = $oEmbedService->getHTML();
+        foreach ($oEmbedHTML as $html) {
+            $this->modx->regClientHTMLBlock($html);
+        }
+
         return;
     }
 }
