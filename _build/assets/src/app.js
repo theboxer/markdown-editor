@@ -20,6 +20,9 @@ markdownEditor.Editor = function(config) {
 Ext.extend(markdownEditor.Editor,Ext.Component,{
     remarkable: ''
     ,fullScreen: false
+    ,localCache: {
+        oEmbed: {}
+    }
     ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
@@ -49,7 +52,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.buildUI();
         this.registerAce();
-        this.registerMarked();
+        this.registerRemarkable();
         this.buildToolbox();
 
         var previewButton = this.toolBox.child('.preview-button');
@@ -464,18 +467,18 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,addGutterToolbar: function(cell){
         this.gutterToolbar = Ext.get(cell);
 
-        //if (this.isMobileDevice()) {
+        if (this.isMobileDevice()) {
             this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
             '<div class="inline-toolbar">' +
                 '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
                 '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-fixed-width"></i></label>' +
             '</div>');
-        //} else {
-        //    this.gutterToolbar.update('<i class="icon icon-plus-circle icon-2x"></i>' +
-        //    '<div class="inline-toolbar">' +
-        //        '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-2x"></i></label>' +
-        //    '</div>');
-        //}
+        } else {
+            this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
+            '<div class="inline-toolbar">' +
+                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
+            '</div>');
+        }
 
         this.gutterToolbar.child('i').on('click', function(){
             var switcher = this.gutterToolbar.child('i');
@@ -494,7 +497,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         }.bind(this));
     }
 
-    ,registerMarked: function() {
+    ,registerRemarkable: function() {
         this.remarkable = new Remarkable({
             html: true,
             highlight: function (str, lang) {
@@ -523,6 +526,48 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
         });
         this.remarkable.inline.ruler.disable([ 'backticks' ]);
+
+        var oEmbedRenderer = function(tokens, idx, options) {
+            if (!this.localCache.oEmbed[tokens[idx].url]) {
+                this.localCache.oEmbed[tokens[idx].url] = {}
+            }
+
+            if (this.localCache.oEmbed[tokens[idx].url].data) {
+                return this.localCache.oEmbed[tokens[idx].url].data;
+            } else {
+                var elID = Ext.id();
+                this.localCache.oEmbed[tokens[idx].url].id = elID;
+
+                MODx.Ajax.request({
+                    url: markdownEditor.config.connectorUrl
+                    ,params: {
+                        action: 'mgr/editor/oembed'
+                        ,url: tokens[idx].url
+                    },
+                    listeners: {
+                        'success': {
+                            fn: function(r) {
+                                console.log(this);
+                                this.localCache.oEmbed[tokens[idx].url].data = r.data;
+                                Ext.get(this.localCache.oEmbed[tokens[idx].url].id).update(r.data);
+
+                                this.textarea.dom.value = this.preview.dom.innerHTML;
+                            },
+                            scope: this
+                        }
+                    }
+                });
+
+                return Ext.DomHelper.markup({tag: 'div', id: elID, html: '[embed ' + tokens[idx].url + ']'});
+            }
+        }.bind(this);
+
+        var oEmbed = function(md) {
+            md.inline.ruler.push('oEmbed', this.oEmbedParser);
+            md.renderer.rules.oEmbed = oEmbedRenderer;
+        }.bind(this);
+
+        this.remarkable.use(oEmbed);
     }
 
     ,parse: function(input) {
@@ -577,6 +622,104 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.textarea.dom.value = output;
 
         return output;
+    }
+
+    ,oEmbedParser: function(state) {
+        // Given state.src [embed url]
+        // We are here:    ^
+        var pos = state.pos;
+        var marker = state.src.charCodeAt(state.pos);
+        if (marker !== 0x5B/* [ */) {
+            return false;
+        }
+
+        // Given state.src [embed url]
+        // We are here:     ^
+        pos++;
+        marker = state.src.charCodeAt(pos);
+        if (marker !== 0x65/* e */) {
+            return false;
+        }
+
+        // Given state.src [embed url]
+        // We are here:      ^
+        pos++;
+        marker = state.src.charCodeAt(pos);
+        if (marker !== 0x6D/* m */) {
+            return false;
+        }
+
+        // Given state.src [embed url]
+        // We are here:       ^
+        pos++;
+        marker = state.src.charCodeAt(pos);
+        if (marker !== 0x62/* b */) {
+            return false;
+        }
+
+        // Given state.src [embed url]
+        // We are here:        ^
+        pos++;
+        marker = state.src.charCodeAt(pos);
+        if (marker !== 0x65/* e */) {
+            return false;
+        }
+
+        // Given state.src [embed url]
+        // We are here:         ^
+        pos++;
+        marker = state.src.charCodeAt(pos);
+        if (marker !== 0x64/* d */) {
+            return false;
+        }
+
+        // Given state.src [embed url]
+        // We are here:          ^
+        pos++;
+        marker = state.src.charCodeAt(pos);
+        if (marker !== 0x20/*   */) {
+            return false;
+        }
+
+        pos++;
+
+        var start = pos;
+        var max = state.posMax;
+        var endFound = false;
+        while (pos < max) {
+            if (state.src.charCodeAt(pos) === 0x5D/* ] */) {
+                endFound = true;
+                break;
+            }
+
+            if (state.src.charCodeAt(pos) === 0x20/*  */) {
+                return false;
+            }
+
+            pos++;
+        }
+
+        if (!endFound) return false;
+
+        state.pos = pos+1;
+
+        if (state.pos > state.posMax) {
+            state.pos = state.posMax;
+        }
+
+        var url = state.src.slice(start, pos);
+
+        // Having matched all three characters we add a token to the state list
+        var token = {
+            type: "oEmbed",
+            level: state.level,
+            content: marker,
+            url: url
+        };
+
+        state.push(token);
+
+        return true;
     }
 
     ,catchAndDoNothing: function(e) {

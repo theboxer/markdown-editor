@@ -607,7 +607,7 @@ background-color: rgba(215, 215, 215, 0.031)\
 border: 1px solid #000000\
 }\
 .ace-clouds-midnight .ace_invisible {\
-color: #666\
+color: #BFBFBF\
 }\
 .ace-clouds-midnight .ace_keyword,\
 .ace-clouds-midnight .ace_meta,\
@@ -1303,11 +1303,8 @@ font-weight: bold;\
 .ace-github .ace_cursor {\
 color: black;\
 }\
-.ace-github.ace_focus .ace_marker-layer .ace_active-line {\
-background: rgb(255, 255, 204);\
-}\
 .ace-github .ace_marker-layer .ace_active-line {\
-background: rgb(245, 245, 245);\
+background: rgb(255, 255, 204);\
 }\
 .ace-github .ace_marker-layer .ace_selection {\
 background: rgb(181, 213, 255);\
@@ -1335,9 +1332,6 @@ background-color : rgba(0, 0, 0, 0.07);\
 .ace-github .ace_marker-layer .ace_selected-word {\
 background: rgb(250, 250, 255);\
 border: 1px solid rgb(200, 200, 250);\
-}\
-.ace-github .ace_invisible {\
-color: #BFBFBF\
 }\
 .ace-github .ace_print-margin {\
 width: 1px;\
@@ -1495,9 +1489,6 @@ background-color: rgb(232, 242, 254)\
 }\
 .ace-katzenmilch .ace_marker-layer .ace_selected-word {\
 border: 1px solid rgba(100, 5, 208, 0.27)\
-}\
-.ace-katzenmilch .ace_invisible {\
-color: #BFBFBF\
 }\
 .ace-katzenmilch .ace_fold {\
 background-color: rgba(2, 95, 73, 0.97);\
@@ -1720,9 +1711,6 @@ background-color: rgba(203, 220, 47, 0.22);\
 }\
 .ace-kuroir .ace_marker-layer .ace_selected-word {\
 border: 1px solid rgba(245, 170, 0, 0.57);\
-}\
-.ace-kuroir .ace_invisible {\
-color: #BFBFBF\
 }\
 .ace-kuroir .ace_fold {\
 border-color: #363636;\
