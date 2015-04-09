@@ -1,8 +1,12 @@
+$bg-color:    #fff;
+$light-color: #aaa;
+$dark-color:  #555;
+
 .markdown-container {
   position: relative;
   border-radius: 3px;
   overflow: hidden;
-  background-color: white;
+  background-color: $bg-color;
 
   .ace_gutter {
     overflow: visible !important;
@@ -34,7 +38,7 @@
   }
 
   .markdown-wrapper {
-    background-color: white;
+    background-color: $bg-color;
   }
 
   &.fullscreen {
@@ -333,11 +337,11 @@ label.link:hover {
     vertical-align: middle;
 
     border-radius: 50%;
-    border: 1px solid #aaa;
-    background: #fff;
+    border: 1px solid $light-color;
+    background: $bg-color;
 
     opacity: 0.5;
-    transition: all 0.07sec ease;
+    transition: all 0.07s ease;
   }
 
   i:hover {
@@ -351,11 +355,13 @@ label.link:hover {
     visibility: hidden;
   }
 }
-
+.ace_dark .ace_gutter i {
+  border: 1px solid $dark-color;
+}
 .md-icon-rotate-45 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.5);
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
-  transition: all 0.07sec ease;
+  transition: all 0.07s ease;
 }
