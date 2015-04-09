@@ -325,27 +325,36 @@ label.link:hover {
     position: relative;
     top: -6px;
     display: inline-block;
-
     padding: 6px;
     margin: 0 27px 0 -15px;
-
     width: 14px;
     height: 14px;
     font-size: 14px;
     line-height: 14px;
     text-align: center;
     vertical-align: middle;
-
     border-radius: 50%;
     border: 1px solid $light-color;
     background: $bg-color;
-
     opacity: 0.5;
-  }
 
-  i:hover {
-    opacity: 1;
-    transition: all 0.15s ease;
+    .ace_dark & {
+      border: 1px solid $dark-color;
+    }
+
+    .status-bar .toolbox & {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      line-height: 25px;
+      font-size: 1.33333em;
+    }
+
+    &:hover {
+      opacity: 1;
+      transition: all 0.15s ease;
+    }
   }
 
   .inline-toolbar {
@@ -354,10 +363,12 @@ label.link:hover {
     margin: -28px 0 0 42px;
     visibility: hidden;
   }
+
+
+
 }
-.ace_dark .ace_gutter i {
-  border: 1px solid $dark-color;
-}
+
+
 .md-icon-rotate-45 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.5);
   -webkit-transform: rotate(45deg);
