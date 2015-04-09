@@ -344,8 +344,9 @@ label.link:hover {
   }
 
   .inline-toolbar {
-    position: relative;
-    width: 100%;
+    text-align: left;
+    width: 200px;
+    margin: -28px 0 0 42px;
     visibility: hidden;
   }
 }
