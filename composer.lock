@@ -4,45 +4,8 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4ba3d3e1e9e6b4e28a77231b0057dd95",
+    "hash": "1f1cbe4d700591c796ca5a5e75a57fec",
     "packages": [
-        {
-            "name": "alb/oembed",
-            "version": "1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/arnaud-lb/alb-oembed.git",
-                "reference": "503c52e35996d6301d74c8cb66cbca4e0aa36caa"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/arnaud-lb/alb-oembed/zipball/503c52e35996d6301d74c8cb66cbca4e0aa36caa",
-                "reference": "503c52e35996d6301d74c8cb66cbca4e0aa36caa",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Alb\\OEmbed\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Arnaud Le Blanc",
-                    "email": "arnaud.lb@gmail.com"
-                }
-            ],
-            "description": "oEmbed consumer library",
-            "homepage": "https://github.com/arnaud-lb/alb-oembed",
-            "keywords": [
-                "oembed"
-            ],
-            "time": "2013-03-27 20:37:56"
-        },
         {
             "name": "essence/essence",
             "version": "2.5.2",

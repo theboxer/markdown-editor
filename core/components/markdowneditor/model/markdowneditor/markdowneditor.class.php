@@ -63,6 +63,43 @@ class MarkdownEditor {
         return $option;
     }
 
+    public function getOEmbed($url)
+    {
+        $embedService = $this->getEmbedServiceInstance($this->modx);
+
+        try {
+            return $embedService->extract($url);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param modX $modx
+     *
+     * @return MarkdownEditor\oEmbed\iOEmbed;
+     */
+    public function getEmbedServiceInstance(modX &$modx)
+    {
+        $service = $this->getOption('oembed.service', array(), 'Noembed');
+        $service = ucfirst($service);
+
+        if (strpos($service, '\\') === false) {
+            $className = 'MarkdownEditor\\oEmbed\\' . $service;
+            if (!class_exists($className)) {
+                return new MarkdownEditor\oEmbed\Noembed($modx);
+            }
+
+            return new $className($modx);
+        }
+
+        if (!class_exists($service)) {
+            return new MarkdownEditor\oEmbed\Noembed($modx);
+        }
+
+        return new $service($modx);
+    }
+
     protected function autoload()
     {
         require_once $this->getOption('modelPath') . 'vendor/autoload.php';

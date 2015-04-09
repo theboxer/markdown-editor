@@ -182,6 +182,29 @@
         "value": true,
         "type": "combo-boolean",
         "area": "markdowneditor.area.general"
+      },
+      {
+        "key": "oembed.service",
+        "value": "Noembed",
+        "area": "markdowneditor.area.oembed"
+      },
+      {
+        "key": "oembed.max_height",
+        "value": 800,
+        "type": "numberfield",
+        "area": "markdowneditor.area.oembed"
+      },
+      {
+        "key": "oembed.max_width",
+        "value": 800,
+        "type": "numberfield",
+        "area": "markdowneditor.area.oembed"
+      },
+      {
+        "key": "oembed.frontend_css",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.oembed"
       }
     ]
   },

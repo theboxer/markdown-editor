@@ -1,0 +1,14 @@
+{
+  "config": {
+    "vendor-dir": "core/components/markdowneditor/model/vendor"
+  },
+  "require": {
+    "intervention/image": "2.*",
+    "essence/essence": "2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MarkdownEditor\\oEmbed\\": "core/components/markdowneditor/model/markdowneditor/oEmbed/"
+    }
+  }
+}

@@ -18,6 +18,16 @@ class MarkdownEditorOnWebPageInit extends MarkdownEditorPlugin {
             $this->modx->regClientStartupScript($this->markdowneditor->getOption('jsUrl') . 'highlight.pack.js');
         }
 
+        $oEmbedService = $this->markdowneditor->getEmbedServiceInstance($this->modx);
+        $oEmbedCSS = $oEmbedService->getCSS();
+
+        $loadOEmbedCSS = (int) $this->markdowneditor->getOption('oembed.frontend_css', null, 1);
+        if ($loadOEmbedCSS) {
+            foreach ($oEmbedCSS as $css) {
+                $this->modx->regClientCSS($css);
+            }
+        }
+
         return;
     }
 }

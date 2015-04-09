@@ -32,6 +32,7 @@ $_lang['area_markdowneditor.area.lp'] = 'Live preview';
 $_lang['area_markdowneditor.area.upload'] = 'Upload';
 $_lang['area_markdowneditor.area.resizer'] = 'Resizer';
 $_lang['area_markdowneditor.area.general'] = 'General';
+$_lang['area_markdowneditor.area.oembed'] = 'oEmbed';
 
 $_lang['setting_markdowneditor.lp.parse_modx_tags'] = 'Parse MODX Tags';
 $_lang['setting_markdowneditor.lp.parse_modx_tags_desc'] = 'If set to yes, Markdown Editor will also parse MODX tags in preview. This option will send an Ajax request to the server each time you update content.';

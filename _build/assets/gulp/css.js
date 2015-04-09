@@ -15,10 +15,20 @@ gulp.task('libcss', function () {
 
 gulp.task('github-md', function () {
     return gulp.src([
-            'bower_components/github-markdown-css/github-markdown.css'
+            'scss/vendor/github-markdown-css/github-markdown.css'
         ])
         .pipe(plumber())
         .pipe(concat('github-markdown.css'))
+        .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
+});
+
+gulp.task('noembed-css', function () {
+    return gulp.src([
+            'scss/vendor/noembed/*.scss'
+        ])
+        .pipe(plumber())
+        .pipe(sass())
+        .pipe(concat('noembed.css'))
         .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
 });
 
