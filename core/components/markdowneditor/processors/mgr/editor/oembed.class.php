@@ -8,14 +8,16 @@ class MarkdownEditorOEmbedProcessor extends modProcessor {
             return $this->modx->toJSON(array('success' => false));
         }
 
-        $essence = \Essence\Essence::instance();
-
-        $data = $essence->embed($url, array(
-            'maxwidth' => 800,
-            'maxheight' => 600
+        $response = Alb\OEmbed\Simple::request($url, array(
+            'maxwidth' => 400,
+            'maxheight' => 300,
         ));
 
-        return $this->modx->toJSON(array('success' => true, 'data' => $data->html));
+        if (!$response) {
+            return $this->modx->toJSON(array('success' => false));
+        }
+
+        return $this->modx->toJSON(array('success' => true, 'data' => $response->getHtml()));
     }
 }
 return 'MarkdownEditorOEmbedProcessor';

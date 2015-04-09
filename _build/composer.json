@@ -4,6 +4,7 @@
   },
   "require": {
     "intervention/image": "2.*",
-    "essence/essence": "2.*"
+    "essence/essence": "2.*",
+    "alb/oembed": "*"
   }
 }
