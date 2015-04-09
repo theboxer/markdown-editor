@@ -528,16 +528,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.remarkable.inline.ruler.disable([ 'backticks' ]);
 
         var oEmbedRenderer = function(tokens, idx, options) {
-            if (!this.localCache.oEmbed[tokens[idx].url]) {
-                this.localCache.oEmbed[tokens[idx].url] = {}
-            }
-
-            if (this.localCache.oEmbed[tokens[idx].url].data) {
-                return this.localCache.oEmbed[tokens[idx].url].data;
+            if (this.localCache.oEmbed[tokens[idx].url]) {
+                return this.localCache.oEmbed[tokens[idx].url];
             } else {
-                var elID = Ext.id();
-                this.localCache.oEmbed[tokens[idx].url].id = elID;
-
                 MODx.Ajax.request({
                     url: markdownEditor.config.connectorUrl
                     ,params: {
@@ -547,9 +540,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     listeners: {
                         'success': {
                             fn: function(r) {
-                                console.log(this);
-                                this.localCache.oEmbed[tokens[idx].url].data = r.data;
-                                Ext.get(this.localCache.oEmbed[tokens[idx].url].id).update(r.data);
+                                this.localCache.oEmbed[tokens[idx].url] = r.data;
+
+                                this.preview.dom.innerHTML = this.preview.dom.innerHTML.replace('[embed ' + tokens[idx].url + ']', r.data);
 
                                 this.textarea.dom.value = this.preview.dom.innerHTML;
                             },
@@ -558,7 +551,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     }
                 });
 
-                return Ext.DomHelper.markup({tag: 'div', id: elID, html: '[embed ' + tokens[idx].url + ']'});
+                return '[embed ' + tokens[idx].url + ']';
             }
         }.bind(this);
 

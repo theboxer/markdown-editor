@@ -10,7 +10,10 @@ class MarkdownEditorOEmbedProcessor extends modProcessor {
 
         $essence = \Essence\Essence::instance();
 
-        $data = $essence->embed($url);
+        $data = $essence->embed($url, array(
+            'maxwidth' => 800,
+            'maxheight' => 600
+        ));
 
         return $this->modx->toJSON(array('success' => true, 'data' => $data->html));
     }
