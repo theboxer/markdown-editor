@@ -341,11 +341,11 @@ label.link:hover {
     background: $bg-color;
 
     opacity: 0.5;
-    transition: all 0.07s ease;
   }
 
   i:hover {
     opacity: 1;
+    transition: all 0.15s ease;
   }
 
   .inline-toolbar {
@@ -363,5 +363,4 @@ label.link:hover {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
-  transition: all 0.07s ease;
 }
