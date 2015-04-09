@@ -249,7 +249,7 @@ label.link:hover {
 .upload-bar,
 .progress.error,
 .progress {
-  padding-left: 10px;
+  padding-left: 30px;
 }
 
 .progress {
@@ -342,18 +342,19 @@ label.link:hover {
       border: 1px solid $dark-color;
     }
 
-    .status-bar .toolbox & {
+    &:hover {
+      opacity: 1;
+      transition: all 0.15s ease;
+    }
+
+    &.status-bar .toolbox i {
       border: 0;
       padding: 0;
       margin: 0;
       background: transparent;
       line-height: 25px;
       font-size: 1.33333em;
-    }
-
-    &:hover {
       opacity: 1;
-      transition: all 0.15s ease;
     }
   }
 
