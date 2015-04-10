@@ -19,6 +19,17 @@ class MarkdownEditorProcessContentProcessor extends modProcessor {
 
         $resourceOutput = $this->getProperty('content');
 
+        $matches = array();
+        preg_match_all('/\[embed ([^\] ]+)\]/', $resourceOutput, $matches);
+
+        if (isset($matches[1])) {
+            foreach ($matches[1] as $key => $url) {
+                $html = $this->modx->markdowneditor->getOEmbed($url);
+
+                $resourceOutput = str_replace($matches[0][$key], $html, $resourceOutput);
+            }
+        }
+
         $this->modx->getParser()->processElementTags('', $resourceOutput, true, false, '[[', ']]', array(), $maxIterations);
         $this->modx->getParser()->processElementTags('', $resourceOutput, true, true, '[[', ']]', array(), $maxIterations);
 

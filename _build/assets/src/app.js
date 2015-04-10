@@ -372,6 +372,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             fontSize: parseInt(MODx.config['markdowneditor.general.font_size']) || 12,
             fontFamily: MODx.config['markdowneditor.general.font_family'] || ''
         });
+        this.editor.$blockScrolling = Infinity;
         this.editor.getSession().setUseWrapMode(true);
         this.editor.getSession().setWrapLimitRange();
         this.editor.renderer.setScrollMargin(10, 10);
@@ -544,7 +545,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
                                 this.preview.dom.innerHTML = this.preview.dom.innerHTML.replace('[embed ' + tokens[idx].url + ']', r.data);
 
-                                this.textarea.dom.value = this.preview.dom.innerHTML;
+                                this.textarea.dom.value = this.textarea.dom.value.replace('[embed ' + tokens[idx].url + ']', r.data);
                             },
                             scope: this
                         }
