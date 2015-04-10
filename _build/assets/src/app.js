@@ -473,28 +473,45 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             '<div class="inline-toolbar">' +
                 '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
                 '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-fixed-width"></i></label>' +
+                '<i class="icon icon-code icon-fixed-width"></i>' +
             '</div>');
         } else {
             this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
             '<div class="inline-toolbar">' +
                 '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
+                '<i class="icon icon-code icon-fixed-width"></i>' +
             '</div>');
         }
 
-        this.gutterToolbar.child('i').on('click', function(){
-            var switcher = this.gutterToolbar.child('i');
-            var inlineToolbar = this.gutterToolbar.child('.inline-toolbar');
+        var switcher = this.gutterToolbar.child('i.icon-plus');
+        var inlineToolbar = this.gutterToolbar.child('.inline-toolbar');
 
+        switcher.turnOn = function(){
+            switcher.addClass('md-icon-rotate-45');
+            inlineToolbar.show();
+        };
 
+        switcher.turnOff = function(){
+            switcher.removeClass('md-icon-rotate-45');
+            inlineToolbar.hide();
+        };
+
+        switcher.on('click', function(){
             if(!switcher.hasClass('md-icon-rotate-45')) {
-                switcher.addClass('md-icon-rotate-45');
-
-                inlineToolbar.show();
+                switcher.turnOn();
             } else {
-                switcher.removeClass('md-icon-rotate-45');
-
-                inlineToolbar.hide();
+                switcher.turnOff();
             }
+        }.bind(this));
+
+        this.gutterToolbar.child('i.icon-code').on('click', function () {
+            MODx.load({
+                xtype: 'markdowneditor-window-oembed'
+                ,success: function(values){
+                    this.editor.insert('[embed ' + values.url + ']');
+                }
+                ,scope: this
+            }).show();
         }.bind(this));
     }
 

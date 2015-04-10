@@ -27,6 +27,9 @@ $_lang['markdowneditor.cropper.crop_upload'] = 'Crop & Upload';
 
 $_lang['markdowneditor.toolbox.preview'] = 'Preview';
 
+$_lang['markdowneditor.oembed.embed_url'] = 'Embed URL';
+$_lang['markdowneditor.oembed.url'] = 'URL';
+
 $_lang['area_markdowneditor.area.cropper'] = 'Cropper';
 $_lang['area_markdowneditor.area.lp'] = 'Live preview';
 $_lang['area_markdowneditor.area.upload'] = 'Upload';
