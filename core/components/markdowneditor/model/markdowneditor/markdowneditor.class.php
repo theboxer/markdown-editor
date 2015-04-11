@@ -63,41 +63,65 @@ class MarkdownEditor {
         return $option;
     }
 
+    public function explodeAndClean($array, $delimiter = ',')
+    {
+        $array = explode($delimiter, $array);     // Explode fields to array
+        $array = array_map('trim', $array);       // Trim array's values
+        $array = array_keys(array_flip($array));  // Remove duplicate fields
+        $array = array_filter($array);            // Remove empty values from array
+
+        return $array;
+    }
+
     public function getOEmbed($url)
     {
-        $embedService = $this->getEmbedServiceInstance($this->modx);
+        $embedServices = $this->getEmbedServiceInstances($this->modx);
 
-        try {
-            return $embedService->extract($url);
-        } catch (Exception $e) {
-            return false;
+        foreach ($embedServices as $embedService) {
+            try {
+                return $embedService->extract($url);
+            } catch (Exception $e) {
+                continue;
+            }
         }
+
+        return false;
     }
 
     /**
      * @param modX $modx
      *
-     * @return MarkdownEditor\oEmbed\iOEmbed;
+     * @return MarkdownEditor\oEmbed\iOEmbed[];
      */
-    public function getEmbedServiceInstance(modX &$modx)
+    public function getEmbedServiceInstances(modX &$modx)
     {
-        $service = $this->getOption('oembed.service', array(), 'Noembed');
-        $service = ucfirst($service);
+        $servicesArray = array();
 
-        if (strpos($service, '\\') === false) {
-            $className = 'MarkdownEditor\\oEmbed\\' . $service;
-            if (!class_exists($className)) {
-                return new MarkdownEditor\oEmbed\Noembed($modx);
+        $services = $this->getOption('oembed.service', array(), 'Noembed');
+        $services = $this->explodeAndClean($services);
+
+        foreach ($services as $service) {
+            $service = ucfirst($service);
+            if (strpos($service, '\\') === false) {
+                $className = 'MarkdownEditor\\oEmbed\\' . $service;
+                if (!class_exists($className)) {
+                    $servicesArray['MarkdownEditor\\oEmbed\\Noembed'] = new MarkdownEditor\oEmbed\Noembed($modx);
+                    continue;
+                }
+
+                $servicesArray[$className] = new $className($modx);
+                continue;
             }
 
-            return new $className($modx);
+            if (!class_exists($service)) {
+                $servicesArray['MarkdownEditor\\oEmbed\\Noembed'] = new MarkdownEditor\oEmbed\Noembed($modx);
+                continue;
+            }
+
+            $servicesArray[$service] = new $service($modx);
         }
 
-        if (!class_exists($service)) {
-            return new MarkdownEditor\oEmbed\Noembed($modx);
-        }
-
-        return new $service($modx);
+        return $servicesArray;
     }
 
     protected function autoload()

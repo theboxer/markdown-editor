@@ -549,6 +549,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             if (this.localCache.oEmbed[tokens[idx].url]) {
                 return this.localCache.oEmbed[tokens[idx].url];
             } else {
+                var embedID = Ext.id();
+
                 MODx.Ajax.request({
                     url: markdownEditor.config.connectorUrl
                     ,params: {
@@ -558,18 +560,25 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     listeners: {
                         'success': {
                             fn: function(r) {
-                                this.localCache.oEmbed[tokens[idx].url] = r.data;
+                                var embedDiv = Ext.get(embedID);
+                                if (embedDiv) {
+                                    embedDiv.update(r.data);
+                                    embedDiv.dom.removeAttribute('id');
 
-                                this.preview.dom.innerHTML = this.preview.dom.innerHTML.replace('[embed ' + tokens[idx].url + ']', r.data);
+                                    this.localCache.oEmbed[tokens[idx].url] = embedDiv.dom.outerHTML;
 
-                                this.textarea.dom.value = this.textarea.dom.value.replace('[embed ' + tokens[idx].url + ']', r.data);
+                                    var textareaContent = Ext.get(Ext.DomHelper.createDom({tag: 'div', html: this.textarea.dom.value}));
+                                    textareaContent.child('#' + embedID).update(r.data).dom.removeAttribute('id');
+
+                                    this.textarea.dom.value = textareaContent.dom.innerHTML;
+                                }
                             },
                             scope: this
                         }
                     }
                 });
 
-                return '[embed ' + tokens[idx].url + ']';
+                return '<div id="' + embedID + '" class="markdowneditor-oembed-content">[embed ' + tokens[idx].url + ']</div>';
             }
         }.bind(this);
 

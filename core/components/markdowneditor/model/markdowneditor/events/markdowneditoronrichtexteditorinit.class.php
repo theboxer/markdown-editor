@@ -14,16 +14,13 @@ class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
             $this->modx->regClientCSS($customCSS);
         }
 
-        $oEmbedService = $this->markdowneditor->getEmbedServiceInstance($this->modx);
-        $oEmbedCSS = $oEmbedService->getCSS();
+        $oEmbedServices = $this->markdowneditor->getEmbedServiceInstances($this->modx);
+        foreach ($oEmbedServices as $oEmbedService) {
+            $oEmbedCSS = $oEmbedService->getCSS();
 
-        foreach ($oEmbedCSS as $css) {
-            $this->modx->regClientCSS($css);
-        }
-
-        $oEmbedHTML = $oEmbedService->getHTML();
-        foreach ($oEmbedHTML as $html) {
-            $this->modx->regClientStartupHTMLBlock($html);
+            foreach ($oEmbedCSS as $css) {
+                $this->modx->regClientCSS($css);
+            }
         }
 
         $this->modx->regClientCSS($this->markdowneditor->getOption('cssUrl') . 'highlight.css');

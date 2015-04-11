@@ -22,7 +22,7 @@ final class EmbedlyCards implements iOEmbed
      */
     public function extract($url)
     {
-        return '<a href="' . $url . '" class="embedly-card">' . $url . '</a>';
+        return '<a href="' . $url . '" class="embedly-card" data-card-controls="0">' . $url . '</a>';
     }
 
     /**
