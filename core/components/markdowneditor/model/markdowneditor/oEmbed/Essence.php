@@ -23,10 +23,19 @@ final class Essence implements iOEmbed
     public function extract($url)
     {
         $essence = \Essence\Essence::instance( );
-        $media = $essence->embed($url, array(
-            'maxwidth' => $this->getMaxWidth(),
-            'maxheight' => $this->getMaxHeight()
-        ));
+
+        $options = array();
+        $maxWidth = $this->getMaxWidth();
+        if (!empty($maxWidth)) {
+            $options['maxwidth'] = $maxWidth;
+        }
+
+        $maxHeight = $this->getMaxHeight();
+        if (!empty($maxHeight)) {
+            $options['maxheight'] = $maxHeight;
+        }
+
+        $media = $essence->embed($url, $options);
 
         if (!$media) {
             throw new \Exception();
@@ -40,7 +49,14 @@ final class Essence implements iOEmbed
      */
     private function getMaxWidth()
     {
-        return intval($this->md->getOption('oembed.max_width', array(), 800));
+        $width = $this->md->getOption('essence.max_width', array(), '');
+        if ($width == '0') return 0;
+
+        if ($width == '') {
+            $width = $this->md->getOption('oembed.max_width', array(), 800);
+        }
+
+        return intval($width);
     }
 
     /**
@@ -48,7 +64,14 @@ final class Essence implements iOEmbed
      */
     private function getMaxHeight()
     {
-        return intval($this->md->getOption('oembed.max_height', array(), 800));
+        $height = $this->md->getOption('essence.max_height', array(), '');
+        if ($height == '0') return 0;
+
+        if ($height == '') {
+            $height = $this->md->getOption('oembed.max_height', array(), 800);
+        }
+
+        return intval($height);
     }
 
     /**

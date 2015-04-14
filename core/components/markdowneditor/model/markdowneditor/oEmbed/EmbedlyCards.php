@@ -22,7 +22,12 @@ final class EmbedlyCards implements iOEmbed
      */
     public function extract($url)
     {
-        return '<a href="' . $url . '" class="embedly-card" data-card-controls="0">' . $url . '</a>';
+        return '<a href="' . $url . '" class="embedly-card" data-card-controls="' . $this->getCardControls() . '" data-card-width="' . $this->getMaxWidth() . '">' . $url . '</a>';
+    }
+
+    private function getCardControls()
+    {
+        return intval($this->md->getOption('embedlycards.card_controls', array(), '0'));
     }
 
     /**
@@ -30,15 +35,14 @@ final class EmbedlyCards implements iOEmbed
      */
     private function getMaxWidth()
     {
-        return intval($this->md->getOption('oembed.max_width', array(), 800));
-    }
+        $height = $this->md->getOption('embedlycards.max_width', array(), '');
+        if ($height == '0') return '';
 
-    /**
-     * @return int
-     */
-    private function getMaxHeight()
-    {
-        return intval($this->md->getOption('oembed.max_height', array(), 800));
+        if ($height == '') {
+            $height = intval($this->md->getOption('oembed.max_width', array(), 800)) . 'px';
+        }
+
+        return $height;
     }
 
 

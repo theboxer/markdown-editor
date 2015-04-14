@@ -54,7 +54,14 @@ final class Noembed implements iOEmbed
      */
     private function getMaxWidth()
     {
-        return intval($this->md->getOption('oembed.max_width', array(), 800));
+        $width = $this->md->getOption('noembed.max_width', array(), '');
+        if ($width == '0') return 0;
+
+        if ($width == '') {
+            $width = $this->md->getOption('oembed.max_width', array(), 800);
+        }
+
+        return intval($width);
     }
 
     /**
@@ -62,7 +69,14 @@ final class Noembed implements iOEmbed
      */
     private function getMaxHeight()
     {
-        return intval($this->md->getOption('oembed.max_height', array(), 800));
+        $height = $this->md->getOption('noembed.max_height', array(), '');
+        if ($height == '0') return 0;
+
+        if ($height == '') {
+            $height = $this->md->getOption('oembed.max_height', array(), 800);
+        }
+
+        return intval($height);
     }
 
     /**
@@ -70,7 +84,21 @@ final class Noembed implements iOEmbed
      */
     private function getServiceURL()
     {
-        return 'http://noembed.com/embed?nowrap=on&maxwidth=' . $this->getMaxWidth() . '&maxheight=' . $this->getMaxHeight() . '&url=';
+        $options = array(
+            'nowrap' => $this->md->getOption('noembed.nowrap', array(), 'on')
+        );
+
+        $maxWidth = $this->getMaxWidth();
+        if (!empty($maxWidth)) {
+            $options['maxwidth'] = $maxWidth;
+        }
+
+        $maxHeight = $this->getMaxHeight();
+        if (!empty($maxHeight)) {
+            $options['maxheight'] = $maxHeight;
+        }
+
+        return 'http://noembed.com/embed?' . http_build_query($options) . '&url=';
     }
 
     /**
