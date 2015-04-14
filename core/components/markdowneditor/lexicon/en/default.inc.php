@@ -95,6 +95,14 @@ $_lang['setting_markdowneditor.cropper.profiles'] = 'Profiles';
 $_lang['setting_markdowneditor.cropper.profiles_desc'] = 'A list of profiles that users can select from in the Cropper window.<br /> Each profile is a JSON object with required <strong>name</strong> property. <code>{"name": "Profile name", "width": 100, "height": 100, "ratio": "1/1"}</code>';
 $_lang['setting_markdowneditor.cropper.show_description'] = 'Profiles description';
 $_lang['setting_markdowneditor.cropper.show_description_desc'] = 'When enabled, profiles select box will also contains profile\'s description.';
+$_lang['setting_markdowneditor.oembed.frontend_css'] = 'Include services CSS';
+$_lang['setting_markdowneditor.oembed.frontend_css_desc'] = 'If enabled, CSS from specified service will be automatically included on frontend.';
+$_lang['setting_markdowneditor.oembed.max_width'] = 'Max width';
+$_lang['setting_markdowneditor.oembed.max_width_desc'] = 'Max width of received element.';
+$_lang['setting_markdowneditor.oembed.max_height'] = 'Max height';
+$_lang['setting_markdowneditor.oembed.max_height_desc'] = 'Max height of received element.';
+$_lang['setting_markdowneditor.oembed.service'] = 'oEmbed service';
+$_lang['setting_markdowneditor.oembed.service_desc'] = 'Comma delimited list of oEmbed services. Other defined services will be used as a fallback. Available services: Essence, Noembed, EmbedlyCards';
 
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded the size limit.';
