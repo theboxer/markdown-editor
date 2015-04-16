@@ -32,6 +32,16 @@ gulp.task('noembed-css', function () {
         .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
 });
 
+gulp.task('cards-css', function () {
+    return gulp.src([
+            'scss/vendor/cards/*.scss'
+        ])
+        .pipe(plumber())
+        .pipe(sass())
+        .pipe(concat('cards.css'))
+        .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
+});
+
 gulp.task('css-highlight', function () {
     return gulp.src([
             'src/vendor/highlight/styles/github.css'
@@ -52,6 +62,7 @@ gulp.task('css', function () {
             .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
 });
 
-gulp.task('css:watch', ['css'], function () {
-    gulp.watch('scss/*.scss', ['css'])
+gulp.task('css:watch', ['css', 'cards-css'], function () {
+    gulp.watch('scss/*.scss', ['css']);
+    gulp.watch('scss/vendor/cards/*.scss', ['cards-css']);
 });

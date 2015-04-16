@@ -3,6 +3,8 @@ namespace MarkdownEditor\oEmbed;
 
 final class Essence implements iOEmbed
 {
+    use Templatable;
+
     /** @var \modX */
     private $modx;
 
@@ -41,7 +43,7 @@ final class Essence implements iOEmbed
             throw new \Exception();
         }
 
-        return $media->html;
+        return $this->getTemplate($media->properties());
     }
 
     /**
@@ -72,15 +74,6 @@ final class Essence implements iOEmbed
         }
 
         return intval($height);
-    }
-
-    /**
-     * Loads custom CSS
-     *
-     * @return array
-     */
-    public function getCSS()
-    {
     }
 
     /**
