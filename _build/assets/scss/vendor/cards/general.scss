@@ -1,4 +1,4 @@
-$img-width: 640px;
+$img-width: 100%;
 
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 
@@ -15,15 +15,14 @@ $img-width: 640px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .2px;
-    margin-bottom: 6px;
-    margin-left: 3px;
+    padding: 5px 0 8px;
+    vertical-align: baseline;
 
     img {
-      vertical-align: top;
       line-height: 0;
-      margin-left: -4px;
+      margin-right: 4px;
       position: relative;
-      top: 2px;
+      vertical-align: top;
     }
 
     a {
@@ -48,7 +47,7 @@ $img-width: 640px;
 
   .card {
     border-left: 8px solid #ccc;
-    padding: 10px 15px;
+    padding: 8px 8px 8px 12px;
     -moz-box-shadow: 1px 1px 5px 0 #ccc;
     -webkit-box-shadow: 1px 1px 5px 0 #ccc;
     box-shadow: 1px 1px 5px 0 #ccc;
@@ -83,6 +82,7 @@ $img-width: 640px;
     color: #1a95b3;
     margin-top: 10px;
     display: inline-block;
+    padding: 4px 8px 8px 0;
 
   }
 }

@@ -3,20 +3,19 @@
   width: 680px;
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif; }
   .md-card img {
-    max-width: 640px; }
+    max-width: 100%; }
   .md-card .card-header {
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .2px;
-    margin-bottom: 6px;
-    margin-left: 3px; }
+    padding: 5px 0 8px;
+    vertical-align: baseline; }
     .md-card .card-header img {
-      vertical-align: top;
       line-height: 0;
-      margin-left: -4px;
+      margin-right: 4px;
       position: relative;
-      top: 2px; }
+      vertical-align: top; }
     .md-card .card-header a {
       color: inherit;
       text-decoration: none; }
@@ -29,7 +28,7 @@
       color: #7f7f7f; }
   .md-card .card {
     border-left: 8px solid #ccc;
-    padding: 10px 15px;
+    padding: 8px 8px 8px 12px;
     -moz-box-shadow: 1px 1px 5px 0 #ccc;
     -webkit-box-shadow: 1px 1px 5px 0 #ccc;
     box-shadow: 1px 1px 5px 0 #ccc;
@@ -55,7 +54,8 @@
     cursor: pointer;
     color: #1a95b3;
     margin-top: 10px;
-    display: inline-block; }
+    display: inline-block;
+    padding: 4px 8px 8px 0; }
 
 .instagram iframe {
   box-shadow: none !important; }
