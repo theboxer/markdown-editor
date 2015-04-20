@@ -29,6 +29,9 @@ $_lang['markdowneditor.toolbox.preview'] = 'Preview';
 
 $_lang['markdowneditor.oembed.embed_url'] = 'Embed URL';
 $_lang['markdowneditor.oembed.url'] = 'URL';
+$_lang['markdowneditor.oembed.read_more'] = 'Read more';
+$_lang['markdowneditor.oembed.show_details'] = 'Show details…';
+$_lang['markdowneditor.oembed.hide_details'] = 'Hide details';
 
 $_lang['area_markdowneditor.area.cropper'] = 'Cropper';
 $_lang['area_markdowneditor.area.lp'] = 'Live preview';

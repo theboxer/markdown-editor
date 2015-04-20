@@ -1,17 +1,22 @@
+$img-width: 640px;
+
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 
 .md-card {
   width: 680px;
-
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif;
+
+  img {
+    max-width: $img-width;
+  }
 
   .card-header {
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .2px;
-    margin-bottom: 3px;
-    margin-left: 6px;
+    margin-bottom: 6px;
+    margin-left: 3px;
 
     img {
       vertical-align: top;
@@ -23,12 +28,17 @@
 
     a {
       color: inherit;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: none;
+      }
+
+      &.provider:hover {
+        border-bottom: 1px dotted #7f7f7f;
+      }
     }
 
-    a:hover {
-      border-bottom: 1px dotted #7f7f7f;
-      text-decoration: none;
-    }
 
     .author {
       margin-left: 5px;
@@ -54,8 +64,7 @@
       padding: 0;
       line-height: 25px;
       border: none;
-      margin-top: 5px;
-      margin-bottom: 5px;
+      margin: 5px 0;
     }
 
     p {
@@ -69,10 +78,12 @@
   }
 
   .more-btn {
+    font-size: 13px;
     cursor: pointer;
-    color: #7f7f7f;
+    color: #1a95b3;
     margin-top: 10px;
     display: inline-block;
+
   }
 
   .more-btn:hover {
