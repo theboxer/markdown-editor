@@ -56,9 +56,6 @@
     color: #1a95b3;
     margin-top: 10px;
     display: inline-block; }
-  .md-card .more-btn:hover {
-    border-bottom: 1px dotted #7f7f7f;
-    text-decoration: none; }
 
 .instagram iframe {
   box-shadow: none !important; }
