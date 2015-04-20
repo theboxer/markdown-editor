@@ -1,6 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 .md-card {
-  width: 640px;
+  width: 680px;
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif; }
   .md-card .card-header {
     font-size: 13px;
@@ -24,7 +24,7 @@
       margin-left: 5px;
       color: #7f7f7f; }
   .md-card .card {
-    border-left: 8px solid #f08295;
+    border-left: 8px solid #ccc;
     padding: 10px 15px;
     -moz-box-shadow: 1px 1px 5px 0 #ccc;
     -webkit-box-shadow: 1px 1px 5px 0 #ccc;
@@ -45,9 +45,21 @@
     .md-card .card p {
       font-size: 13px;
       line-height: 20px; }
+  .md-card .more {
+    display: none; }
+  .md-card .more-btn {
+    cursor: pointer;
+    color: #7f7f7f;
+    margin-top: 10px;
+    display: inline-block; }
+  .md-card .more-btn:hover {
+    border-bottom: 1px dotted #7f7f7f;
+    text-decoration: none; }
 
-.twitter {
-  width: 545px; }
-  .twitter iframe {
-    border: none !important;
-    box-shadow: none !important; }
+.instagram iframe {
+  box-shadow: none !important; }
+
+.twitter iframe {
+  border: none !important;
+  box-shadow: none !important;
+  width: 680px !important; }

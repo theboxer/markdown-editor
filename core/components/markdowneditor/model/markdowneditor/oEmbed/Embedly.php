@@ -66,7 +66,7 @@ final class Embedly implements iOEmbed
             $options['maxheight'] = $maxHeight;
         }
 
-        return 'http://api.embed.ly/1/oembed?' . http_build_query($options) . '&url=';
+        return 'http://api.embed.ly/1/extract?' . http_build_query($options) . '&url=';
     }
 
     /**
@@ -97,6 +97,8 @@ final class Embedly implements iOEmbed
 
         $result = $this->modx->fromJSON($result);
 
+        $this->standardizeProps($result);
+
         return $this->getTemplate($result);
     }
 
@@ -118,5 +120,45 @@ final class Embedly implements iOEmbed
     public function getHTML()
     {
         return array();
+    }
+
+    private function standardizeProps(&$result)
+    {
+        if (isset($result['favicon_colors'])) {
+            $color = '190,23,43';
+
+            foreach ($result['favicon_colors'] as $colors) {
+                $min = min($colors['color']);
+                $max = max($colors['color']);
+
+                $color = implode(',', $colors['color']);
+
+                if (($max - $min) > 10) {
+                    break;
+                }
+            }
+
+            $result['color'] = 'rgb(' . $color . ')';
+        }
+
+        if (isset($result['authors'])) {
+            $result['author_name'] = $result['authors'][0]['name'];
+            $result['author_url'] = $result['authors'][0]['url'];
+        }
+
+        if (isset($result['media']['type'])) {
+            switch ($result['media']['type']) {
+                case 'photo':
+                    $result['type'] = 'photo';
+                    break;
+                case 'video':
+                    $result['type'] = 'video';
+                    break;
+            }
+        }
+
+        if (isset($result['images'][0]['url'])) {
+            $result['thumbnail_url'] = $result['images'][0]['url'];
+        }
     }
 }

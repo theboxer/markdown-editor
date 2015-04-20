@@ -190,13 +190,13 @@
       },
       {
         "key": "oembed.max_height",
-        "value": 800,
+        "value": 640,
         "type": "numberfield",
         "area": "markdowneditor.area.oembed"
       },
       {
         "key": "oembed.max_width",
-        "value": 800,
+        "value": 640,
         "type": "numberfield",
         "area": "markdowneditor.area.oembed"
       },

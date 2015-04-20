@@ -13,45 +13,55 @@ trait Templatable
      */
     protected function getTemplate($props)
     {
-        $props = $this->convertNull($props);
+        $this->convertNull($props);
+        $this->processProps($props);
 
-        if (!isset($props['thumbnail_url']) && isset($props['images']) && is_array($props['images'])) {
-            $props['thumbnail_url'] = $props['images'][0]['url'];
-        }
+        $reflection = new \ReflectionClass($this);
+        $shortName = strtolower($reflection->getShortName());
+        $longName = strtolower(str_replace('\\', '_', $reflection->getName()));
 
-        if (!isset($props['author_name'])) {
-            $props['author_name'] = $props['authors'][0]['name'];
-        }
-
-        if (!isset($props['author_url'])) {
-            $props['author_url'] = $props['authors'][0]['url'];
-        }
-
-        if (!isset($props['favicon_url'])) {
-            $props['favicon_url'] = $this->getFavicon($props['provider_url']);
-        }
-
-        if (!isset($props['description'])) {
-            $props['description'] = '';
-        }
+        $templates = [
+            [
+                'name' => $props['provider_name'],
+                'path' => 'services/' . $shortName . '/providers',
+            ],
+            [
+                'name' => $props['provider_name'],
+                'path' => 'services/' . $longName . '/providers',
+            ],
+            [
+                'name' => $props['type'],
+                'path' => 'services/' . $shortName,
+            ],
+            [
+                'name' => $props['type'],
+                'path' => 'services/' . $longName,
+            ],
+            [
+                'name' => $props['provider_name'],
+                'path' => 'providers',
+            ],
+            [
+                'name' => $props['type'],
+                'path' => '',
+            ],
+            [
+                'name' => 'general',
+                'path' => '',
+            ],
+        ];
 
         $template = null;
-        if (isset($props['provider_name'])) {
-            $template = $this->getTemplateFor($props['provider_name'], '/providers/');
-        }
+        foreach ($templates as $tpl) {
+            $template = $this->getTemplateFor($tpl['name'], $tpl['path']);
 
-        if ($template === null) {
-            $template = $this->getTemplateFor($props['type']);
-        }
-
-        if ($template === null) {
-            $template = $this->getTemplateFor('general');
+            if ($template != null) break;
         }
 
         return $template->process($props);
     }
 
-    private function getTemplateFor($name, $path = '/')
+    private function getTemplateFor($name, $path = '')
     {
         $chunk = $this->modx->getObject('modChunk', array(
             'name' => 'md' . ucfirst($name),
@@ -62,18 +72,18 @@ trait Templatable
             return $chunk;
         }
 
-        $templatesDir = $this->md->getOption('templatesPath') . 'services' . $path;
+        $templatesDir = $this->md->getOption('templatesPath') . $path;
         $files = [
             $name . '.html',
             strtolower($name) . '.html',
         ];
 
         foreach ($files as $file) {
-            if (file_exists($templatesDir . $file)) {
+            if (file_exists($templatesDir . '/' . $file)) {
                 /** @var \modChunk $chunk */
                 $chunk = $this->modx->newObject('modChunk', array('name' => 'inline-' . uniqid()));
                 $chunk->setCacheable(false);
-                $chunk->set('snippet', file_get_contents($templatesDir . $file));
+                $chunk->set('snippet', file_get_contents($templatesDir . '/' . $file));
 
                 return $chunk;
             }
@@ -82,15 +92,13 @@ trait Templatable
         return null;
     }
 
-    private function convertNull($props)
+    private function convertNull(&$props)
     {
         foreach ($props as $key => $value) {
             if (is_null($value)) {
                 $props[$key] = "";
             }
         }
-
-        return $props;
     }
 
     private function getFavicon($url)
@@ -122,6 +130,29 @@ trait Templatable
         $favicon = str_replace('https://', '//', $favicon);
 
         return $favicon;
+    }
+
+    private function processProps(&$props)
+    {
+        $defaultArray = [
+            'title' => '',
+            'description' => '',
+            'author_name' => '',
+            'author_url' => '',
+            'favicon_url' => '',
+            'provider_name' => '',
+            'thumbnail_url' => '',
+            'url' => '',
+            'html' => '',
+            'color' => '#D71414'
+        ];
+
+        $props = array_merge($defaultArray, $props);
+
+        if (empty($props['favicon_url'])) {
+            $props['favicon_url'] = $this->getFavicon($props['provider_url']);
+        }
+
     }
 
     public function getCSS()

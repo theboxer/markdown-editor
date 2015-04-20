@@ -1,13 +1,10 @@
-<div class="md-card">
+<div class="md-card instagram">
     <div class="card-header">
         [[+favicon_url:notempty=`<img src="[[+favicon_url]]" width="16" height="16" alt="[[+provider_name]]"/>`]]
         <a href="[[+provider_url]]">[[+provider_name]]</a>
         [[+author_name:notempty=`<span class="author"><a href="[[+author_url]]">[[+author_name]]</a></span>`]]
     </div>
-    <div class="card">
-        [[+thumbnail_url:notempty=`<img src="[[+thumbnail_url:phpthumbof=`w=600&h=200&zc=1`]]" alt="[[+title]]"/>`]]
-        <h2>[[+title]]</h2>
-        [[+description:notempty=`<p>[[+description]]</p>`]]
-        <p><a href="[[+url]]">Read more</a></p>
+    <div class="card" style="border-left-color: [[+color]];">
+        [[+html]]
     </div>
 </div>

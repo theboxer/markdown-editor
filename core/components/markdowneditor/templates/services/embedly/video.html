@@ -1,0 +1,16 @@
+<div class="md-card">
+    <div class="card-header">
+        [[+favicon_url:notempty=`<img src="[[+favicon_url]]" width="16" height="16" alt="[[+provider_name]]"/>`]]
+        <a href="[[+provider_url]]">[[+provider_name]]</a>
+        [[+author_name:notempty=`<span class="author"><a href="[[+author_url]]">[[+author_name]]</a></span>`]]
+    </div>
+    <div class="card" style="border-left-color: [[+color]];">
+        [[+media.html]]
+        <span class="more-btn show" onclick="javascript:this.style.display = 'none';this.parentElement.getElementsByClassName('more')[0].style.display = 'inline-block'">Show details</span>
+        <div class="more">
+            <h3>[[+title]]</h3>
+            <p>[[+description]]</p>
+            <span class="more-btn hide" onclick="javascript:this.parentElement.style.display = 'none';this.parentElement.parentElement.getElementsByClassName('more-btn show')[0].style.display = 'inline-block';">Hide details</span>
+        </div>
+    </div>
+</div>

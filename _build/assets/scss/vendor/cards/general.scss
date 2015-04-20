@@ -1,7 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 
 .md-card {
-  width: 640px;
+  width: 680px;
 
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif;
 
@@ -37,7 +37,7 @@
   }
 
   .card {
-    border-left: 8px solid rgb(240, 130, 149);
+    border-left: 8px solid #ccc;
     padding: 10px 15px;
     -moz-box-shadow: 1px 1px 5px 0 #ccc;
     -webkit-box-shadow: 1px 1px 5px 0 #ccc;
@@ -64,4 +64,19 @@
     }
   }
 
+  .more {
+    display: none;
+  }
+
+  .more-btn {
+    cursor: pointer;
+    color: #7f7f7f;
+    margin-top: 10px;
+    display: inline-block;
+  }
+
+  .more-btn:hover {
+    border-bottom: 1px dotted #7f7f7f;
+    text-decoration: none;
+  }
 }
