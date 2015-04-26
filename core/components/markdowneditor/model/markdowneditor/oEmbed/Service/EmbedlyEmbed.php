@@ -72,42 +72,12 @@ final class EmbedlyEmbed extends OEmbed implements iOEmbed
 
     protected function standardizeProps(&$result)
     {
-        $autoColor = (int)$this->getOption('auto_card_color', 1);
-        if ($autoColor && isset($result['favicon_colors'])) {
-            $color = $this->getOption('default_card_color', '#D71212');
+        $width = $this->getMaxWidth();
 
-            foreach ($result['favicon_colors'] as $colors) {
-                $min = min($colors['color']);
-                $max = max($colors['color']);
-
-                $color = 'rgb(' . implode(',', $colors['color']) . ')';
-
-                if (($max - $min) > 10) {
-                    break;
-                }
-            }
-
-            $result['color'] = $color;
+        if (isset($result['thumbnail_width']) && $result['thumbnail_width'] < ($width - 50)) {
+            $result['thumbnail_type'] = 'small';
         }
 
-        if (isset($result['authors'])) {
-            $result['author_name'] = $result['authors'][0]['name'];
-            $result['author_url'] = $result['authors'][0]['url'];
-        }
-
-        if (isset($result['media']['type'])) {
-            switch ($result['media']['type']) {
-                case 'photo':
-                    $result['type'] = 'photo';
-                    break;
-                case 'video':
-                    $result['type'] = 'video';
-                    break;
-            }
-        }
-
-        if (isset($result['images'][0]['url'])) {
-            $result['thumbnail_url'] = $result['images'][0]['url'];
-        }
+        $result['thumbnail_width'] = $width;
     }
 }

@@ -108,6 +108,14 @@ final class EmbedlyExtract extends OEmbed implements iOEmbed
 
         if (isset($result['images'][0]['url'])) {
             $result['thumbnail_url'] = $result['images'][0]['url'];
+
+            $width = $this->getMaxWidth();
+
+            if (isset($result['images'][0]['width']) && $result['images'][0]['width'] < ($width - 50)) {
+                $result['thumbnail_type'] = 'small';
+            }
+
+            $result['thumbnail_width'] = $width;
         }
     }
 }

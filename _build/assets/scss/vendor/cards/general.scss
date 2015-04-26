@@ -3,7 +3,6 @@ $img-width: 100%;
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 
 .md-card {
-  //width: 668px;
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif;
 
   img {
@@ -69,6 +68,15 @@ $img-width: 100%;
     p {
       font-size: 13px;
       line-height: 20px;
+    }
+
+    .card-thumbnail {
+      &.small {
+        width: 175px;
+        height: 175px;
+        float: left;
+        padding: 10px 10px 10px 0;
+      }
     }
   }
 

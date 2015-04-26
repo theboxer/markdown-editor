@@ -108,6 +108,17 @@ trait Cards
     private function getFavicon($url)
     {
         $favicon = '';
+
+        $faviconUrl = parse_url($url);
+
+        $faviconUrl = (isset($faviconUrl['scheme']) ? $faviconUrl['scheme'] . '://' : '') . $faviconUrl['host'] . '/favicon.ico';
+
+        $header =  get_headers($faviconUrl);
+        if(preg_match("|200|", $header[0])) {
+            return $faviconUrl;
+        }
+
+
         $html = file_get_contents($url);
         $dom = new \DOMDocument();
         $dom->loadHTML($html);
@@ -148,7 +159,8 @@ trait Cards
             'thumbnail_url' => '',
             'url' => '',
             'html' => '',
-            'color' => $this->getOption('default_card_color', '#D71212')
+            'color' => $this->getOption('default_card_color', '#D71212'),
+            'thumbnail_type' => 'large',
         ];
 
         $props = array_merge($defaultArray, $props);

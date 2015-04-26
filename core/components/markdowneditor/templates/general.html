@@ -5,9 +5,18 @@
         [[+author_name:notempty=`<span class="author"><a href="[[+author_url]]">[[+author_name]]</a></span>`]]
     </div>
     <div class="card" style="border-left-color: [[+color]];">
-        [[+thumbnail_url:notempty=`<img src="[[+thumbnail_url:phpthumbof=`w=700&h=200&zc=1`]]" alt="[[+title]]"/>`]]
-        <h2>[[+title]]</h2>
-        [[+description:notempty=`<p>[[+description]]</p>`]]
-        <p><a href="[[+url]]">[[%markdowneditor.oembed.read_more]]</a></p>
+        <div class="card-thumbnail [[+thumbnail_type:default=`large`]]">
+            [[+thumbnail_type:eq=`small`:then=`
+                [[+thumbnail_url:notempty=`<img src="[[+thumbnail_url]]" alt="[[+title:htmlent]]"/>`]]
+            `:else=`
+                [[+thumbnail_url:notempty=`<img src="[[+thumbnail_url:phpthumbof=`w=[[+thumbnail_width]]&h=200&zc=1`]]" alt="[[+title:htmlent]]"/>`]]
+            `]]
+
+        </div>
+        <div class="card-content">
+            <h2>[[+title]]</h2>
+            [[+description:notempty=`<p>[[+description]]</p>`]]
+            <p><a href="[[+url]]">[[%markdowneditor.oembed.read_more]]</a></p>
+        </div>
     </div>
 </div>
