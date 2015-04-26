@@ -1,59 +1,27 @@
 <?php
-namespace MarkdownEditor\oEmbed;
+namespace MarkdownEditor\oEmbed\Service;
 
-final class Embedly implements iOEmbed
+use MarkdownEditor\oEmbed\Cards;
+use MarkdownEditor\oEmbed\iOEmbed;
+use MarkdownEditor\oEmbed\OEmbed;
+
+final class EmbedlyEmbed extends OEmbed implements iOEmbed
 {
-    use Templatable;
-
-    /** @var \modX */
-    private $modx;
-
-    /** @var \MarkdownEditor */
-    private $md;
-
-    public function __construct(\modX &$modx)
-    {
-        $this->modx =& $modx;
-        $this->md = $this->modx->markdowneditor;
-    }
-
-    /**
-     * @return int
-     */
-    private function getMaxWidth()
-    {
-        $width = $this->md->getOption('embedly.max_width', array(), '');
-        if ($width == '0') return 0;
-
-        if ($width == '') {
-            $width = $this->md->getOption('oembed.max_width', array(), 800);
-        }
-
-        return intval($width);
-    }
-
-    /**
-     * @return int
-     */
-    private function getMaxHeight()
-    {
-        $height = $this->md->getOption('embedly.max_height', array(), '');
-        if ($height == '0') return 0;
-
-        if ($height == '') {
-            $height = $this->md->getOption('oembed.max_height', array(), 800);
-        }
-
-        return intval($height);
-    }
+    use Cards;
 
     /**
      * @return string
+     * @throws \Exception
      */
-    private function getServiceURL()
+    protected function getServiceURL()
     {
+        $key = $this->getOption('api_key', null, 'embedly', true);
+        if (empty($key)) {
+            throw new \Exception();
+        }
+
         $options = array(
-            'key' => '11380f5abcb040968a674f2dc9bf5e54'
+            'key' => $key
         );
 
         $maxWidth = $this->getMaxWidth();
@@ -66,7 +34,7 @@ final class Embedly implements iOEmbed
             $options['maxheight'] = $maxHeight;
         }
 
-        return 'http://api.embed.ly/1/extract?' . http_build_query($options) . '&url=';
+        return 'http://api.embed.ly/1/oembed?' . http_build_query($options) . '&url=';
     }
 
     /**
@@ -102,43 +70,24 @@ final class Embedly implements iOEmbed
         return $this->getTemplate($result);
     }
 
-    /**
-     * Loads custom JS
-     *
-     * @return array
-     */
-    public function getJS()
+    protected function standardizeProps(&$result)
     {
-        return array();
-    }
-
-    /**
-     * Loads custom HTML
-     *
-     * @return array
-     */
-    public function getHTML()
-    {
-        return array();
-    }
-
-    private function standardizeProps(&$result)
-    {
-        if (isset($result['favicon_colors'])) {
-            $color = '190,23,43';
+        $autoColor = (int)$this->getOption('auto_card_color', 1);
+        if ($autoColor && isset($result['favicon_colors'])) {
+            $color = $this->getOption('default_card_color', '#D71212');
 
             foreach ($result['favicon_colors'] as $colors) {
                 $min = min($colors['color']);
                 $max = max($colors['color']);
 
-                $color = implode(',', $colors['color']);
+                $color = 'rgb(' . implode(',', $colors['color']) . ')';
 
                 if (($max - $min) > 10) {
                     break;
                 }
             }
 
-            $result['color'] = 'rgb(' . $color . ')';
+            $result['color'] = $color;
         }
 
         if (isset($result['authors'])) {

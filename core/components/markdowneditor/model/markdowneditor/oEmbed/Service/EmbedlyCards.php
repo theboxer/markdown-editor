@@ -1,20 +1,11 @@
 <?php
-namespace MarkdownEditor\oEmbed;
+namespace MarkdownEditor\oEmbed\Service;
 
-final class EmbedlyCards implements iOEmbed
+use MarkdownEditor\oEmbed\iOEmbed;
+use MarkdownEditor\oEmbed\OEmbed;
+
+final class EmbedlyCards extends OEmbed implements iOEmbed
 {
-    /** @var \modX */
-    private $modx;
-
-    /** @var \MarkdownEditor */
-    private $md;
-
-    public function __construct(\modX &$modx)
-    {
-        $this->modx =& $modx;
-        $this->md = $this->modx->markdowneditor;
-    }
-
     /**
      * @param string $url
      * @throws \Exception
@@ -27,43 +18,20 @@ final class EmbedlyCards implements iOEmbed
 
     private function getCardControls()
     {
-        return intval($this->md->getOption('embedlycards.card_controls', array(), '0'));
+        return intval($this->getOption('card_controls', '0', 'embedlycards'));
     }
 
     /**
      * @return int
      */
-    private function getMaxWidth()
+    protected function getMaxWidth()
     {
-        $height = $this->md->getOption('embedlycards.max_width', array(), '');
+        $height = $this->getOption('max_width', 640);
         if ($height == '0') return '';
 
-        if ($height == '') {
-            $height = intval($this->md->getOption('oembed.max_width', array(), 800)) . 'px';
-        }
+        $height = intval($height) . 'px';
 
         return $height;
-    }
-
-
-    /**
-     * Loads custom CSS
-     *
-     * @return array
-     */
-    public function getCSS()
-    {
-        return array();
-    }
-
-    /**
-     * Loads custom JS
-     *
-     * @return array
-     */
-    public function getJS()
-    {
-        return array();
     }
 
     /**

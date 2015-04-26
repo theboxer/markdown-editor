@@ -1,6 +1,5 @@
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 .md-card {
-  width: 668px;
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif; }
   .md-card img {
     max-width: 100%; }
@@ -61,6 +60,4 @@
   box-shadow: none !important; }
 
 .twitter iframe {
-  border: none !important;
-  box-shadow: none !important;
-  width: 680px !important; }
+  width: 100% !important; }

@@ -39,6 +39,7 @@ $_lang['area_markdowneditor.area.upload'] = 'Upload';
 $_lang['area_markdowneditor.area.resizer'] = 'Resizer';
 $_lang['area_markdowneditor.area.general'] = 'General';
 $_lang['area_markdowneditor.area.oembed'] = 'oEmbed';
+$_lang['area_markdowneditor.area.embedly'] = 'Embedly';
 
 $_lang['setting_markdowneditor.lp.parse_modx_tags'] = 'Parse MODX Tags';
 $_lang['setting_markdowneditor.lp.parse_modx_tags_desc'] = 'If set to yes, Markdown Editor will also parse MODX tags in preview. This option will send an Ajax request to the server each time you update content.';
@@ -106,6 +107,12 @@ $_lang['setting_markdowneditor.oembed.max_height'] = 'Max height';
 $_lang['setting_markdowneditor.oembed.max_height_desc'] = 'Max height of received element.';
 $_lang['setting_markdowneditor.oembed.service'] = 'oEmbed service';
 $_lang['setting_markdowneditor.oembed.service_desc'] = 'Comma delimited list of oEmbed services. Other defined services will be used as a fallback. Available services: Essence, Noembed, EmbedlyCards';
+$_lang['setting_markdowneditor.oembed.default_card_color'] = 'Default card\'s color';
+$_lang['setting_markdowneditor.oembed.default_card_color_desc'] = 'Default color of card\'s stripe.';
+$_lang['setting_markdowneditor.oembed.auto_card_color'] = 'Auto card\'s color';
+$_lang['setting_markdowneditor.oembed.auto_card_color_desc'] = 'If enabled and selected service supports auto color, color of the stripe will be generated from favicon of the embedding url.';
+$_lang['setting_markdowneditor.embedly.api_key'] = 'API key';
+$_lang['setting_markdowneditor.embedly.api_key_desc'] = 'Embedly API key, required for EmbedlyExtract and EmbedlyEmbed service.';
 
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded the size limit.';

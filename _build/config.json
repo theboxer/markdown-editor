@@ -205,6 +205,22 @@
         "value": true,
         "type": "combo-boolean",
         "area": "markdowneditor.area.oembed"
+      },
+      {
+        "key": "oembed.default_card_color",
+        "value": "#D71212",
+        "area": "markdowneditor.area.oembed"
+      },
+      {
+        "key": "oembed.auto_card_color",
+        "value": true,
+        "type": "combo-boolean",
+        "area": "markdowneditor.area.oembed"
+      },
+      {
+        "key": "embedly.api_key",
+        "value": "",
+        "area": "markdowneditor.area.embedly"
       }
     ]
   },

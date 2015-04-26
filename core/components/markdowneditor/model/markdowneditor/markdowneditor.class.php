@@ -97,15 +97,15 @@ class MarkdownEditor {
     {
         $servicesArray = array();
 
-        $services = $this->getOption('oembed.service', array(), 'Noembed');
+        $services = $this->getOption('oembed.service', array(), 'Essence');
         $services = $this->explodeAndClean($services);
 
         foreach ($services as $service) {
             $service = ucfirst($service);
             if (strpos($service, '\\') === false) {
-                $className = 'MarkdownEditor\\oEmbed\\' . $service;
+                $className = 'MarkdownEditor\\oEmbed\\Service\\' . $service;
                 if (!class_exists($className)) {
-                    $servicesArray['MarkdownEditor\\oEmbed\\Noembed'] = new MarkdownEditor\oEmbed\Noembed($modx);
+                    $servicesArray['MarkdownEditor\\oEmbed\\Service\\Essence'] = new MarkdownEditor\oEmbed\Service\Essence($modx);
                     continue;
                 }
 
@@ -114,7 +114,7 @@ class MarkdownEditor {
             }
 
             if (!class_exists($service)) {
-                $servicesArray['MarkdownEditor\\oEmbed\\Noembed'] = new MarkdownEditor\oEmbed\Noembed($modx);
+                $servicesArray['MarkdownEditor\\oEmbed\\Service\\Essence'] = new MarkdownEditor\oEmbed\Service\Essence($modx);
                 continue;
             }
 

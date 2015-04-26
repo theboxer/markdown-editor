@@ -4,8 +4,10 @@ namespace MarkdownEditor\oEmbed;
 /**
  * @property \MarkdownEditor $md
  * @property \modX $modx
+ *
+ * @method string getOption() getOption($key, $default = '', $area = ['oembed'], $addDefaultArea = false)
  */
-trait Templatable
+trait Cards
 {
     /**
      * @param array $props
@@ -57,6 +59,8 @@ trait Templatable
 
             if ($template != null) break;
         }
+
+        $props['card_width'] = (intval($this->getOption('max_width', 640)) + 28) . 'px';
 
         return $template->process($props);
     }
@@ -144,7 +148,7 @@ trait Templatable
             'thumbnail_url' => '',
             'url' => '',
             'html' => '',
-            'color' => '#D71414'
+            'color' => $this->getOption('default_card_color', '#D71212')
         ];
 
         $props = array_merge($defaultArray, $props);
