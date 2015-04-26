@@ -6,7 +6,7 @@ markdownEditor.window.OEmbed = function(config) {
         ,resizable: false
         ,collapsible: false
         ,maximizable: false
-        ,height: 180
+        ,height: 185
         ,modal: true
         ,fields: this.getFields(config)
     });
@@ -27,11 +27,13 @@ Ext.extend(markdownEditor.window.OEmbed,MODx.Window, {
     ,submit: function(){
         var f = this.fp.getForm();
 
-        if (this.config.success) {
-            Ext.callback(this.config.success,this.config.scope || this,[f.getValues()]);
-        }
+        if (f.isValid()) {
+            if (this.config.success) {
+                Ext.callback(this.config.success,this.config.scope || this,[f.getValues()]);
+            }
 
-        this.close();
+            this.close();
+        }
     }
 });
 Ext.reg('markdowneditor-window-oembed',markdownEditor.window.OEmbed);

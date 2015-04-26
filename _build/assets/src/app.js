@@ -509,6 +509,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 xtype: 'markdowneditor-window-oembed'
                 ,success: function(values){
                     this.editor.insert('[embed ' + values.url + ']');
+                    this.editor.focus();
                 }
                 ,scope: this
             }).show();
