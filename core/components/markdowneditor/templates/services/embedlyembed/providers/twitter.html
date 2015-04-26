@@ -1,0 +1,14 @@
+<div class="md-card twitter" [[+card_width:notempty=`style="width:[[+card_width]];"`]]>
+    <div class="card-header">
+        [[+favicon_url:notempty=`<img src="[[+favicon_url]]" width="16" height="16" alt="[[+provider_name]]"/>`]]
+        <a href="[[+provider_url]]">[[+provider_name]]</a>
+        [[+author_name:notempty=`<span class="author"><a href="[[+author_url]]">[[+author_name]]</a></span>`]]
+    </div>
+    <div class="card" style="border-left-color: [[+color]];">
+        <blockquote class="twitter-tweet">
+            <p>[[+description]]</p>
+            — @[[+author_name]] <a href="[[+url]]"></a>
+        </blockquote>
+        <script async="" src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+</div>
