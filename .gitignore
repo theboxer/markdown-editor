@@ -1,32 +1,22 @@
-# Bower & Node Modules #
-########################
 _build/assets/bower_components
 _build/assets/node_modules
 
-# Composer dependencies #
-#########################
+_build/mkdocs_site
+
 core/components/markdowneditor/model/vendor
 
-# Config files #
-################
 _build/build.config.php
 config.core.php
 
-# Packages #
-############
 _packages/*.*
 !_packages/.gitignore
 !_packages/*.zip
 
-# IDE files #
-#############
 .idea
 .settings
 nbproject
 .project
 
-# OS generated files #
-######################
 .DS_Store
 .DS_Store?
 ._*

@@ -228,6 +228,9 @@
     "tables": ["MarkdownEditorContent"]
   },
   "build": {
+    "readMe": "docs/readme.md",
+    "license": "docs/license.md",
+    "changeLog": "docs/changelog.md",
     "resolver": {
       "after": ["resolve.whicheditor.php"]
     }

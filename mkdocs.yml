@@ -1,0 +1,12 @@
+site_name: Markdown Editor
+docs_dir: core/components/markdowneditor/docs
+site_dir: _build/mkdocs_site
+repo_url: https://github.com/modxcms/markdown-editor
+theme_dir: '_build/mkdocs_theme'
+pages:
+- [index.md, Markdown Editor]
+- [oembed.md, oEmbed]
+- [systemsettings.md, System Settings]
+- [changelog.md, Changelog]
+- [license.md, License]
+theme: yeti

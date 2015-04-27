@@ -1,5 +1,5 @@
 {
-  "name": "markdowneditor",
+  "name": "markdown-editor",
   "version": "1.0.0",
   "license": "MIT",
   "engines": {
@@ -18,7 +18,5 @@
     "gulp-uglify": "^0.3.1",
     "merge-stream": "",
     "gulp-sourcemaps": ""
-
-
   }
 }

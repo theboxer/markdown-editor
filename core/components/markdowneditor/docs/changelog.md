@@ -1,7 +1,5 @@
-Changelog for MarkdownEditor.
+## MarkdownEditor 1.0.0
 
-MarkdownEditor 1.0.0
-==============
 - Live preview
 - Drag & drop upload
 - Image cropper
