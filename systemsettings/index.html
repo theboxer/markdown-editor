@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+
+	<title>System Settings - Markdown Editor - Markdown Editor</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+        <link href="../css/base.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="..">Markdown Editor</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="../oembed">oEmbed</a>
+                </li>
+            
+            
+            
+                <li class="active">
+                    <a href=".">System Settings</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="../changelog">Changelog</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="../license">License</a>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                
+                <li >
+                    <a rel="next" href="../oembed">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li >
+                    <a rel="prev" href="../changelog">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/modxcms/markdown-editor">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main"><a href="#general">General</a></li>
+        
+            <li><a href="#editors-theme">Editor's theme</a></li>
+        
+            <li><a href="#font-size">Font size</a></li>
+        
+            <li><a href="#font-family">Font family</a></li>
+        
+            <li><a href="#gfm-css">GFM CSS</a></li>
+        
+            <li><a href="#gfm-css-in-manager">GFM CSS in Manager</a></li>
+        
+            <li><a href="#custom-css-in-manager">Custom CSS in Manager</a></li>
+        
+            <li><a href="#highlightjs">Highlight.js</a></li>
+        
+            <li><a href="#split-editor">Split editor</a></li>
+        
+            <li><a href="#split-editor-full-screen">Split editor full screen</a></li>
+        
+    
+        <li class="main"><a href="#live-preview">Live preview</a></li>
+        
+            <li><a href="#parse-modx-tags">Parse MODX Tags</a></li>
+        
+            <li><a href="#parse-modx-tags-timeout">Parse MODX Tags timeout</a></li>
+        
+    
+        <li class="main"><a href="#upload">Upload</a></li>
+        
+            <li><a href="#image_upload_path">image_upload_path</a></li>
+        
+            <li><a href="#image_upload_url">image_upload_url</a></li>
+        
+            <li><a href="#file_upload_path">file_upload_path</a></li>
+        
+            <li><a href="#file_upload_url">file_upload_url</a></li>
+        
+            <li><a href="#under_resource">under_resource</a></li>
+        
+            <li><a href="#delete_unused">delete_unused</a></li>
+        
+            <li><a href="#enable_image_upload">enable_image_upload</a></li>
+        
+            <li><a href="#enable_file_upload">enable_file_upload</a></li>
+        
+            <li><a href="#max_size">max_size</a></li>
+        
+            <li><a href="#image_types">image_types</a></li>
+        
+            <li><a href="#file_types">file_types</a></li>
+        
+    
+        <li class="main"><a href="#cropper">Cropper</a></li>
+        
+            <li><a href="#enable-cropper">Enable Cropper</a></li>
+        
+            <li><a href="#profiles">Profiles</a></li>
+        
+            <li><a href="#profiles-description">Profiles description</a></li>
+        
+    
+        <li class="main"><a href="#resizer">Resizer</a></li>
+        
+            <li><a href="#aspect_ratio_constraint">aspect_ratio_constraint</a></li>
+        
+            <li><a href="#upsize_constraint">upsize_constraint</a></li>
+        
+            <li><a href="#width">width</a></li>
+        
+            <li><a href="#height">height</a></li>
+        
+    
+        <li class="main"><a href="#oembed">oEmbed</a></li>
+        
+            <li><a href="#service">service</a></li>
+        
+            <li><a href="#max_height">max_height</a></li>
+        
+            <li><a href="#max_width">max_width</a></li>
+        
+            <li><a href="#frontend_css">frontend_css</a></li>
+        
+            <li><a href="#default_card_color">default_card_color</a></li>
+        
+            <li><a href="#auto_card_color">auto_card_color</a></li>
+        
+    
+        <li class="main"><a href="#embedly">Embedly</a></li>
+        
+            <li><a href="#api-key">API key</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<h1>System Settings</h1>
+<h2 id="general">General</h2>
+<h3 id="editors-theme">Editor's theme</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.theme</code><br />
+<strong>Default:</strong> <code>monokai</code></p>
+<p>Type the name of available themes from the <a href="https://github.com/ajaxorg/ace/tree/master/lib/ace/theme">Ace editor project</a>.</p>
+<h3 id="font-size">Font size</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.font_size</code><br />
+<strong>Default:</strong> <code>12</code></p>
+<p>Font size for Markdown editor.</p>
+<h3 id="font-family">Font family</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.font_family</code></p>
+<p>Font family which will be used for editor.</p>
+<h3 id="gfm-css">GFM CSS</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.include_ghfmd</code><br />
+<strong>Default:</strong> <code>true</code></p>
+<p>When enabled, GitHub Flavoured Markdown CSS will be automatically included on the frontend.
+Styles will be applied only to elements with class <code>markdown-body</code>.</p>
+<h3 id="gfm-css-in-manager">GFM CSS in Manager</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.include_ghfmd_manager</code><br />
+<strong>Default:</strong> <code>true</code></p>
+<p>When enabled, GitHub Flavoured Markdown CSS will be automatically included in the Manager, when creating/updating Resources.</p>
+<h3 id="custom-css-in-manager">Custom CSS in Manager</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.custom_css_manager</code></p>
+<p>If set, specified CSS file will be automatically included in Manager, when creating/updating Resources.
+All definition must be prefixed with class <code>preview-md</code> to be applied on preview panel.</p>
+<h3 id="highlightjs">Highlight.js</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.include_highlight</code><br />
+<strong>Default:</strong> <code>true</code></p>
+<p>When enabled, highlight.js will be automatically included on the frontend.</p>
+<h3 id="split-editor">Split editor</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.split</code><br />
+<strong>Default:</strong> <code>false</code></p>
+<p>When enabled, editor will be in split mode by default.</p>
+<h3 id="split-editor-full-screen">Split editor full screen</h3>
+<p><strong>Key:</strong> <code>markdowneditor.general.split_fullscreen</code><br />
+<strong>Default:</strong> <code>true</code></p>
+<p>When enabled, editor will be in split mode by default when entering full screen.</p>
+<h2 id="live-preview">Live preview</h2>
+<h3 id="parse-modx-tags">Parse MODX Tags</h3>
+<p><strong>Key:</strong> <code>markdowneditor.lp.parse_modx_tags</code><br />
+<strong>Default:</strong> <code>false</code></p>
+<p>If enabled, Markdown Editor will also parse MODX tags in the preview. 
+This option will send an Ajax request to the server each time you update content.</p>
+<h3 id="parse-modx-tags-timeout">Parse MODX Tags timeout</h3>
+<p><strong>Key:</strong> <code>markdowneditor.lp.parse_modx_tags_timeout</code><br />
+<strong>Default:</strong> <code>300</code></p>
+<p>Delay sending an AJAX request to parse content by the specified timeout in milliseconds.</p>
+<h2 id="upload">Upload</h2>
+<h3 id="image_upload_path">image_upload_path</h3>
+<h3 id="image_upload_url">image_upload_url</h3>
+<h3 id="file_upload_path">file_upload_path</h3>
+<h3 id="file_upload_url">file_upload_url</h3>
+<h3 id="under_resource">under_resource</h3>
+<h3 id="delete_unused">delete_unused</h3>
+<h3 id="enable_image_upload">enable_image_upload</h3>
+<h3 id="enable_file_upload">enable_file_upload</h3>
+<h3 id="max_size">max_size</h3>
+<h3 id="image_types">image_types</h3>
+<h3 id="file_types">file_types</h3>
+<h2 id="cropper">Cropper</h2>
+<h3 id="enable-cropper">Enable Cropper</h3>
+<p><strong>Key:</strong> <code>markdowneditor.cropper.enable_cropper</code><br />
+<strong>Default:</strong> <code>true</code></p>
+<p>When enabled, a pop-up window with Cropper will show before each image upload. 
+In the cropper pop-up you can crop, scale and rotate image.</p>
+<h3 id="profiles">Profiles</h3>
+<p><strong>Key:</strong> <code>markdowneditor.cropper.profiles</code><br />
+<strong>Default:</strong> </p>
+<pre><code class="js">[{
+    &quot;name&quot;: &quot;Free form&quot;
+},{
+    &quot;name&quot;: &quot;Square&quot;,
+    &quot;ratio&quot;: &quot;1/1&quot;
+},{
+    &quot;name&quot;: &quot;4x6 wide&quot;,
+    &quot;ratio&quot;: &quot;6/4&quot;
+},{
+    &quot;name&quot;: &quot;5x7 wide&quot;,
+    &quot;ratio&quot;: &quot;7/5&quot;
+},{
+    &quot;name&quot;: &quot;1920x1080 HD&quot;,
+    &quot;width&quot;: 1920,
+    &quot;height&quot;: 1080
+}]
+</code></pre>
+
+<p>A list of profiles that users can select from in the Cropper window. Each profile is a JSON object with following properties:</p>
+<ul>
+<li><strong>name</strong> (required) - Name of the profile, shows in the Profile select box in Cropper window.</li>
+<li><strong>ratio</strong> (optional) - Ratio of the cropper box, won't allow user to crop image in different ratio. Example: <code>16/9</code> </li>
+<li><strong>width</strong> (optional) - Instead of Ratio, you can specify width &amp; height and ratio will be counted automatically.</li>
+<li><strong>height</strong> (optional) - Instead of Ratio, you can specify width &amp; height and ratio will be counted automatically.</li>
+</ul>
+<h3 id="profiles-description">Profiles description</h3>
+<p><strong>Key:</strong> <code>markdowneditor.cropper.show_description</code><br />
+<strong>Default:</strong> <code>false</code></p>
+<p>When enabled, profiles select box will also contains profile's description with ratio, width &amp; height.</p>
+<h2 id="resizer">Resizer</h2>
+<h3 id="aspect_ratio_constraint">aspect_ratio_constraint</h3>
+<h3 id="upsize_constraint">upsize_constraint</h3>
+<h3 id="width">width</h3>
+<h3 id="height">height</h3>
+<h2 id="oembed">oEmbed</h2>
+<h3 id="service">service</h3>
+<h3 id="max_height">max_height</h3>
+<h3 id="max_width">max_width</h3>
+<h3 id="frontend_css">frontend_css</h3>
+<h3 id="default_card_color">default_card_color</h3>
+<h3 id="auto_card_color">auto_card_color</h3>
+<h2 id="embedly">Embedly</h2>
+<h3 id="api-key">API key</h3>
+<p><strong>Key:</strong> <code>markdowneditor.embedly.api_key</code></p>
+<p>Embedly API key, required for EmbedlyExtract and EmbedlyEmbed service. Can be obtained at <a href="http://embed.ly/">http://embed.ly/</a>.</p>
+</div>
+            
+        </div>
+
+        
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script src="../js/base.js"></script>
+    </body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="./img/favicon.ico">
+
+	<title>Markdown Editor - Markdown Editor</title>
+
+        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="./css/highlight.css">
+        <link href="./css/base.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href=".">Markdown Editor</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="oembed/">oEmbed</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="systemsettings/">System Settings</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="changelog/">Changelog</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="license/">License</a>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                
+                <li class="disabled">
+                    <a rel="next" >
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li >
+                    <a rel="prev" href="oembed/">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/modxcms/markdown-editor">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main"><a href="#features">Features</a></li>
+        
+    
+        <li class="main"><a href="#background">Background</a></li>
+        
+    
+        <li class="main"><a href="#contribution">Contribution</a></li>
+        
+            <li><a href="#all-contributors">All contributors</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<h1>Markdown Editor</h1>
+<p>Markdown Editor is a MODX component for creating content in Markdown format. It automatically parses input into the HTML.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>Live preview</li>
+<li>Drag &amp; drop upload</li>
+<li>Image cropper</li>
+<li>oEmbed through multiple services</li>
+<li>Resource suggestion on ctrl+space</li>
+<li>Parsing MODX tag in live preview</li>
+<li>Custom CSS for Manager preview</li>
+<li>Auto include GFM &amp; Highlight on frontend</li>
+</ul>
+<h2 id="background">Background</h2>
+<p>Markdown Editor uses several libraries to deliver amazing experience with editing markdown content.</p>
+<p>Editor itself is build on top of the great JavaScript editor <a href="http://ace.c9.io/">Ace</a>. We uses Ace with the markdown mode and some very custom modifications to improve working with the markdown content.
+Editor has enhanced list support, resource hinting (<code>cmd/ctrl + space</code>) from page title, drag &amp; drop upload and more.</p>
+<p>For transforming markdown into HTML editor uses JavaScript library <a href="https://github.com/jonschlinkert/remarkable">Remarkable</a> with a support for GFM.
+Remarkable transforms makrdown to HTML blazingly fast, so you can enjoy real live preview.</p>
+<ul>
+<li><a href="http://ace.c9.io/">Ace editor</a></li>
+<li><a href="https://github.com/jonschlinkert/remarkable">Remarkable</a></li>
+<li><a href="https://github.com/fengyuanchen/cropper">Cropper</a></li>
+</ul>
+<h2 id="contribution">Contribution</h2>
+<p>I would love to thank <a href="https://twitter.com/@renekopcem">Roman</a> &amp; <a href="https://twitter.com/@rthrash">Ryan</a> for providing unmeasurable support, amazing ideas and for helping with styling the editor.</p>
+<h3 id="all-contributors">All contributors</h3>
+<ul>
+<li><a href="https://twitter.com/@renekopcem">Roman Klos</a></li>
+<li><a href="https://twitter.com/@rthrash">Ryan Thrash</a></li>
+</ul>
+</div>
+            
+        </div>
+
+        
+
+        <script src="./js/jquery-1.10.2.min.js"></script>
+        <script src="./js/bootstrap-3.0.3.min.js"></script>
+        <script src="./js/highlight.pack.js"></script>
+        <script src="./js/base.js"></script>
+    </body>
+</html>
