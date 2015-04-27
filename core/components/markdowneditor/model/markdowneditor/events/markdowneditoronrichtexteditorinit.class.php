@@ -1,6 +1,13 @@
 <?php
 class MarkdownEditorOnRichTextEditorInit extends MarkdownEditorPlugin {
 
+    public function init()
+    {
+        if ($this->scriptProperties['editor'] != 'MarkdownEditor') return false;
+
+        return parent::init();
+    }
+
     public function process() {
         $this->modx->controller->addLexiconTopic('markdowneditor:default');
 
