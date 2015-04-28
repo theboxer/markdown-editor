@@ -36,7 +36,8 @@
     border-top-right-radius: 5px;
     -moz-border-radius-bottomright: 8px;
     -webkit-border-bottom-right-radius: 8px;
-    border-bottom-right-radius: 8px; }
+    border-bottom-right-radius: 8px;
+    min-height: 185px; }
     .md-card .card h2 {
       font-size: 20px;
       padding: 0;

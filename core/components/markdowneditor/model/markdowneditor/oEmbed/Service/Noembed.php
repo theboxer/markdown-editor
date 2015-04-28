@@ -47,7 +47,7 @@ final class Noembed extends OEmbed implements iOEmbed
     protected function getServiceURL()
     {
         $options = array(
-            'nowrap' => $this->md->getOption('nowrap', 'on', 'noembed')
+            'nowrap' => $this->getOption('nowrap', 'on', 'noembed')
         );
 
         $maxWidth = $this->getMaxWidth();
