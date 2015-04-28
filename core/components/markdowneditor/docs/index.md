@@ -1,5 +1,11 @@
 Markdown Editor is a MODX component for creating content in Markdown format. It automatically parses input into the HTML.
 
+## Requirements
+Markdown Editor requires 
+
+- MODX Revolution 2.3+
+- PHP 5.4+
+
 ## Features
 - Live preview
 - Drag & drop upload
@@ -22,7 +28,6 @@ Remarkable transforms makrdown to HTML blazingly fast, so you can enjoy real liv
 - [Ace editor](http://ace.c9.io/)
 - [Remarkable](https://github.com/jonschlinkert/remarkable)
 - [Cropper](https://github.com/fengyuanchen/cropper)
-
 
 ## Contribution
 I would love to thank [Roman](https://twitter.com/@renekopcem) & [Ryan](https://twitter.com/@rthrash) for providing unmeasurable support, amazing ideas and for helping with styling the editor.
