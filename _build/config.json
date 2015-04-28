@@ -78,7 +78,7 @@
       },
       {
         "key": "upload.max_size",
-        "value": "2097152",
+        "value": "",
         "type": "textfield",
         "area": "markdowneditor.area.upload"
       },

@@ -67,17 +67,68 @@ This option will send an Ajax request to the server each time you update content
 Delay sending an AJAX request to parse content by the specified timeout in milliseconds.
 
 ## Upload
-### image_upload_path
-### image_upload_url
-### file_upload_path
-### file_upload_url
-### under_resource
-### delete_unused
-### enable_image_upload
-### enable_file_upload
-### max_size
-### image_types
-### file_types
+### Image upload path
+**Key:** `markdowneditor.upload.image_upload_path`  
+
+Path where images will be uploaded. If no path is set, images will be uploaded in `assets/u` directory.
+
+### Image upload URL
+**Key:** `markdowneditor.upload.image_upload_url`  
+
+URL to the image upload directory. If not URL is set, `assets/u` will be used.
+
+### File upload path
+**Key:** `markdowneditor.upload.file_upload_path`  
+
+Path where files will be uploaded. If no path is set, files will be uploaded in `assets/u` directory.
+
+### File upload URL
+**Key:** `markdowneditor.upload.file_upload_url`  
+
+URL to the file upload directory. If not URL is set, `assets/u` will be used.
+
+### Under resource
+**Key:** `markdowneditor.upload.under_resource`  
+**Default:** `true`
+
+When enabled, all uploaded files will be stored under directory with name of the resource ID.
+
+### Delete unused
+**Key:** `markdowneditor.upload.delete_unused`  
+**Default:** `true`
+
+When enabled, unused images and files will be deleted from the upload directory.
+[Under resource](#under-resource) setting has to be enabled.
+
+### Image upload
+**Key:** `markdowneditor.upload.enable_image_upload`  
+**Default:** `true`
+
+When enabled, users will be able to upload images.
+
+### File upload
+**Key:** `markdowneditor.upload.enable_file_upload`  
+**Default:** `true`
+
+When enabled, users will be able to upload non-image files.
+
+### Max size
+**Key:** `markdowneditor.upload.max_size`  
+
+Max allowed size in bits of a file or image. If no value is set, value from system setting `upload_maxsize` will be used.
+If `0` is set, files with any size can be uploaded (beware about PHP upload limits).
+
+### Image types
+**Key:** `markdowneditor.upload.image_types`  
+**Default:** `jpg,jpeg,png,gif,bmp`
+
+Comma delimited list of image types that can be uploaded.
+
+### File types
+**Key:** `markdowneditor.upload.file_types`  
+**Default:** `txt,html,htm,xml,js,css,zip,gz,rar,z,tgz,tar,mp3,mp4,aac,wav,au,wmv,avi,mpg,mpeg,pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,odb,odg,odf`
+
+Comma delimited list of file types that can be uploaded.
 
 ## Cropper
 ### Enable Cropper
@@ -123,18 +174,74 @@ A list of profiles that users can select from in the Cropper window. Each profil
 When enabled, profiles select box will also contains profile's description with ratio, width & height.
 
 ## Resizer
-### aspect_ratio_constraint
-### upsize_constraint
-### width
-### height
+### Aspect ratio constraint
+**Key:** `markdowneditor.resizer.aspect_ratio_constraint`  
+**Default:** `true`
+
+When enabled, the image will keep their aspect ratio when resizing.
+
+### Upsize constraint
+**Key:** `markdowneditor.resizer.upsize_constraint`  
+**Default:** `true`
+
+When enabled, the image will not be resized to a larger height or width.
+
+### Width
+**Key:** `markdowneditor.resizer.width`  
+**Default:** `400`
+
+Width of a resized image.
+
+### Height
+**Key:** `markdowneditor.resizer.height`  
+**Default:** `0`
+
+Height of a resized image.
 
 ## oEmbed
-### service
-### max_height
-### max_width
-### frontend_css
-### default_card_color
-### auto_card_color
+### oEmbed service
+**Key:** `markdowneditor.oembed.oembed`  
+**Default:** `Essence,EmbedlyCards`
+
+Comma delimited list of oEmbed services.
+Other defined services will be used as a fallback.  
+Available services:
+
+- Essence
+- Noembed
+- EmbedlyExtract (requires API key)
+- EmbedlyEmbed (requires API key)
+- EmbedlyCards
+
+### Max height
+**Key:** `markdowneditor.oembed.max_height`  
+**Default:** `640`
+
+Max height of received element.
+
+### Max width
+**Key:** `markdowneditor.oembed.max_width`  
+**Default:** `640`
+
+Max width of received element.
+
+### Include services CSS
+**Key:** `markdowneditor.oembed.frontend_css`  
+**Default:** `1`
+
+If enabled, CSS from specified service will be automatically included on frontend.
+
+### Default card's color
+**Key:** `markdowneditor.oembed.default_card_color`  
+**Default:** `#D71212`
+
+Default color of card's stripe. Color can be entered in any valid format for CSS.
+
+### Auto card's color
+**Key:** `markdowneditor.oembed.auto_card_color`  
+**Default:** `true`
+
+If enabled and selected service supports auto color, color of the card's stripe will be generated from favicon of the embedding url.
 
 ## Embedly
 ### API key
