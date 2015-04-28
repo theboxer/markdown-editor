@@ -10,6 +10,11 @@ Run:
 - `composer install` from repository root
 - `npm install` from `_build/assets`
 
+For building JS/CSS you can use several gulp tasks (run from `_build/assets` directory):
+
+- `gulp watch` - builds all JS & CSS and starts a watcher for JS & CSS
+- `gulp build` - builds all JS & CSS 
+
 ## Code style
 Please follow [PSR-2](http://www.php-fig.org/psr/psr-2/) Coding Style Guide.
 
