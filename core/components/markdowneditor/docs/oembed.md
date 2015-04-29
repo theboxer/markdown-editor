@@ -27,14 +27,14 @@ This service is an implementation for [Embed.ly Extract](http://embed.ly/extract
 Requirement for using this service is a valid API key, that can be obtain after registering at [Embed.ly](http://embed.ly/) site.
 They offer a **free tier** that should be enough for most of users. For presentation is used card-style view.
 
-This service **supports** [auto color](systemsetting#auto-cards-color).
+This service **supports** [auto color](systemsettings.md#auto-cards-color).
 
 ### Embedly Embed
 This service is an implementation for [Embed.ly Embed](http://embed.ly/embed) API.
 Requirement for using this service is a valid API key, that can be obtain after registering at [Embed.ly](http://embed.ly/) site.
 They offer a **free tier** that should be enough for most of users. For presentation is used card-style view.
 
-This service doesn't support [auto color](systemsetting#auto-cards-color).
+This service doesn't support [auto color](systemsettings.md#auto-cards-color).
 
 ### Embedly Cards
 This is an implementation of [Embed.ly Cards](http://embed.ly/cards). 
