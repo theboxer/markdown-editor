@@ -380,6 +380,13 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.editor.getSession().setMode("ace/mode/markdowneditor");
         this.editor.setTheme("ace/theme/" + (MODx.config['markdowneditor.general.theme'] || 'monokai'));
 
+        if (this.contentMD.hasClass('ace_dark')) {
+            this.mdContainer.addClass('theme-dark');
+        } else {
+            this.mdContainer.addClass('theme-light');
+        }
+        
+        
         this.editor.selection.on('changeCursor', function (e, selection) {
             if (this.gutterToolbar) {
                 this.gutterToolbar.update('');

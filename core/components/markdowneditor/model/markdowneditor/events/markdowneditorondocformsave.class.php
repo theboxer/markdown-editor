@@ -24,15 +24,6 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
         return;
     }
 
-    private function newResource(&$content, $field)
-    {
-        $underResource = (int) $this->markdowneditor->getOption('upload.under_resource', null, 1);
-        if ($underResource) {
-            $this->moveFilesUnderCorrectResource($content, $field);
-        }
-
-    }
-
     private function moveFilesUnderCorrectResource(&$md, $field)
     {
         $matches = array();

@@ -228,9 +228,9 @@
     "tables": ["MarkdownEditorContent"]
   },
   "build": {
-    "readMe": "docs/readme.md",
+    "readme": "docs/index.md",
     "license": "docs/license.md",
-    "changeLog": "docs/changelog.md",
+    "changelog": "docs/changelog.md",
     "resolver": {
       "after": ["resolve.whicheditor.php"]
     }
