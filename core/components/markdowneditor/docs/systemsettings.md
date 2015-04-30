@@ -9,18 +9,18 @@ Type the name of available themes from the [Ace editor project](https://github.c
 **Key:** `markdowneditor.general.font_size`  
 **Default:** `12`
 
-Font size for Markdown editor.
+Font size for Markdown Editor.
+
 ### Font family 
 **Key:** `markdowneditor.general.font_family`
 
-Font family which will be used for editor.
+Font family used when editing Markdown text.
 
 ### GFM CSS
 **Key:** `markdowneditor.general.include_ghfmd`  
 **Default:** `true`
 
-When enabled, GitHub Flavoured Markdown CSS will be automatically included on the frontend.
-Styles will be applied only to elements with class `markdown-body`.
+When enabled, GitHub Flavored Markdown CSS will be automatically included on the frontend. Styles will be applied only to elements with class `markdown-body`.
 
 ### GFM CSS in Manager
 **Key:** `markdowneditor.general.include_ghfmd_manager`  
@@ -31,26 +31,25 @@ When enabled, GitHub Flavoured Markdown CSS will be automatically included in th
 ### Custom CSS in Manager
 **Key:** `markdowneditor.general.custom_css_manager`
 
-If set, specified CSS file will be automatically included in Manager, when creating/updating Resources.
-All definition must be prefixed with class `preview-md` to be applied on preview panel.
+If set, specified CSS file will be automatically included in Manager, when creating/updating Resources. All definitions must be prefixed with the class `preview-md` to be applied on the preview panel.
 
 ### Highlight.js 
 **Key:** `markdowneditor.general.include_highlight`  
 **Default:** `true`
 
-When enabled, highlight.js will be automatically included on the frontend.
+When enabled, _highlight.js_ will be automatically included on the frontend to provide syntax highlighting of code blocks.
 
 ### Split editor
 **Key:** `markdowneditor.general.split`  
 **Default:** `false`
 
-When enabled, editor will be in split mode by default.
+When enabled and in the standard MODX content editing window, the Markdown Editor will be in split in half with Markdown to the left and the HTML preview to the right.
 
 ### Split editor full screen
 **Key:** `markdowneditor.general.split_fullscreen`  
 **Default:** `true`
 
-When enabled, editor will be in split mode by default when entering full screen.
+When enabled and in full screen editing mode, editor will be in split mode by default when entering full screen.
 
 ## Live preview
 ### Parse MODX Tags
@@ -58,40 +57,40 @@ When enabled, editor will be in split mode by default when entering full screen.
 **Default:** `false`
 
 If enabled, Markdown Editor will also parse MODX tags in the preview. 
-This option will send an Ajax request to the server each time you update content.
+This option will send an Ajax request to the server each time you update content, delayed by the amount specified in the `Parse MODX Tags timeout` setting.
 
 ### Parse MODX Tags timeout
 **Key:** `markdowneditor.lp.parse_modx_tags_timeout`  
 **Default:** `300`
 
-Delay sending an AJAX request to parse content by the specified timeout in milliseconds.
+Delay sending an Ajax request to parse the content by the specified timeout, in milliseconds.
 
 ## Upload
 ### Image upload path
 **Key:** `markdowneditor.upload.image_upload_path`  
 
-Path where images will be uploaded. If no path is set, images will be uploaded in `assets/u` directory.
+The path to the directory where images will be uploaded, relative to the web root. If no path is set, images will be uploaded in `assets/u` directory.
 
 ### Image upload URL
 **Key:** `markdowneditor.upload.image_upload_url`  
 
-URL to the image upload directory. If not URL is set, `assets/u` will be used.
+The URL to the image upload directory. If no URL is set, `assets/u` will be used.
 
 ### File upload path
 **Key:** `markdowneditor.upload.file_upload_path`  
 
-Path where files will be uploaded. If no path is set, files will be uploaded in `assets/u` directory.
+The path where non-image files will be uploaded. If no path is set, files will be uploaded in `assets/u` directory.
 
 ### File upload URL
 **Key:** `markdowneditor.upload.file_upload_url`  
 
-URL to the file upload directory. If not URL is set, `assets/u` will be used.
+The URL to the file upload directory. If not URL is set, `assets/u` will be used.
 
 ### Under resource
 **Key:** `markdowneditor.upload.under_resource`  
 **Default:** `true`
 
-When enabled, all uploaded files will be stored under directory with name of the resource ID.
+When enabled, all uploaded files will be stored under a directory with name of the resource ID.
 
 ### Delete unused
 **Key:** `markdowneditor.upload.delete_unused`  
@@ -115,8 +114,8 @@ When enabled, users will be able to upload non-image files.
 ### Max size
 **Key:** `markdowneditor.upload.max_size`  
 
-Max allowed size in bits of a file or image. If no value is set, value from system setting `upload_maxsize` will be used.
-If `0` is set, files with any size can be uploaded (beware about PHP upload limits).
+The maximum allowed size in bits for files or images uploaded through _Markdown Editor_. If no value is set, the value of the system setting `upload_maxsize` will be used.
+If `0` is set, files with any size can be uploaded (beware of PHP upload limits).
 
 ### Image types
 **Key:** `markdowneditor.upload.image_types`  
@@ -135,8 +134,8 @@ Comma delimited list of file types that can be uploaded.
 **Key:** `markdowneditor.cropper.enable_cropper`  
 **Default:** `true`
 
-When enabled, a pop-up window with Cropper will show before each image upload. 
-In the cropper pop-up you can crop, scale and rotate image.
+When enabled, a pop-up window with Cropper will show with each image upload. 
+In the cropper pop-up you can crop, scale and rotate images before they are uploaded.
 
 ### Profiles
 **Key:** `markdowneditor.cropper.profiles`  
@@ -160,7 +159,7 @@ In the cropper pop-up you can crop, scale and rotate image.
 }]
 ```
 
-A list of profiles that users can select from in the Cropper window. Each profile is a JSON object with following properties:
+A list of profiles that users can select from in the Cropper window. The first item in the list is the default for image uploads. Each profile is a JSON object with following properties:
 
 - **name** (required) - Name of the profile, shows in the Profile select box in Cropper window.
 - **ratio** (optional) - Ratio of the cropper box, won't allow user to crop image in different ratio. Example: `16/9` 
@@ -171,7 +170,7 @@ A list of profiles that users can select from in the Cropper window. Each profil
 **Key:** `markdowneditor.cropper.show_description`  
 **Default:** `false`
 
-When enabled, profiles select box will also contains profile's description with ratio, width & height.
+When enabled, the profile select box will also contains each profile’s description with ratio, width & height.
 
 ## Resizer
 ### Aspect ratio constraint
@@ -184,34 +183,34 @@ When enabled, the image will keep their aspect ratio when resizing.
 **Key:** `markdowneditor.resizer.upsize_constraint`  
 **Default:** `true`
 
-When enabled, the image will not be resized to a larger height or width.
+When enabled, the image will _not_ be resized to a larger height or width.
 
 ### Width
 **Key:** `markdowneditor.resizer.width`  
 **Default:** `400`
 
-Width of a resized image.
+Default width for resized images.
 
 ### Height
 **Key:** `markdowneditor.resizer.height`  
 **Default:** `0`
 
-Height of a resized image.
+Default height for resized image.
 
 ## oEmbed
 ### oEmbed service
 **Key:** `markdowneditor.oembed.oembed`  
 **Default:** `Essence,EmbedlyCards`
 
-Comma delimited list of oEmbed services.
-Other defined services will be used as a fallback.  
-Available services:
+Comma delimited list of oEmbed services. When more than one service is used, they will go through the list of services as fallbacks when others don't return results.
 
-- Essence
-- Noembed
-- EmbedlyExtract (requires API key)
-- EmbedlyEmbed (requires API key)
-- EmbedlyCards
+The available services include:
+
+- [Essence](https://github.com/essence/essence)
+- [Noembed](https://noembed.com/)
+- [EmbedlyExtract](http://embed.ly/extract) (requires API key)
+- [EmbedlyEmbed](http://embed.ly/embed) (requires API key)
+- [EmbedlyCards](http://embed.ly/cards)
 
 ### Max height
 **Key:** `markdowneditor.oembed.max_height`  
@@ -229,22 +228,22 @@ Max width of received element.
 **Key:** `markdowneditor.oembed.frontend_css`  
 **Default:** `1`
 
-If enabled, CSS from specified service will be automatically included on frontend.
+If enabled, CSS from specified service will be automatically included on the frontend.
 
 ### Default card's color
 **Key:** `markdowneditor.oembed.default_card_color`  
 **Default:** `#D71212`
 
-Default color of card's stripe. Color can be entered in any valid format for CSS.
+Default color of each card’s stripe at the left side. Colors can be entered in any valid format for CSS.
 
 ### Auto card's color
 **Key:** `markdowneditor.oembed.auto_card_color`  
 **Default:** `true`
 
-If enabled and selected service supports auto color, color of the card's stripe will be generated from favicon of the embedding url.
+If enabled and the selected service supports auto color (e.g., Embed.ly Cards, Embed.ly Extract), the color of the card’s stripe will be generated from the favicon of the embedding url.
 
-## Embedly
+## Embed.ly
 ### API key
 **Key:** `markdowneditor.embedly.api_key`
 
-Embedly API key, required for EmbedlyExtract and EmbedlyEmbed service. Can be obtained at [http://embed.ly/](http://embed.ly/).
+The Embed.ly API key, required for the EmbedlyExtract and EmbedlyEmbed services. An Embed.ly API key can be obtained at [http://embed.ly/](http://embed.ly/).
