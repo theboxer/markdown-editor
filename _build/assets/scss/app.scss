@@ -82,7 +82,7 @@ $gutter-pad:  37px;
       left: 0;
       right: 0;
       bottom: -1px;
-      top: auto;
+      top: auto !important;
       z-index: 10;
     }
 
@@ -152,13 +152,14 @@ $gutter-pad:  37px;
 
 .preview-md {
   //  width: 500px !important;
-  min-height: 412px;
+  min-height: 425px;
   display: none;
 }
 
 .content-md {
   border: 0;
   border-radius: 0;
+  padding-bottom: 0;
 }
 
 .preview-button-off {
@@ -202,7 +203,7 @@ $gutter-pad:  37px;
 .status-bar {
   min-height: 25px;
   position: relative !important;
-  top: 0;
+  top: -5px !important;
   border: 0;
   border-top: none;
   font-size: 12px;

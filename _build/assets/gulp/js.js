@@ -46,7 +46,7 @@ gulp.task('js', function () {
             .pipe(sourcemaps.init())
             .pipe(plumber())
             .pipe(concat('app.js'))
-            .pipe(uglify())
+            //.pipe(uglify())
             .pipe(sourcemaps.write())
             .pipe(gulp.dest('../../assets/components/markdowneditor/js/mgr'));
 });
