@@ -131,6 +131,13 @@ $gutter-pad:  37px;
       display: block !important;
       padding-left: 20px;
     }
+
+    
+    &.theme-light .preview-md {
+      background: #fefefe;
+      box-shadow: inset 6px 0 9px 0 rgba(0,0,0,.05);
+    }
+
     .status-bar {
       //top: -5px;
       //padding-left: 30px;
