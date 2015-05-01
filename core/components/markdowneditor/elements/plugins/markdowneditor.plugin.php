@@ -17,13 +17,10 @@ $markdowneditor = $modx->getService(
     )
 );
 
-$className = 'MarkdownEditor' . $modx->event->name;
-
-$modx->loadClass('MarkdownEditorPlugin', $markdowneditor->getOption('modelPath') . 'markdowneditor/events/', true, true);
-$modx->loadClass($className, $markdowneditor->getOption('modelPath') . 'markdowneditor/events/', true, true);
+$className = 'MarkdownEditor\\Event\\' . $modx->event->name;
 
 if (class_exists($className)) {
-    /** @var MarkdownEditorPlugin $handler */
+    /** @var MarkdownEditor\Event\Event $handler */
     $handler = new $className($modx, $scriptProperties);
     $handler->run();
 }

@@ -1,8 +1,10 @@
 <?php
-class MarkdownEditorOnDocFormPrerender extends MarkdownEditorPlugin {
+namespace MarkdownEditor\Event;
+
+class OnDocFormPrerender extends Event {
     public function process() {
-        /** @var modResource $resource */
-        $resource = $this->scriptProperties['resource'];
+        /** @var \modResource $resource */
+        $resource = $this->sp['resource'];
         $mdContent = array();
 
         if ($resource) {
@@ -12,7 +14,7 @@ class MarkdownEditorOnDocFormPrerender extends MarkdownEditorPlugin {
                 'namespace' => 'core'
             ));
 
-            /** @var MarkdownEditorContent[] $contents */
+            /** @var \MarkdownEditorContent[] $contents */
             $contents = $this->modx->getIterator('MarkdownEditorContent', $c);
             foreach ($contents as $content) {
                 $mdContent[$content->element_name] = $content->content;
@@ -20,7 +22,7 @@ class MarkdownEditorOnDocFormPrerender extends MarkdownEditorPlugin {
         }
 
         $this->modx->regClientStartupHTMLBlock('<script type="text/javascript">
-            markdownEditor.config = '.$this->modx->toJSON($this->markdowneditor->options).';
+            markdownEditor.config = '.$this->modx->toJSON($this->md->options).';
             markdownEditor.content = ' . $this->modx->toJSON($mdContent) . ';
         </script>');
 

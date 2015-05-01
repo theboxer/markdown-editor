@@ -1,8 +1,10 @@
 <?php
-class MarkdownEditorOnBeforeDocFormSave extends MarkdownEditorPlugin {
+namespace MarkdownEditor\Event;
+
+class OnBeforeDocFormSave extends Event {
     public function process() {
-        /** @var modResource $resource */
-        $resource = $this->scriptProperties['resource'];
+        /** @var \modResource $resource */
+        $resource = $this->sp['resource'];
         $resourceArray = $resource->toArray();
 
         foreach ($resourceArray as $field => $v) {
@@ -34,7 +36,7 @@ class MarkdownEditorOnBeforeDocFormSave extends MarkdownEditorPlugin {
 
         if (isset($matches[1])) {
             foreach ($matches[1] as $key => $url) {
-                $html = $this->modx->markdowneditor->getOEmbed($url);
+                $html = $this->md->getOEmbed($url);
 
                 $content = str_replace($matches[0][$key], $html, $content);
             }

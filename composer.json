@@ -8,7 +8,8 @@
   },
   "autoload": {
     "psr-4": {
-      "MarkdownEditor\\oEmbed\\": "core/components/markdowneditor/model/markdowneditor/oEmbed/"
+      "MarkdownEditor\\oEmbed\\": "core/components/markdowneditor/model/markdowneditor/oEmbed/",
+      "MarkdownEditor\\Event\\": "core/components/markdowneditor/model/markdowneditor/Event/"
     }
   }
 }

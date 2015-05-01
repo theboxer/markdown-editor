@@ -1,5 +1,7 @@
 <?php
-class MarkdownEditorOnRichTextEditorRegister extends MarkdownEditorPlugin {
+namespace MarkdownEditor\Event;
+
+class OnRichTextEditorRegister extends Event {
 
     public function init()
     {

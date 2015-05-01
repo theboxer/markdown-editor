@@ -75,7 +75,7 @@ class MarkdownEditor {
 
     public function getOEmbed($url)
     {
-        $embedServices = $this->getEmbedServiceInstances($this->modx);
+        $embedServices = $this->getEmbedServiceInstances();
 
         foreach ($embedServices as $embedService) {
             try {
@@ -89,11 +89,9 @@ class MarkdownEditor {
     }
 
     /**
-     * @param modX $modx
-     *
      * @return MarkdownEditor\oEmbed\iOEmbed[];
      */
-    public function getEmbedServiceInstances(modX &$modx)
+    public function getEmbedServiceInstances()
     {
         $servicesArray = array();
 
@@ -105,20 +103,20 @@ class MarkdownEditor {
             if (strpos($service, '\\') === false) {
                 $className = 'MarkdownEditor\\oEmbed\\Service\\' . $service;
                 if (!class_exists($className)) {
-                    $servicesArray['MarkdownEditor\\oEmbed\\Service\\Essence'] = new MarkdownEditor\oEmbed\Service\Essence($modx);
+                    $servicesArray['MarkdownEditor\\oEmbed\\Service\\Essence'] = new MarkdownEditor\oEmbed\Service\Essence($this->modx);
                     continue;
                 }
 
-                $servicesArray[$className] = new $className($modx);
+                $servicesArray[$className] = new $className($this->modx);
                 continue;
             }
 
             if (!class_exists($service)) {
-                $servicesArray['MarkdownEditor\\oEmbed\\Service\\Essence'] = new MarkdownEditor\oEmbed\Service\Essence($modx);
+                $servicesArray['MarkdownEditor\\oEmbed\\Service\\Essence'] = new MarkdownEditor\oEmbed\Service\Essence($this->modx);
                 continue;
             }
 
-            $servicesArray[$service] = new $service($modx);
+            $servicesArray[$service] = new $service($this->modx);
         }
 
         return $servicesArray;

@@ -1,23 +1,25 @@
 <?php
-class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
+namespace MarkdownEditor\Event;
+
+class OnDocFormSave extends Event {
 
     /** @var string $uploadPath */
     private $uploadPath;
     /** @var string $uploadURL */
     private $uploadURL;
-    /** @var modResource $resource */
+    /** @var \modResource $resource */
     private $resource;
     /** @var array $uploadedFiles */
     private $uploadedFiles = array();
 
     public function process() {
-        $this->uploadPath = $this->markdowneditor->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
+        $this->uploadPath = $this->md->getOption('upload.file_upload_path', null, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'u/', true);
         $this->uploadPath = rtrim($this->uploadPath, '/') . '/';
 
-        $this->uploadURL = $this->markdowneditor->getOption('upload.file_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
+        $this->uploadURL = $this->md->getOption('upload.file_upload_url', null, $this->modx->getOption('assets_url', null, MODX_ASSETS_URL) . 'u/', true);
         $this->uploadURL = rtrim($this->uploadURL, '/') . '/';
 
-        $this->resource = $this->scriptProperties['resource'];
+        $this->resource = $this->sp['resource'];
 
         $this->saveMarkdown();
 
@@ -83,11 +85,11 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
     private function saveMarkdown()
     {
         $resourceArray = $this->resource->toArray();
-        $mode = $this->scriptProperties['mode'];
-        $deleteUnused = (int) $this->markdowneditor->getOption('upload.delete_unused', null, 1);
-        $underResource = (int) $this->markdowneditor->getOption('upload.under_resource', null, 1);
+        $mode = $this->sp['mode'];
+        $deleteUnused = (int) $this->md->getOption('upload.delete_unused', null, 1);
+        $underResource = (int) $this->md->getOption('upload.under_resource', null, 1);
 
-        if ($mode == modSystemEvent::MODE_UPD) {
+        if ($mode == \modSystemEvent::MODE_UPD) {
             if ($deleteUnused && $underResource) {
                 $this->uploadedFiles();
             }
@@ -110,13 +112,13 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
                 $content->set('namespace', 'core');
             }
 
-            if ($mode == modSystemEvent::MODE_NEW) {
+            if ($mode == \modSystemEvent::MODE_NEW) {
                 if ($underResource) {
                     $this->moveFilesUnderCorrectResource($value, $fieldName);
                 }
             }
 
-            if ($mode == modSystemEvent::MODE_UPD) {
+            if ($mode == \modSystemEvent::MODE_UPD) {
                 if ($deleteUnused && $underResource) {
                     $this->unsetUnusedFiles($value);
                 }
@@ -129,7 +131,7 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
             $this->resource->{$field} = '';
         }
 
-        if ($mode == modSystemEvent::MODE_UPD) {
+        if ($mode == \modSystemEvent::MODE_UPD) {
             if ($deleteUnused && $underResource) {
                 $this->deleteUnusedFiles();
             }
@@ -143,7 +145,7 @@ class MarkdownEditorOnDocFormSave extends MarkdownEditorPlugin {
 
         if (!is_dir($path)) return;
 
-        foreach (new DirectoryIterator($path) as $file) {
+        foreach (new \DirectoryIterator($path) as $file) {
             if ($file->isFile()) {
                 $uploadedFiles[] = $file->getFilename();
             }

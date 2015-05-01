@@ -1,19 +1,21 @@
 <?php
-abstract class MarkdownEditorPlugin {
+namespace MarkdownEditor\Event;
 
-    /** @var modX $modx */
+abstract class Event {
+
+    /** @var \modX */
     protected $modx;
 
-    /** @var MarkdownEditor $markdowneditor */
-    protected $markdowneditor;
+    /** @var \MarkdownEditor */
+    protected $md;
 
-    /** @var array $scriptProperties */
-    protected $scriptProperties;
+    /** @var array */
+    protected $sp;
 
-    public function __construct(&$modx, &$scriptProperties) {
-        $this->scriptProperties =& $scriptProperties;
+    public function __construct(\modX &$modx, &$scriptProperties) {
+        $this->sp =& $scriptProperties;
         $this->modx =& $modx;
-        $this->markdowneditor = $this->modx->markdowneditor;
+        $this->md = $this->modx->markdowneditor;
     }
 
     public function run() {
@@ -21,13 +23,14 @@ abstract class MarkdownEditorPlugin {
         if ($init !== true) {
             return;
         }
+        
         $this->process();
     }
 
     public function init()
     {
-        if (isset($this->scriptProperties['resource'])) {
-            if (!$this->scriptProperties['resource']->richtext) return false;
+        if (isset($this->sp['resource'])) {
+            if (!$this->sp['resource']->richtext) return false;
         }
 
         $useEditor = $this->modx->getOption('use_editor', false);
