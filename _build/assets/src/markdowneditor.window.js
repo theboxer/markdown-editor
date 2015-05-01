@@ -138,6 +138,7 @@ markdownEditor.window.Cropper = function(config) {
                 fn: function() {
                     var cropperOptions = {};
                     this.$cropperEl = $('#' + this.id + ' ' + config.cropperSelector);
+                    cropperOptions.strict = false;
 
                     cropperOptions.crop = function (data) {
                         this.imageData = [
