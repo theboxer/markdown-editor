@@ -50,3 +50,7 @@ I would love to thank [Roman](https://twitter.com/@renekopcem) & [Ryan](https://
 ### All contributors
 - [Roman Klos](https://twitter.com/@renekopcem)
 - [Ryan Thrash](https://twitter.com/@rthrash)
+
+## Show Your Support
+If you enjoy using Markdown Editor, please consider supporting its ongoing development or showing thanks via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FE62UABYW2V6S). 
+Anything is appreciated!

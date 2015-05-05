@@ -17,3 +17,7 @@ _Markdown Editor_ requires
 - Parsing MODX tag in live preview
 - Custom CSS for Manager preview
 - Auto include GFM & Highlight on frontend
+
+## Show Your Support
+If you enjoy using Markdown Editor, please consider supporting its ongoing development or showing thanks via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FE62UABYW2V6S). 
+Anything is appreciated!
