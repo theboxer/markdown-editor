@@ -399,12 +399,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             var range = selection.getRange();
             if (range.start.row != range.end.row) return;
 
-            if (selection.session.doc.$lines[this.editor.getCursorPosition().row] == "") {
-                var node = Ext.DomQuery.selectNode('.' + this.mdElementName + '_markdown .ace_gutter-cell:nth-child(' + (this.editor.getCursorPosition().row + 1) + ')');
-                if (node) {
-                    this.addGutterToolbar(node);
-                }
-            }
+            this.editor.session.addGutterDecoration(range.start.row, '');
         }.bind(this));
 
         this.editor.session.gutterRenderer =  {
