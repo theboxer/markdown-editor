@@ -291,6 +291,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.child('i').addClass('icon-stop');
 
             that.contentMD.parent().parent().addClass('split');
+            that.editor.resize();
         };
 
         this.toolBox.child('.splitscreen-button').turnOff = function() {
@@ -298,6 +299,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             this.child('i').removeClass('icon-stop');
 
             that.contentMD.parent().parent().removeClass('split');
+            that.editor.resize();
         };
 
         this.toolBox.child('.fullscreen-button').turnOn = function() {
@@ -325,6 +327,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             that.contentMD.parent().parent().addClass('fullscreen');
 
             that.editor.setOption('maxLines', null);
+            that.editor.resize();
         };
 
         this.toolBox.child('.fullscreen-button').turnOff = function() {
