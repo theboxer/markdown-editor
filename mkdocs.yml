@@ -8,6 +8,7 @@ pages:
 - [oembed.md, oEmbed]
 - [systemsettings.md, System Settings]
 - [contributing.md, Contributing]
+- [typography.md, Typography]
 - [changelog.md, Changelog]
 - [license.md, License]
 theme: yeti
