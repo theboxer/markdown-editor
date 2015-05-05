@@ -211,7 +211,6 @@ $gutter-pad:  37px;
   min-height: 25px;
   position: relative !important;
   border: 0;
-  border-top: none;
   font-size: 12px;
   line-height: 25px;
 }
@@ -258,6 +257,14 @@ label.link:hover {
 .progress.error,
 .progress {
   padding-left: $gutter-pad;
+}
+
+.upload-bar {
+  margin-top: -5px;
+
+  .fullscreen & {
+    margin-top: 0;
+  }
 }
 
 .progress {
