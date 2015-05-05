@@ -1,7 +1,7 @@
 site_name: Markdown Editor
 docs_dir: core/components/markdowneditor/docs
 site_dir: _build/mkdocs_site
-repo_url: https://github.com/modxcms/markdown-editor
+repo_url: https://github.com/theboxer/markdown-editor
 theme_dir: '_build/mkdocs_theme'
 pages:
 - [index.md, Markdown Editor]
