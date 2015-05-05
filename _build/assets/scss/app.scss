@@ -210,7 +210,6 @@ $gutter-pad:  37px;
 .status-bar {
   min-height: 25px;
   position: relative !important;
-  top: -5px !important;
   border: 0;
   border-top: none;
   font-size: 12px;
@@ -380,15 +379,17 @@ label.link:hover {
     margin: -28px 0 0 42px;
     visibility: hidden;
   }
-
-
-
 }
-
 
 .md-icon-rotate-45 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0.5);
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+
+#modx-resource-content {
+  .main-wrapper {
+    padding: 0 !important;
+  }
 }

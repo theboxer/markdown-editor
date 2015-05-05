@@ -183,7 +183,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.mdContainer = Ext.get(Ext.DomHelper.insertBefore(this.textarea, {
             tag: 'div',
-            class: 'markdown-container ace-' + (MODx.config['markdowneditor.general.theme'] || 'monokai').toLowerCase()
+            class: 'markdown-container ace-' + (MODx.config['markdowneditor.general.theme'] || 'monokai').toLowerCase().replace(/_/g, '-')
         }));
 
         var fullScreenHeader = Ext.get(Ext.DomHelper.append(this.mdContainer.dom,{
