@@ -20,6 +20,7 @@ markdownEditor.Editor = function(config) {
 Ext.extend(markdownEditor.Editor,Ext.Component,{
     remarkable: ''
     ,fullScreen: false
+    ,diffDOM: null
     ,localCache: {
         oEmbed: {}
     }
@@ -47,6 +48,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,render: function(container, position) {
         this.textarea = Ext.get(this.mdElementId);
         this.mdElementName = this.textarea.dom.name;
+        this.diffDOM = new diffDOM();
 
         if (!this.textarea) return;
 
@@ -220,13 +222,17 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             tag: 'div',
             class: 'markdown-body preview-md'
         }));
+        
+        this.preview = Ext.get(Ext.DomHelper.append(this.preview.dom,{
+            tag: 'div'
+        }));
 
         var that = this;
         this.preview.fixHeight = function () {
             that.editor.resize();
             var height = that.editor.getSession().getScreenLength() * that.editor.renderer.lineHeight + that.editor.renderer.scrollBar.getWidth()  + 25;
             
-            this.setHeight(height);
+            this.parent().setHeight(height);
         };
 
         if (MODx.config['markdowneditor.upload.enable_image_upload'] == 1 || MODx.config['markdowneditor.upload.enable_file_upload'] == 1) {
@@ -622,13 +628,17 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     listeners: {
                         'success': {
                             fn: function(r) {
-                                this.preview.update(r.data);
+                                var newPreview = document.createElement('div');
+                                newPreview.innerHTML = r.data;
 
-                                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
-                                    this.preview.dom.scrollTop = this.preview.dom.scrollHeight
-                                }
+                                this.diffDOM.apply(this.preview.dom, this.diffDOM.diff(this.preview.dom, newPreview));
 
                                 this.preview.fixHeight();
+                                
+                                if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
+                                    this.preview.parent().dom.scrollTop = this.preview.parent().dom.scrollHeight
+                                }
+                                
                             },
                             scope: this
                         }
@@ -636,13 +646,16 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 });
             }.bind(this), timeout);
         } else {
-            this.preview.update(output);
-
-            if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
-                this.preview.dom.scrollTop = this.preview.dom.scrollHeight
-            }
-
+            var newPreview = document.createElement('div');
+            newPreview.innerHTML = output;
+            
+            this.diffDOM.apply(this.preview.dom, this.diffDOM.diff(this.preview.dom, newPreview));
+            
             this.preview.fixHeight();
+            
+            if ((this.editor.getCursorPosition().row + 2) >= this.editor.getSession().getDocument().getLength()) {
+                this.preview.parent().dom.scrollTop = this.preview.parent().dom.scrollHeight;
+            }
         }
 
         this.taMarkdown.dom.value = this.editor.getValue();

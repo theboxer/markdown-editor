@@ -32857,3 +32857,1011 @@ void 0===c?d&&"get"in d&&null!==(e=d.get(a,b))?e:(e=n.find.attr(a,b),null==e?voi
  * Date: 2015-04-18T04:35:01.500Z
  */
 !function(a){"function"==typeof define&&define.amd?define(["jquery"],a):a("object"==typeof exports?require("jquery"):jQuery)}(function(a){"use strict";function b(a){return"number"==typeof a}function c(a){return"undefined"==typeof a}function d(a,c){var d=[];return b(c)&&d.push(c),d.slice.apply(a,d)}function e(a,b){var c=d(arguments,2);return function(){return a.apply(b,c.concat(d(arguments)))}}function f(a){var b=a.match(/^(https?:)\/\/([^\:\/\?#]+):?(\d*)/i);return b&&(b[1]!==o.protocol||b[2]!==o.hostname||b[3]!==o.port)}function g(a){var b="timestamp="+(new Date).getTime();return a+(-1===a.indexOf("?")?"?":"&")+b}function h(a,b){return b.left<0&&a.width<b.left+b.width&&b.top<0&&a.height<b.top+b.height}function i(a){return a?"rotate("+a+"deg)":"none"}function j(a,b){var c,d,e=R(a.degree)%180,f=(e>90?180-e:e)*Math.PI/180,g=S(f),h=T(f),i=a.width,j=a.height,k=a.aspectRatio;return b?(c=i/(h+g/k),d=c/k):(c=i*h+j*g,d=i*g+j*h),{width:c,height:d}}function k(b,c){var d=a("<canvas>")[0],e=d.getContext("2d"),f=c.naturalWidth,g=c.naturalHeight,h=c.rotate,i=j({width:f,height:g,degree:h});return h?(d.width=i.width,d.height=i.height,e.save(),e.translate(i.width/2,i.height/2),e.rotate(h*Math.PI/180),e.drawImage(b,-f/2,-g/2,f,g),e.restore()):(d.width=f,d.height=g,e.drawImage(b,0,0,f,g)),d}function l(b,c){this.$element=a(b),this.options=a.extend({},l.DEFAULTS,a.isPlainObject(c)&&c),this.ready=!1,this.built=!1,this.rotated=!1,this.cropped=!1,this.disabled=!1,this.canvas=null,this.cropBox=null,this.load()}var m=a(window),n=a(document),o=window.location,p=".cropper",q="preview"+p,r=/^(e|n|w|s|ne|nw|sw|se|all|crop|move|zoom)$/,s="cropper-modal",t="cropper-hide",u="cropper-hidden",v="cropper-invisible",w="cropper-move",x="cropper-crop",y="cropper-disabled",z="cropper-bg",A="mousedown touchstart",B="mousemove touchmove",C="mouseup mouseleave touchend touchleave touchcancel",D="wheel mousewheel DOMMouseScroll",E="dblclick",F="resize"+p,G="build"+p,H="built"+p,I="dragstart"+p,J="dragmove"+p,K="dragend"+p,L="zoomin"+p,M="zoomout"+p,N=a.isFunction(a("<canvas>")[0].getContext),O=Math.sqrt,P=Math.min,Q=Math.max,R=Math.abs,S=Math.sin,T=Math.cos,U=parseFloat,V={};V.load=function(b){var c,d,e,h,i=this.options,j=this.$element;if(!b)if(j.is("img")){if(!j.attr("src"))return;b=j.prop("src")}else j.is("canvas")&&N&&(b=j[0].toDataURL());b&&(e=a.Event(G),j.one(G,i.build).trigger(e),e.isDefaultPrevented()||(i.checkImageOrigin&&f(b)&&(c="anonymous",j.prop("crossOrigin")||(d=g(b))),this.$clone=h=a("<img>"),h.one("load",a.proxy(function(){var a=h.prop("naturalWidth")||h.width(),c=h.prop("naturalHeight")||h.height();this.image={naturalWidth:a,naturalHeight:c,aspectRatio:a/c,rotate:0},this.url=b,this.ready=!0,this.build()},this)).one("error",function(){h.remove()}).attr({src:d||b,crossOrigin:c}),h.addClass(t).insertAfter(j)))},V.build=function(){var b,c,d=this.$element,e=this.$clone,f=this.options;this.ready&&(this.built&&this.unbuild(),this.$cropper=b=a(l.TEMPLATE),d.addClass(u),e.removeClass(t),this.$container=d.parent().append(b),this.$canvas=b.find(".cropper-canvas").append(e),this.$dragBox=b.find(".cropper-drag-box"),this.$cropBox=c=b.find(".cropper-crop-box"),this.$viewBox=b.find(".cropper-view-box"),this.addListeners(),this.initPreview(),f.aspectRatio=U(f.aspectRatio)||0/0,f.autoCrop?(this.cropped=!0,f.modal&&this.$dragBox.addClass(s)):c.addClass(u),f.background&&b.addClass(z),f.highlight||c.find(".cropper-face").addClass(v),f.guides||c.find(".cropper-dashed").addClass(u),f.movable||c.find(".cropper-face").data("drag","move"),f.resizable||c.find(".cropper-line, .cropper-point").addClass(u),this.setDragMode(f.dragCrop?"crop":"move"),this.built=!0,this.render(),d.one(H,f.built).trigger(H))},V.unbuild=function(){this.built&&(this.built=!1,this.container=null,this.canvas=null,this.cropBox=null,this.removeListeners(),this.resetPreview(),this.$preview=null,this.$viewBox=null,this.$cropBox=null,this.$dragBox=null,this.$canvas=null,this.$container=null,this.$cropper.remove(),this.$cropper=null)},a.extend(V,{render:function(){this.initContainer(),this.initCanvas(),this.initCropBox(),this.renderCanvas(),this.cropped&&this.renderCropBox()},initContainer:function(){var a=this.$element,b=this.$container,c=this.$cropper,d=this.options;c.addClass(u),a.removeClass(u),c.css(this.container={width:Q(b.width(),U(d.minContainerWidth)||200),height:Q(b.height(),U(d.minContainerHeight)||100)}),a.addClass(u),c.removeClass(u)},initCanvas:function(){var b=this.container,c=b.width,d=b.height,e=this.image,f=e.aspectRatio,g={aspectRatio:f,width:c,height:d};d*f>c?g.height=c/f:g.width=d*f,g.oldLeft=g.left=(c-g.width)/2,g.oldTop=g.top=(d-g.height)/2,this.canvas=g,this.limitCanvas(!0,!0),this.initialImage=a.extend({},e),this.initialCanvas=a.extend({},g)},limitCanvas:function(b,c){var d,e,f=this.options,g=f.strict,h=this.container,i=h.width,j=h.height,k=this.canvas,l=k.aspectRatio,m=this.cropBox,n=this.cropped&&m;b&&(d=U(f.minCanvasWidth)||0,e=U(f.minCanvasHeight)||0,d?(g&&(d=Q(n?m.width:i,d)),e=d/l):e?(g&&(e=Q(n?m.height:j,e)),d=e*l):g&&(n?(d=m.width,e=m.height,e*l>d?d=e*l:e=d/l):(d=i,e=j,e*l>d?e=d/l:d=e*l)),a.extend(k,{minWidth:d,minHeight:e,maxWidth:1/0,maxHeight:1/0})),c&&(g?n?(k.minLeft=P(m.left,m.left+m.width-k.width),k.minTop=P(m.top,m.top+m.height-k.height),k.maxLeft=m.left,k.maxTop=m.top):(k.minLeft=P(0,i-k.width),k.minTop=P(0,j-k.height),k.maxLeft=Q(0,i-k.width),k.maxTop=Q(0,j-k.height)):(k.minLeft=-k.width,k.minTop=-k.height,k.maxLeft=i,k.maxTop=j))},renderCanvas:function(a){var b,c,d=this.options,e=this.canvas,f=this.image;this.rotated&&(this.rotated=!1,c=j({width:f.width,height:f.height,degree:f.rotate}),b=c.width/c.height,b!==e.aspectRatio&&(e.left-=(c.width-e.width)/2,e.top-=(c.height-e.height)/2,e.width=c.width,e.height=c.height,e.aspectRatio=b,this.limitCanvas(!0,!1))),(e.width>e.maxWidth||e.width<e.minWidth)&&(e.left=e.oldLeft),(e.height>e.maxHeight||e.height<e.minHeight)&&(e.top=e.oldTop),e.width=P(Q(e.width,e.minWidth),e.maxWidth),e.height=P(Q(e.height,e.minHeight),e.maxHeight),this.limitCanvas(!1,!0),e.oldLeft=e.left=P(Q(e.left,e.minLeft),e.maxLeft),e.oldTop=e.top=P(Q(e.top,e.minTop),e.maxTop),this.$canvas.css({width:e.width,height:e.height,left:e.left,top:e.top}),this.renderImage(),this.cropped&&d.strict&&!h(this.container,e)&&this.limitCropBox(!0,!0),a&&this.output()},renderImage:function(){var b,c=this.canvas,d=this.image;d.rotate&&(b=j({width:c.width,height:c.height,degree:d.rotate,aspectRatio:d.aspectRatio},!0)),a.extend(d,b?{width:b.width,height:b.height,left:(c.width-b.width)/2,top:(c.height-b.height)/2}:{width:c.width,height:c.height,left:0,top:0}),this.$clone.css({width:d.width,height:d.height,marginLeft:d.left,marginTop:d.top,transform:i(d.rotate)})},initCropBox:function(){var b=this.options,c=this.canvas,d=b.aspectRatio,e=U(b.autoCropArea)||.8,f={width:c.width,height:c.height};d&&(c.height*d>c.width?f.height=f.width/d:f.width=f.height*d),this.cropBox=f,this.limitCropBox(!0,!0),f.width=P(Q(f.width,f.minWidth),f.maxWidth),f.height=P(Q(f.height,f.minHeight),f.maxHeight),f.width=Q(f.minWidth,f.width*e),f.height=Q(f.minHeight,f.height*e),f.oldLeft=f.left=c.left+(c.width-f.width)/2,f.oldTop=f.top=c.top+(c.height-f.height)/2,this.initialCropBox=a.extend({},f)},limitCropBox:function(a,b){var c,d,e=this.options,f=e.strict,g=this.container,h=g.width,i=g.height,j=this.canvas,k=this.cropBox,l=e.aspectRatio;a&&(c=U(e.minCropBoxWidth)||0,d=U(e.minCropBoxHeight)||0,k.minWidth=P(h,c),k.minHeight=P(i,d),k.maxWidth=P(h,f?j.width:h),k.maxHeight=P(i,f?j.height:i),l&&(k.maxHeight*l>k.maxWidth?(k.minHeight=k.minWidth/l,k.maxHeight=k.maxWidth/l):(k.minWidth=k.minHeight*l,k.maxWidth=k.maxHeight*l)),k.minWidth=P(k.maxWidth,k.minWidth),k.minHeight=P(k.maxHeight,k.minHeight)),b&&(f?(k.minLeft=Q(0,j.left),k.minTop=Q(0,j.top),k.maxLeft=P(h,j.left+j.width)-k.width,k.maxTop=P(i,j.top+j.height)-k.height):(k.minLeft=0,k.minTop=0,k.maxLeft=h-k.width,k.maxTop=i-k.height))},renderCropBox:function(){var a=this.options,b=this.container,c=b.width,d=b.height,e=this.$cropBox,f=this.cropBox;(f.width>f.maxWidth||f.width<f.minWidth)&&(f.left=f.oldLeft),(f.height>f.maxHeight||f.height<f.minHeight)&&(f.top=f.oldTop),f.width=P(Q(f.width,f.minWidth),f.maxWidth),f.height=P(Q(f.height,f.minHeight),f.maxHeight),this.limitCropBox(!1,!0),f.oldLeft=f.left=P(Q(f.left,f.minLeft),f.maxLeft),f.oldTop=f.top=P(Q(f.top,f.minTop),f.maxTop),a.movable&&e.find(".cropper-face").data("drag",f.width===c&&f.height===d?"move":"all"),e.css({width:f.width,height:f.height,left:f.left,top:f.top}),this.cropped&&a.strict&&!h(b,this.canvas)&&this.limitCanvas(!0,!0),this.disabled||this.output()},output:function(){var a=this.options;this.preview(),a.crop&&a.crop.call(this.$element,this.getData())}}),V.initPreview=function(){var b=this.url;this.$preview=a(this.options.preview),this.$viewBox.html('<img src="'+b+'">'),this.$preview.each(function(){var c=a(this);c.data(q,{width:c.width(),height:c.height(),original:c.html()}).html('<img src="'+b+'" style="display:block;width:100%;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;image-orientation: 0deg!important">')})},V.resetPreview=function(){this.$preview.each(function(){var b=a(this);b.html(b.data(q).original).removeData(q)})},V.preview=function(){var b=this.image,c=this.canvas,d=this.cropBox,e=b.width,f=b.height,g=d.left-c.left-b.left,h=d.top-c.top-b.top,j=b.rotate;this.cropped&&!this.disabled&&(this.$viewBox.find("img").css({width:e,height:f,marginLeft:-g,marginTop:-h,transform:i(j)}),this.$preview.each(function(){var b=a(this),c=b.data(q),k=c.width/d.width,l=c.width,m=d.height*k;m>c.height&&(k=c.height/d.height,l=d.width*k,m=c.height),b.width(l).height(m).find("img").css({width:e*k,height:f*k,marginLeft:-g*k,marginTop:-h*k,transform:i(j)})}))},V.addListeners=function(){var b=this.options;this.$element.on(I,b.dragstart).on(J,b.dragmove).on(K,b.dragend).on(L,b.zoomin).on(M,b.zoomout),this.$cropper.on(A,a.proxy(this.dragstart,this)).on(E,a.proxy(this.dblclick,this)),b.zoomable&&b.mouseWheelZoom&&this.$cropper.on(D,a.proxy(this.wheel,this)),n.on(B,this._dragmove=e(this.dragmove,this)).on(C,this._dragend=e(this.dragend,this)),b.responsive&&m.on(F,this._resize=e(this.resize,this))},V.removeListeners=function(){var a=this.options;this.$element.off(I,a.dragstart).off(J,a.dragmove).off(K,a.dragend).off(L,a.zoomin).off(M,a.zoomout),this.$cropper.off(A,this.dragstart).off(E,this.dblclick),a.zoomable&&a.mouseWheelZoom&&this.$cropper.off(D,this.wheel),n.off(B,this._dragmove).off(C,this._dragend),a.responsive&&m.off(F,this._resize)},a.extend(V,{resize:function(){var b,c,d,e=this.$container,f=this.container;this.disabled||(d=e.width()/f.width,(1!==d||e.height()!==f.height)&&(b=this.getCanvasData(),c=this.getCropBoxData(),this.render(),this.setCanvasData(a.each(b,function(a,c){b[a]=c*d})),this.setCropBoxData(a.each(c,function(a,b){c[a]=b*d}))))},dblclick:function(){this.disabled||this.setDragMode(this.$dragBox.hasClass(x)?"move":"crop")},wheel:function(a){var b=a.originalEvent,c=1;this.disabled||(a.preventDefault(),b.deltaY?c=b.deltaY>0?1:-1:b.wheelDelta?c=-b.wheelDelta/120:b.detail&&(c=b.detail>0?1:-1),this.zoom(.1*-c))},dragstart:function(b){var c,d,e,f=this.options,g=b.originalEvent,h=g&&g.touches,i=b;if(!this.disabled){if(h){if(e=h.length,e>1){if(!f.zoomable||!f.touchDragZoom||2!==e)return;i=h[1],this.startX2=i.pageX,this.startY2=i.pageY,c="zoom"}i=h[0]}if(c=c||a(i.target).data("drag"),r.test(c)){if(b.preventDefault(),d=a.Event(I,{originalEvent:g,dragType:c}),this.$element.trigger(d),d.isDefaultPrevented())return;this.dragType=c,this.cropping=!1,this.startX=i.pageX,this.startY=i.pageY,"crop"===c&&(this.cropping=!0,this.$dragBox.addClass(s))}}},dragmove:function(b){var c,d,e=this.options,f=b.originalEvent,g=f&&f.touches,h=b,i=this.dragType;if(!this.disabled){if(g){if(d=g.length,d>1){if(!e.zoomable||!e.touchDragZoom||2!==d)return;h=g[1],this.endX2=h.pageX,this.endY2=h.pageY}h=g[0]}if(i){if(b.preventDefault(),c=a.Event(J,{originalEvent:f,dragType:i}),this.$element.trigger(c),c.isDefaultPrevented())return;this.endX=h.pageX,this.endY=h.pageY,this.change()}}},dragend:function(b){var c,d=this.dragType;if(!this.disabled&&d){if(b.preventDefault(),c=a.Event(K,{originalEvent:b.originalEvent,dragType:d}),this.$element.trigger(c),c.isDefaultPrevented())return;this.cropping&&(this.cropping=!1,this.$dragBox.toggleClass(s,this.cropped&&this.options.modal)),this.dragType=""}}}),a.extend(V,{reset:function(){this.built&&!this.disabled&&(this.image=a.extend({},this.initialImage),this.canvas=a.extend({},this.initialCanvas),this.renderCanvas(),this.cropped&&(this.cropBox=a.extend({},this.initialCropBox),this.renderCropBox()))},clear:function(){this.cropped&&!this.disabled&&(a.extend(this.cropBox,{left:0,top:0,width:0,height:0}),this.cropped=!1,this.renderCropBox(),this.limitCanvas(),this.renderCanvas(),this.$dragBox.removeClass(s),this.$cropBox.addClass(u))},destroy:function(){var a=this.$element;this.ready?(this.unbuild(),a.removeClass(u)):this.$clone.off("load").remove(),a.removeData("cropper")},replace:function(a){!this.disabled&&a&&this.load(a)},enable:function(){this.built&&(this.disabled=!1,this.$cropper.removeClass(y))},disable:function(){this.built&&(this.disabled=!0,this.$cropper.addClass(y))},move:function(a,c){var d=this.canvas;this.built&&!this.disabled&&b(a)&&b(c)&&(d.left+=a,d.top+=c,this.renderCanvas(!0))},zoom:function(b){var c,d,e,f=this.canvas;if(b=U(b),b&&this.built&&!this.disabled&&this.options.zoomable){if(c=a.Event(b>0?L:M),this.$element.trigger(c),c.isDefaultPrevented())return;b=-1>=b?1/(1-b):1>=b?1+b:b,d=f.width*b,e=f.height*b,f.left-=(d-f.width)/2,f.top-=(e-f.height)/2,f.width=d,f.height=e,this.renderCanvas(!0),this.setDragMode("move")}},rotate:function(a){var b=this.image;a=U(a),a&&this.built&&!this.disabled&&this.options.rotatable&&(b.rotate=(b.rotate+a)%360,this.rotated=!0,this.renderCanvas(!0))},getData:function(){var b,c,d=this.cropBox,e=this.canvas,f=this.image;return this.built&&this.cropped?(c={x:d.left-e.left,y:d.top-e.top,width:d.width,height:d.height},b=f.width/f.naturalWidth,a.each(c,function(a,d){d/=b,c[a]=d})):c={x:0,y:0,width:0,height:0},c.rotate=f.rotate,c},getContainerData:function(){return this.built?this.container:{}},getImageData:function(){return this.ready?this.image:{}},getCanvasData:function(){var a,b=this.canvas;return this.built&&(a={left:b.left,top:b.top,width:b.width,height:b.height}),a||{}},setCanvasData:function(c){var d=this.canvas,e=d.aspectRatio;this.built&&!this.disabled&&a.isPlainObject(c)&&(b(c.left)&&(d.left=c.left),b(c.top)&&(d.top=c.top),b(c.width)?(d.width=c.width,d.height=c.width/e):b(c.height)&&(d.height=c.height,d.width=c.height*e),this.renderCanvas(!0))},getCropBoxData:function(){var a,b=this.cropBox;return this.built&&this.cropped&&(a={left:b.left,top:b.top,width:b.width,height:b.height}),a||{}},setCropBoxData:function(c){var d=this.cropBox,e=this.options.aspectRatio;this.built&&this.cropped&&!this.disabled&&a.isPlainObject(c)&&(b(c.left)&&(d.left=c.left),b(c.top)&&(d.top=c.top),e?b(c.width)?(d.width=c.width,d.height=d.width/e):b(c.height)&&(d.height=c.height,d.width=d.height*e):(b(c.width)&&(d.width=c.width),b(c.height)&&(d.height=c.height)),this.renderCropBox())},getCroppedCanvas:function(b){var c,d,e,f,g,h,i,j,l,m,n;if(this.built&&this.cropped&&N)return a.isPlainObject(b)||(b={}),n=this.getData(),c=n.width,d=n.height,j=c/d,a.isPlainObject(b)&&(g=b.width,h=b.height,g?(h=g/j,i=g/c):h&&(g=h*j,i=h/d)),e=g||c,f=h||d,l=a("<canvas>")[0],l.width=e,l.height=f,m=l.getContext("2d"),b.fillColor&&(m.fillStyle=b.fillColor,m.fillRect(0,0,e,f)),m.drawImage.apply(m,function(){var a,b,e,f,g,h,j=k(this.$clone[0],this.image),l=j.width,m=j.height,o=[j],p=n.x,q=n.y;return-c>=p||p>l?p=a=e=g=0:0>=p?(e=-p,p=0,a=g=P(l,c+p)):l>=p&&(e=0,a=g=P(c,l-p)),0>=a||-d>=q||q>m?q=b=f=h=0:0>=q?(f=-q,q=0,b=h=P(m,d+q)):m>=q&&(f=0,b=h=P(d,m-q)),o.push(p,q,a,b),i&&(e*=i,f*=i,g*=i,h*=i),g>0&&h>0&&o.push(e,f,g,h),o}.call(this)),l},setAspectRatio:function(a){var b=this.options;this.disabled||c(a)||(b.aspectRatio=U(a)||0/0,this.built&&(this.initCropBox(),this.cropped&&this.renderCropBox()))},setDragMode:function(a){var b=this.$dragBox,c=!1,d=!1;if(this.ready&&!this.disabled){switch(a){case"crop":this.options.dragCrop?(c=!0,b.data("drag",a)):d=!0;break;case"move":d=!0,b.data("drag",a);break;default:b.removeData("drag")}b.toggleClass(x,c).toggleClass(w,d)}}}),V.change=function(){var a,b=this.dragType,c=this.options,d=this.canvas,e=this.container,f=this.cropBox,g=f.width,h=f.height,i=f.left,j=f.top,k=i+g,l=j+h,m=0,n=0,o=e.width,p=e.height,q=!0,r=c.aspectRatio,s={x:this.endX-this.startX,y:this.endY-this.startY};switch(c.strict&&(m=f.minLeft,n=f.minTop,o=m+P(e.width,d.width),p=n+P(e.height,d.height)),r&&(s.X=s.y*r,s.Y=s.x/r),b){case"all":i+=s.x,j+=s.y;break;case"e":if(s.x>=0&&(k>=o||r&&(n>=j||l>=p))){q=!1;break}g+=s.x,r&&(h=g/r,j-=s.Y/2),0>g&&(b="w",g=0);break;case"n":if(s.y<=0&&(n>=j||r&&(m>=i||k>=o))){q=!1;break}h-=s.y,j+=s.y,r&&(g=h*r,i+=s.X/2),0>h&&(b="s",h=0);break;case"w":if(s.x<=0&&(m>=i||r&&(n>=j||l>=p))){q=!1;break}g-=s.x,i+=s.x,r&&(h=g/r,j+=s.Y/2),0>g&&(b="e",g=0);break;case"s":if(s.y>=0&&(l>=p||r&&(m>=i||k>=o))){q=!1;break}h+=s.y,r&&(g=h*r,i-=s.X/2),0>h&&(b="n",h=0);break;case"ne":if(r){if(s.y<=0&&(n>=j||k>=o)){q=!1;break}h-=s.y,j+=s.y,g=h*r}else s.x>=0?o>k?g+=s.x:s.y<=0&&n>=j&&(q=!1):g+=s.x,s.y<=0?j>0&&(h-=s.y,j+=s.y):(h-=s.y,j+=s.y);0>g&&0>h?(b="sw",h=0,g=0):0>g?(b="nw",g=0):0>h&&(b="se",h=0);break;case"nw":if(r){if(s.y<=0&&(n>=j||m>=i)){q=!1;break}h-=s.y,j+=s.y,g=h*r,i+=s.X}else s.x<=0?i>0?(g-=s.x,i+=s.x):s.y<=0&&n>=j&&(q=!1):(g-=s.x,i+=s.x),s.y<=0?j>0&&(h-=s.y,j+=s.y):(h-=s.y,j+=s.y);0>g&&0>h?(b="se",h=0,g=0):0>g?(b="ne",g=0):0>h&&(b="sw",h=0);break;case"sw":if(r){if(s.x<=0&&(m>=i||l>=p)){q=!1;break}g-=s.x,i+=s.x,h=g/r}else s.x<=0?i>0?(g-=s.x,i+=s.x):s.y>=0&&l>=p&&(q=!1):(g-=s.x,i+=s.x),s.y>=0?p>l&&(h+=s.y):h+=s.y;0>g&&0>h?(b="ne",h=0,g=0):0>g?(b="se",g=0):0>h&&(b="nw",h=0);break;case"se":if(r){if(s.x>=0&&(k>=o||l>=p)){q=!1;break}g+=s.x,h=g/r}else s.x>=0?o>k?g+=s.x:s.y>=0&&l>=p&&(q=!1):g+=s.x,s.y>=0?p>l&&(h+=s.y):h+=s.y;0>g&&0>h?(b="nw",h=0,g=0):0>g?(b="sw",g=0):0>h&&(b="ne",h=0);break;case"move":d.left+=s.x,d.top+=s.y,this.renderCanvas(!0),q=!1;break;case"zoom":this.zoom(function(a,b,c,d){var e=O(a*a+b*b),f=O(c*c+d*d);return(f-e)/e}(R(this.startX-this.startX2),R(this.startY-this.startY2),R(this.endX-this.endX2),R(this.endY-this.endY2))),this.startX2=this.endX2,this.startY2=this.endY2,q=!1;break;case"crop":s.x&&s.y&&(a=this.$cropper.offset(),i=this.startX-a.left,j=this.startY-a.top,g=f.minWidth,h=f.minHeight,s.x>0?s.y>0?b="se":(b="ne",j-=h):s.y>0?(b="sw",i-=g):(b="nw",i-=g,j-=h),this.cropped||(this.cropped=!0,this.$cropBox.removeClass(u)))}q&&(f.width=g,f.height=h,f.left=i,f.top=j,this.dragType=b,this.renderCropBox()),this.startX=this.endX,this.startY=this.endY},a.extend(l.prototype,V),l.DEFAULTS={aspectRatio:0/0,autoCropArea:.8,crop:null,preview:"",strict:!0,responsive:!0,checkImageOrigin:!0,modal:!0,guides:!0,highlight:!0,background:!0,autoCrop:!0,dragCrop:!0,movable:!0,resizable:!0,rotatable:!0,zoomable:!0,touchDragZoom:!0,mouseWheelZoom:!0,minCanvasWidth:0,minCanvasHeight:0,minCropBoxWidth:0,minCropBoxHeight:0,minContainerWidth:200,minContainerHeight:100,build:null,built:null,dragstart:null,dragmove:null,dragend:null,zoomin:null,zoomout:null},l.setDefaults=function(b){a.extend(l.DEFAULTS,b)},l.TEMPLATE=function(a,b){return b=b.split(","),a.replace(/\d+/g,function(a){return b[a]})}('<0 6="5-container"><0 6="5-canvas"></0><0 6="5-2-9" 3-2="move"></0><0 6="5-crop-9"><1 6="5-view-9"></1><1 6="5-8 8-h"></1><1 6="5-8 8-v"></1><1 6="5-face" 3-2="all"></1><1 6="5-7 7-e" 3-2="e"></1><1 6="5-7 7-n" 3-2="n"></1><1 6="5-7 7-w" 3-2="w"></1><1 6="5-7 7-s" 3-2="s"></1><1 6="5-4 4-e" 3-2="e"></1><1 6="5-4 4-n" 3-2="n"></1><1 6="5-4 4-w" 3-2="w"></1><1 6="5-4 4-s" 3-2="s"></1><1 6="5-4 4-ne" 3-2="ne"></1><1 6="5-4 4-nw" 3-2="nw"></1><1 6="5-4 4-sw" 3-2="sw"></1><1 6="5-4 4-se" 3-2="se"></1></0></0>',"div,span,drag,data,point,cropper,class,line,dashed,box"),l.other=a.fn.cropper,a.fn.cropper=function(b){var e,f=d(arguments,1);return this.each(function(){var c,d=a(this),g=d.data("cropper");g||d.data("cropper",g=new l(this,b)),"string"==typeof b&&a.isFunction(c=g[b])&&(e=c.apply(g,f))}),c(e)?this:e},a.fn.cropper.Constructor=l,a.fn.cropper.setDefaults=l.setDefaults,a.fn.cropper.noConflict=function(){return a.fn.cropper=l.other,this}});
+(function () {
+
+  var diffcount;
+
+  var ADD_ATTRIBUTE = 0,
+    MODIFY_ATTRIBUTE = 1,
+    REMOVE_ATTRIBUTE = 2,
+    MODIFY_TEXT_ELEMENT = 3,
+    RELOCATE_GROUP = 4,
+    REMOVE_ELEMENT = 5,
+    ADD_ELEMENT = 6,
+    REMOVE_TEXT_ELEMENT = 7,
+    ADD_TEXT_ELEMENT = 8,
+    REPLACE_ELEMENT = 9,
+    MODIFY_VALUE = 10,
+    MODIFY_CHECKED = 11,
+    MODIFY_SELECTED = 12,
+    MODIFY_DATA = 13,
+    ACTION = 14,
+    ROUTE = 15,
+    OLD_VALUE = 16,
+    NEW_VALUE = 17,
+    ELEMENT = 18,
+    GROUP = 19,
+    FROM = 20,
+    TO = 21,
+    NAME = 22,
+    VALUE = 23,
+    TEXT = 24,
+    ATTRIBUTES = 25,
+    NODE_NAME = 26,
+    COMMENT = 27,
+    CHILD_NODES = 28,
+    CHECKED = 29,
+    SELECTED = 30;
+
+  var Diff = function (options) {
+    var diff = this;
+    Object.keys(options).forEach(function (option) {
+      diff[option] = options[option];
+    });
+  }
+  Diff.prototype = {
+    toString: function () {
+      return JSON.stringify(this);
+    }
+  };
+
+  var SubsetMapping = function SubsetMapping(a, b) {
+    this["old"] = a;
+    this["new"] = b;
+  };
+
+  SubsetMapping.prototype = {
+    contains: function contains(subset) {
+      if (subset.length < this.length) {
+        return subset["new"] >= this["new"] && subset["new"] < this["new"] + this.length;
+      }
+      return false;
+    },
+    toString: function toString() {
+      return this.length + " element subset, first mapping: old " + this["old"] + " → new " + this["new"];
+    }
+  };
+
+  var elementDescriptors = function(el) {
+    var output = [];
+    if (el.nodeType == 1) {
+      output.push(el.tagName);
+      if (typeof(el.className) == 'string') {
+        output.push(el.tagName + '.' + el.className.replace(/ /g, '.'));
+      }
+      if (el.id) {
+        output.push(el.tagName + '#' + el.id);
+      }
+    }
+    return output;
+  }
+
+  var findUniqueDescriptors = function(li) {
+    var uniqueDescriptors = {};
+    var duplicateDescriptors = {};
+
+    for (var i = 0; i < li.length; i++) {
+      var node = li[i];
+      var descriptors = elementDescriptors(node);
+      for (var j = 0; j < descriptors.length; j++) {
+        var descriptor = descriptors[j];
+        var inUnique = descriptor in uniqueDescriptors;
+        var inDupes = descriptor in duplicateDescriptors;
+        if (!inUnique && !inDupes) {
+          uniqueDescriptors[descriptor] = true;
+        } else if (inUnique) {
+          delete uniqueDescriptors[descriptor];
+          duplicateDescriptors[descriptor] = true;
+        }
+      }
+    }
+
+    return uniqueDescriptors;
+  }
+
+  var uniqueInBoth = function(l1, l2) {
+    var l1Unique = findUniqueDescriptors(l1);
+    var l2Unique = findUniqueDescriptors(l2);
+    var inBoth = {};
+
+    var key;
+    for (key in l1Unique) {
+      if (l2Unique[key]) {
+        inBoth[key] = true;
+      }
+    }
+
+    return inBoth;
+  }
+
+  var roughlyEqual = function roughlyEqual(e1, e2, uniqueDescriptors, sameSiblings, preventRecursion) {
+    if (!e1 || !e2) return false;
+    if (e1.nodeType !== e2.nodeType) return false;
+    if (e1.nodeType === 3) {
+      if (e2.nodeType !== 3) return false;
+      // Note that we initially don't care what the text content of a node is,
+      // the mere fact that it's the same tag and "has text" means it's roughly
+      // equal, and then we can find out the true text difference later.
+      return preventRecursion ? true : e1.data === e2.data;
+    }
+    if (e1.nodeName !== e2.nodeName) return false;
+    if (e1.tagName === e2.tagName) {
+      if (e1.tagName in uniqueDescriptors) return true
+      if (e1.id && e1.id === e2.id) {
+        var idDescriptor = e1.tagName + '#' + e1.id;
+        if (idDescriptor in uniqueDescriptors) return true;
+      }
+      if (e1.className && e1.className === e2.className) {
+        var classDescriptor = e1.tagName + '.' + e1.className.replace(/ /g, '.');
+        if (classDescriptor in uniqueDescriptors) return true;
+      }
+      if (sameSiblings) return true;
+    }
+    if (e1.childNodes.length !== e2.childNodes.length) return false;
+    var thesame = true;
+    var childUniqueDescriptors = uniqueInBoth(e1.childNodes, e2.childNodes);
+    for (var i = e1.childNodes.length - 1; i >= 0; i--) {
+      if (preventRecursion) {
+        thesame = thesame && (e1.childNodes[i].nodeName === e2.childNodes[i].nodeName);
+      } else {
+        // note: we only allow one level of recursion at any depth. If 'preventRecursion'
+        //       was not set, we must explicitly force it to true for child iterations.
+        thesame = thesame && roughlyEqual(e1.childNodes[i], e2.childNodes[i], childUniqueDescriptors, true, true);
+      }
+    }
+    return thesame;
+  };
+
+
+  var cleanCloneNode = function (node) {
+    // Clone a node with contents and add values manually,
+    // to avoid https://bugzilla.mozilla.org/show_bug.cgi?id=230307
+    var clonedNode = node.cloneNode(true),
+      textareas, clonedTextareas, options, clonedOptions, i;
+
+    if (node.nodeType != 8 && node.nodeType != 3) {
+
+      textareas = node.querySelectorAll('textarea');
+      clonedTextareas = clonedNode.querySelectorAll('textarea');
+      for (i = 0; i < textareas.length; i++) {
+        if (clonedTextareas[i].value !== textareas[i].value) {
+          clonedTextareas[i].value = textareas[i].value;
+        }
+      }
+      if (node.value && (node.value !== clonedNode.value)) {
+        clonedNode.value = node.value;
+      }
+      options = node.querySelectorAll('option');
+      clonedOptions = clonedNode.querySelectorAll('option');
+      for (i = 0; i < options.length; i++) {
+        if (options[i].selected && !(clonedOptions[i].selected)) {
+          clonedOptions[i].selected = true;
+        } else if (!(options[i].selected) && clonedOptions[i].selected) {
+          clonedOptions[i].selected = false;
+        }
+      }      
+      if (node.selected && !(clonedNode.selected)) {
+        clonedNode.selected = true;
+      } else if (!(node.selected) && clonedNode.selected) {
+        clonedNode.selected = false;
+      }
+    }
+    return clonedNode;
+  };
+
+  var nodeToObj = function (node) {
+    var objNode = {}, i;
+
+    if (node.nodeType === 3) {
+      objNode[TEXT] = node.data;
+    } else if (node.nodeType === 8) {
+      objNode[COMMENT] = node.data;
+    } else {
+      objNode[NODE_NAME] = node.nodeName;
+      if (node.attributes && node.attributes.length > 0) {
+        objNode[ATTRIBUTES] = [];
+        for (i = 0; i < node.attributes.length; i++) {
+          objNode[ATTRIBUTES].push([node.attributes[i].name, node.attributes[i].value]);
+        }
+      }
+      if (node.childNodes && node.childNodes.length > 0) {
+        objNode[CHILD_NODES] = [];
+        for (i = 0; i < node.childNodes.length; i++) {
+          objNode[CHILD_NODES].push(nodeToObj(node.childNodes[i]));
+        }
+      }
+      if (node.value) {
+        objNode[VALUE] = node.value;
+      }
+      if (node.checked) {
+        objNode[CHECKED] = node.checked;
+      }
+      if (node.selected) {
+        objNode[SELECTED] = node.selected;
+      }
+    }
+    return objNode;
+  };
+
+  var objToNode = function (objNode, insideSvg) {
+    var node, i;
+    if (objNode.hasOwnProperty(TEXT)) {
+      node = document.createTextNode(objNode[TEXT]);
+    } else if (objNode.hasOwnProperty(COMMENT)) {
+      node = document.createComment(objNode[COMMENT]);
+    } else {
+      if (objNode[NODE_NAME] === 'svg' || insideSvg) {
+        node = document.createElementNS('http://www.w3.org/2000/svg', objNode[NODE_NAME]);
+        insideSvg = true;
+      } else {
+        node = document.createElement(objNode[NODE_NAME]);
+      }
+      if (objNode[ATTRIBUTES]) {
+        for (i = 0; i < objNode[ATTRIBUTES].length; i++) {
+          node.setAttribute(objNode[ATTRIBUTES][i][0], objNode[ATTRIBUTES][i][1]);
+        }
+      }
+      if (objNode[CHILD_NODES]) {
+        for (i = 0; i < objNode[CHILD_NODES].length; i++) {
+          node.appendChild(objToNode(objNode[CHILD_NODES][i], insideSvg));
+        }
+      }
+      if (objNode[VALUE]) {
+        node.value = objNode[VALUE];
+      }
+      if (objNode[CHECKED]) {
+        node.checked = objNode[CHECKED];
+      }
+      if (objNode[SELECTED]) {
+        node.selected = objNode[SELECTED];
+      }
+    }
+    return node;
+  };
+
+
+
+  /**
+   * based on https://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Longest_common_substring#JavaScript
+   */
+  var findCommonSubsets = function (c1, c2, marked1, marked2) {
+    var lcsSize = 0,
+      index = [],
+      len1 = c1.length,
+      len2 = c2.length;
+    // set up the matching table
+    var matches = [],
+      a, i, j, k, l;
+    for (a = 0; a < len1 + 1; a++) {
+      matches[a] = [];
+    }
+
+    var uniqueDescriptors = uniqueInBoth(c1, c2);
+
+    // If all of the elements are the same tag, id and class, then we can
+    // consider them roughly the same even if they have a different number of
+    // children. This will reduce removing and re-adding similar elements.
+    var subsetsSame = len1 == len2;
+    if (subsetsSame) {
+      for (k = 0; k < len1; k++) {
+        var c1Desc = elementDescriptors(c1[k]);
+        var c2Desc = elementDescriptors(c2[k]);
+        if (c1Desc.length != c2Desc.length) {
+          subsetsSame = false;
+          break;
+        }
+        for (l = 0; l < c1Desc.length; l++) {
+          if (c1Desc[l] != c2Desc[l]) {
+            subsetsSame = false;
+            break;
+          }
+        }
+        if (!subsetsSame) {
+          break;
+        }
+      }
+    }
+
+    // fill the matches with distance values
+    for (i = 0; i < len1; i++) {
+      for (j = 0; j < len2; j++) {
+        if (!marked1[i] && !marked2[j] && roughlyEqual(c1[i], c2[j], uniqueDescriptors, subsetsSame)) {
+          matches[i + 1][j + 1] = (matches[i][j] ? matches[i][j] + 1 : 1);
+          if (matches[i + 1][j + 1] > lcsSize) {
+            lcsSize = matches[i + 1][j + 1];
+            index = [i + 1, j + 1];
+          }
+        } else {
+          matches[i + 1][j + 1] = 0;
+        }
+      }
+    }
+    if (lcsSize === 0) {
+      return false;
+    }
+    var origin = [index[0] - lcsSize, index[1] - lcsSize];
+    var ret = new SubsetMapping(origin[0], origin[1]);
+    ret.length = lcsSize;
+    return ret;
+  };
+
+  /**
+   * This should really be a predefined function in Array...
+   */
+  var makeArray = function (n, v) {
+    var deepcopy = function (v) {
+      v.slice();
+      for (var i = 0, last = v.length; i < last; i++) {
+        if (v[i] instanceof Array) {
+          v[i] = deepcopy(v[i]);
+        }
+      }
+    };
+    if (v instanceof Array) {
+      v = deepcopy(v);
+    }
+    var set = function () {
+      return v;
+    };
+    return (new Array(n)).join('.').split('.').map(set);
+  };
+
+  /**
+   * Generate arrays that indicate which node belongs to which subset,
+   * or whether it's actually an orphan node, existing in only one
+   * of the two trees, rather than somewhere in both.
+   */
+  var getGapInformation = function (t1, t2, stable) {
+    // [true, true, ...] arrays
+    var set = function (v) {
+      return function () {
+        return v;
+      }
+    },
+      gaps1 = makeArray(t1.childNodes.length, true),
+      gaps2 = makeArray(t2.childNodes.length, true),
+      group = 0;
+
+    // give elements from the same subset the same group number
+    stable.forEach(function (subset) {
+      var i, end;
+      for (i = subset["old"], end = i + subset.length; i < end; i++) {
+        gaps1[i] = group;
+      }
+      for (i = subset["new"], end = i + subset.length; i < end; i++) {
+        gaps2[i] = group;
+      }
+      group++;
+    });
+
+    return {
+      gaps1: gaps1,
+      gaps2: gaps2
+    };
+  };
+
+  /**
+   * Find all matching subsets, based on immediate child differences only.
+   */
+  var markSubTrees = function (oldTree, newTree) {
+    oldTree = cleanCloneNode(oldTree);
+    newTree = cleanCloneNode(newTree);
+    // note: the child lists are views, and so update as we update old/newTree
+    var oldChildren = oldTree.childNodes,
+      newChildren = newTree.childNodes,
+      marked1 = makeArray(oldChildren.length, false),
+      marked2 = makeArray(newChildren.length, false),
+      subsets = [],
+      subset = true,
+      i;
+    while (subset) {
+      subset = findCommonSubsets(oldChildren, newChildren, marked1, marked2);
+      if (subset) {
+        subsets.push(subset);
+        for (i = 0; i < subset.length; i++) {
+          marked1[subset.old + i] = true;
+        }
+        for (i = 0; i < subset.length; i++) {
+          marked2[subset.new + i] = true;
+        }
+      }
+    }
+    return subsets;
+  };
+
+  var findFirstInnerDiff = function (t1, t2, subtrees, route) {
+    if (subtrees.length === 0) return false;
+
+    var gapInformation = getGapInformation(t1, t2, subtrees),
+      gaps1 = gapInformation.gaps1,
+      gl1 = gaps1.length,
+      gaps2 = gapInformation.gaps2,
+      gl2 = gaps1.length,
+      i, j, k,
+      last = gl1 < gl2 ? gl1 : gl2;
+
+    // Check for correct submap sequencing (irrespective of gaps) first:
+    var sequence = 0,
+      group, node, similarNode, testNode,
+      shortest = gl1 < gl2 ? gaps1 : gaps2;
+
+    // group relocation
+    for (i = 0, last = shortest.length; i < last; i++) {
+      if (gaps1[i] === true) {
+        node = t1.childNodes[i];
+        if (node.nodeType === 3) {
+          if (t2.childNodes[i].nodeType === 3 && node.data != t2.childNodes[i].data) {
+            testNode = node;
+            while (testNode.nextSibling && testNode.nextSibling.nodeType === 3) {
+              testNode = testNode.nextSibling;
+              if (t2.childNodes[i].data === testNode.data) {
+                similarNode = true;
+                break;
+              }
+            }
+            if (!similarNode) {
+              k = {};
+              k[ACTION] = MODIFY_TEXT_ELEMENT;
+              k[ROUTE] = route.concat(i);
+              k[OLD_VALUE] = node.data;
+              k[NEW_VALUE] = t2.childNodes[i].data;
+              return new Diff(k);
+            }
+          }
+          k = {};
+          k[ACTION] = REMOVE_TEXT_ELEMENT;
+          k[ROUTE] = route.concat(i);
+          k[VALUE] = node.data;
+          return new Diff(k);
+        }
+        k = {};
+        k[ACTION] = REMOVE_ELEMENT;
+        k[ROUTE] = route.concat(i);
+        k[ELEMENT] = nodeToObj(node);
+        return new Diff(k);
+      }
+      if (gaps2[i] === true) {
+        node = t2.childNodes[i];
+        if (node.nodeType === 3) {
+          k = {};
+          k[ACTION] = ADD_TEXT_ELEMENT;
+          k[ROUTE] = route.concat(i);
+          k[VALUE] = node.data;
+          return new Diff(k);
+        }
+        k = {};
+        k[ACTION] = ADD_ELEMENT;
+        k[ROUTE] = route.concat(i);
+        k[ELEMENT] = nodeToObj(node);
+        return new Diff(k);
+      }
+      if (gaps1[i] != gaps2[i]) {
+        group = subtrees[gaps1[i]];
+        var toGroup = Math.min(group["new"], (t1.childNodes.length - group.length));
+        if (toGroup != i) {
+          //Check wehther destination nodes are different than originating ones.
+          var destinationDifferent = false;
+          for (j = 0; j < group.length; j++) {
+            if (!t1.childNodes[toGroup + j].isEqualNode(t1.childNodes[i + j])) {
+              destinationDifferent = true;
+            }
+
+          }
+          if (destinationDifferent) {
+            k = {};
+            k[ACTION] = RELOCATE_GROUP;
+            k[GROUP] = group;
+            k[FROM] = i;
+            k[TO] = toGroup;
+            k[ROUTE] = route;
+            return new Diff(k);
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+
+  function swap(obj, p1, p2) {
+    (function (_) {
+      obj[p1] = obj[p2];
+      obj[p2] = _;
+    }(obj[p1]));
+  };
+
+
+  var DiffTracker = function () {
+    this.list = [];
+  };
+  DiffTracker.prototype = {
+    list: false,
+    add: function (difflist) {
+      var list = this.list;
+      difflist.forEach(function (diff) {
+        list.push(diff);
+      });
+    },
+    forEach: function (fn) {
+      this.list.forEach(fn);
+    }
+  };
+
+
+
+
+  var diffDOM = function (debug, diffcap) {
+    if (typeof debug === 'undefined') {
+      debug = false;
+
+    } else {
+
+      ADD_ATTRIBUTE = "add attribute",
+      MODIFY_ATTRIBUTE = "modify attribute",
+      REMOVE_ATTRIBUTE = "remove attribute",
+      MODIFY_TEXT_ELEMENT = "modify text element",
+      RELOCATE_GROUP = "relocate group",
+      REMOVE_ELEMENT = "remove element",
+      ADD_ELEMENT = "add element",
+      REMOVE_TEXT_ELEMENT = "remove text element",
+      ADD_TEXT_ELEMENT = "add text element",
+      REPLACE_ELEMENT = "replace element",
+      MODIFY_VALUE = "modify value",
+      MODIFY_CHECKED = "modify checked",
+      MODIFY_SELECTED = "modify selected",
+      ACTION = "action",
+      ROUTE = "route",
+      OLD_VALUE = "oldValue",
+      NEW_VALUE = "newValue",
+      ELEMENT = "element",
+      GROUP = "group",
+      FROM = "from",
+      TO = "to",
+      NAME = "name",
+      VALUE = "value",
+      TEXT = "text",
+      ATTRIBUTES = "attributes",
+    NODE_NAME = "nodeName",
+    COMMENT = "comment",
+    CHILD_NODES = "childNodes",
+    CHECKED = "checked",
+    SELECTED = "selected";
+    }
+
+
+
+
+    if (typeof diffcap === 'undefined')
+      diffcap = 10;
+    this.debug = debug;
+    this.diffcap = diffcap;
+  };
+  diffDOM.prototype = {
+
+    // ===== Create a diff =====
+
+    diff: function (t1, t2) {
+      diffcount = 0;
+      t1 = cleanCloneNode(t1);
+      t2 = cleanCloneNode(t2);
+      if (this.debug) {
+        this.t1Orig = nodeToObj(t1);
+        this.t2Orig = nodeToObj(t2);
+      }
+
+      this.tracker = new DiffTracker();
+      return this.findDiffs(t1, t2);
+    },
+    findDiffs: function (t1, t2) {
+      var diff;
+      do {
+        if (this.debug) {
+          diffcount++;
+          if (diffcount > this.diffcap) {
+            window.diffError = [this.t1Orig, this.t2Orig];
+            throw new Error("surpassed diffcap:" + JSON.stringify(this.t1Orig) + " -> " + JSON.stringify(this.t2Orig));
+          }
+        }
+        difflist = this.findFirstDiff(t1, t2, []);
+        if (difflist) {
+          if (!difflist.length) {
+            difflist = [difflist];
+          }
+          this.tracker.add(difflist);
+          this.apply(t1, difflist);
+        }
+      } while (difflist);
+      return this.tracker.list;
+    },
+    findFirstDiff: function (t1, t2, route) {
+      // outer differences?
+      var difflist = this.findOuterDiff(t1, t2, route);
+      if (difflist.length > 0) {
+        return difflist;
+      }
+      // inner differences?
+      var diff = this.findInnerDiff(t1, t2, route);
+      if (diff) {
+        if (typeof diff.length === "undefined") {
+          diff = [diff];
+        }
+        if (diff.length > 0) {
+          return diff;
+        }
+      }
+      // no differences
+      return false;
+    },
+    findOuterDiff: function (t1, t2, route) {
+      var k;
+      
+      if (t1.nodeName != t2.nodeName) {
+        k = {};
+        k[ACTION] = REPLACE_ELEMENT;
+        k[OLD_VALUE] = nodeToObj(t1);
+        k[NEW_VALUE] = nodeToObj(t2);
+        k[ROUTE] = route;
+        return [new Diff(k)];
+      }
+      
+      var slice = Array.prototype.slice,
+        byName = function (a, b) {
+          return a.name > b.name;
+        },
+        attr1 = t1.attributes ? slice.call(t1.attributes).sort(byName) : [],
+        attr2 = t2.attributes ? slice.call(t2.attributes).sort(byName) : [],
+        find = function (attr, list) {
+          for (var i = 0, last = list.length; i < last; i++) {
+            if (list[i].name === attr.name)
+              return i;
+          }
+          return -1;
+        },
+        diffs = [];
+      if ((t1.value || t2.value) && t1.value !== t2.value && t1.nodeName !== 'OPTION') {
+        k = {};
+        k[ACTION] = MODIFY_VALUE;
+        k[OLD_VALUE] = t1.value;
+        k[NEW_VALUE] = t2.value;
+        k[ROUTE] = route;
+        diffs.push(new Diff(k));
+      }
+      if ((t1.checked || t2.checked) && t1.checked !== t2.checked) {
+        k = {};
+        k[ACTION] = MODIFY_CHECKED;
+        k[OLD_VALUE] = t1.checked;
+        k[NEW_VALUE] = t2.checked;
+        k[ROUTE] = route;
+        diffs.push(new Diff(k));
+      }  
+
+      attr1.forEach(function (attr) {
+        var pos = find(attr, attr2),
+          k;
+        if (pos === -1) {
+          k = {};
+          k[ACTION] = REMOVE_ATTRIBUTE;
+          k[ROUTE] = route;
+          k[NAME] = attr.name;
+          k[VALUE] = attr.value;
+          diffs.push(new Diff(k));
+          return diffs;
+        }
+        var a2 = attr2.splice(pos, 1)[0];
+        if (attr.value !== a2.value) {
+          k = {};
+          k[ACTION] = MODIFY_ATTRIBUTE;
+          k[ROUTE] = route;
+          k[NAME] = attr.name;
+          k[OLD_VALUE] = attr.value;
+          k[NEW_VALUE] = a2.value;
+
+          diffs.push(new Diff(k));
+               //    console.log(diffs);
+        }
+      });
+      if (!t1.attributes && t1.data !== t2.data) {
+          k = {};
+          k[ACTION] = MODIFY_DATA;
+          k[ROUTE] = route;
+          k[OLD_VALUE] = t1.data;
+          k[NEW_VALUE] = t2.data;
+          diffs.push(new Diff(k));          
+      }
+      if (diffs.length > 0) {
+        return diffs;
+      };
+      attr2.forEach(function (attr) {
+        var k;
+        k = {};
+        k[ACTION] = ADD_ATTRIBUTE;
+        k[ROUTE] = route;
+        k[NAME] = attr.name;
+        k[VALUE] = attr.value;
+        diffs.push(new Diff(k));
+        
+      });
+      
+      if ((t1.selected || t2.selected) && t1.selected !== t2.selected) {
+        if (diffs.length > 0) {
+            return diffs;
+        }
+        k = {};
+        k[ACTION] = MODIFY_SELECTED;
+        k[OLD_VALUE] = t1.selected;
+        k[NEW_VALUE] = t2.selected;
+        k[ROUTE] = route;
+        diffs.push(new Diff(k));
+      }      
+      
+      return diffs;
+    },
+    findInnerDiff: function (t1, t2, route) {
+      var subtrees = markSubTrees(t1, t2),
+        mappings = subtrees.length,
+        k;
+      // no correspondence whatsoever
+      // if t1 or t2 contain differences that are not text nodes, return a diff. 
+
+      // two text nodes with differences
+      if (mappings === 0) {
+        if (t1.nodeType === 3 && t2.nodeType === 3 && t1.data !== t2.data) {
+          k = {};
+          k[ACTION] = MODIFY_TEXT_ELEMENT;
+          k[OLD_VALUE] = t1.data;
+          k[NEW_VALUE] = t2.data;
+          k[ROUTE] = route;
+          return new Diff(k);
+        }
+      }
+      // possibly identical content: verify
+      if (mappings < 2) {
+        var diff, difflist, i, last, e1, e2;
+        for (i = 0, last = Math.max(t1.childNodes.length, t2.childNodes.length); i < last; i++) {
+          e1 = t1.childNodes[i];
+          e2 = t2.childNodes[i];
+          // TODO: this is a similar code path to the one
+          //       in findFirstInnerDiff. Can we unify these?
+          if (e1 && !e2) {
+            if (e1.nodeType === 3) {
+              k = {};
+              k[ACTION] = REMOVE_TEXT_ELEMENT;
+              k[ROUTE] = route.concat(i);
+              k[VALUE] = e1.data;
+              return new Diff(k);
+            }
+            k = {};
+            k[ACTION] = REMOVE_ELEMENT;
+            k[ROUTE] = route.concat(i);
+            k[ELEMENT] = nodeToObj(e1);
+            return new Diff(k);
+          }
+          if (e2 && !e1) {
+            if (e2.nodeType === 3) {
+              k = {};
+              k[ACTION] = ADD_TEXT_ELEMENT;
+              k[ROUTE] = route.concat(i);
+              k[VALUE] = e2.data;
+              return new Diff(k);
+            }
+            k = {};
+            k[ACTION] = ADD_ELEMENT;
+            k[ROUTE] = route.concat(i);
+            k[ELEMENT] = nodeToObj(e2);
+            return new Diff(k);
+          }
+          if (e1.nodeType != 3 || e2.nodeType != 3) {
+            difflist = this.findOuterDiff(e1, e2, route.concat(i));
+            if (difflist.length > 0) {
+              return difflist;
+            }
+          }
+          diff = this.findInnerDiff(e1, e2, route.concat(i));
+          if (diff) {
+            return diff;
+          }
+        }
+      }
+
+      // one or more differences: find first diff
+      return this.findFirstInnerDiff(t1, t2, subtrees, route);
+    },
+
+    // imported
+    findFirstInnerDiff: findFirstInnerDiff,
+
+    // ===== Apply a diff =====
+
+    apply: function (tree, diffs) {
+      var dobj = this;
+      if (typeof diffs.length === "undefined") {
+        diffs = [diffs];
+      }
+      if (diffs.length === 0) {
+        return true;
+      }
+      diffs.forEach(function (diff) {
+        if (!dobj.applyDiff(tree, diff))
+          return false;
+      });
+      return true;
+    },
+    getFromRoute: function (tree, route) {
+      route = route.slice();
+      var c, node = tree;
+      while (route.length > 0) {
+        if (!node.childNodes) {
+          return false;
+        }
+        c = route.splice(0, 1)[0];
+        node = node.childNodes[c];
+      }
+      return node;
+    },
+    // diffing text elements can be overwritten for use with diff_match_patch and alike
+    textDiff: function (node, currentValue, expectedValue, newValue) {
+      node.data = newValue;
+      return;
+    },
+    applyDiff: function (tree, diff) {
+      var node = this.getFromRoute(tree, diff[ROUTE]);
+      if (diff[ACTION] === ADD_ATTRIBUTE) {
+        if (!node || !node.setAttribute)
+          return false;
+        node.setAttribute(diff[NAME], diff[VALUE]);
+      } else if (diff[ACTION] === MODIFY_ATTRIBUTE) {
+        if (!node || !node.setAttribute)
+          return false;
+        node.setAttribute(diff[NAME], diff[NEW_VALUE]);
+      } else if (diff[ACTION] === REMOVE_ATTRIBUTE) {
+        if (!node || !node.removeAttribute)
+          return false;
+        node.removeAttribute(diff[NAME]);
+      } else if (diff[ACTION] === MODIFY_VALUE) {
+        if (!node || typeof node.value === 'undefined')
+          return false;
+        node.value = diff[NEW_VALUE];
+      } else if (diff[ACTION] === MODIFY_DATA) {
+        if (!node || typeof node.data === 'undefined')
+          return false;
+        node.data = diff[NEW_VALUE];
+      } else if (diff[ACTION] === MODIFY_CHECKED) {
+        if (!node || typeof node.checked === 'undefined')
+          return false;
+        node.checked = diff[NEW_VALUE];
+      } else if (diff[ACTION] === MODIFY_SELECTED) {
+        if (!node || typeof node.selected === 'undefined')
+          return false;
+        node.selected = diff[NEW_VALUE];     
+      } else if (diff[ACTION] === MODIFY_TEXT_ELEMENT) {
+        if (!node || node.nodeType != 3)
+          return false;
+        this.textDiff(node, node.data, diff[OLD_VALUE], diff[NEW_VALUE]);
+      } else if (diff[ACTION] === REPLACE_ELEMENT) {
+        var newNode = objToNode(diff[NEW_VALUE]);
+        node.parentNode.replaceChild(newNode, node);
+      } else if (diff[ACTION] === RELOCATE_GROUP) {
+        var group = diff[GROUP],
+          from = diff[FROM],
+          to = diff[TO],
+          child, reference;
+        reference = node.childNodes[to + group.length];
+        // slide elements up
+        if (from < to) {
+          for (var i = 0; i < group.length; i++) {
+            child = node.childNodes[from];
+            node.insertBefore(child, reference);
+          }
+        } else {
+          // slide elements down
+          reference = node.childNodes[to];
+          for (var i = 0; i < group.length; i++) {
+            child = node.childNodes[from + i];
+            node.insertBefore(child, reference);
+          }
+        }
+      } else if (diff[ACTION] === REMOVE_ELEMENT) {
+        node.parentNode.removeChild(node);
+      } else if (diff[ACTION] === REMOVE_TEXT_ELEMENT) {
+        if (!node || node.nodeType != 3)
+          return false;
+        node.parentNode.removeChild(node);
+      } else if (diff[ACTION] === ADD_ELEMENT) {
+        var route = diff[ROUTE].slice(),
+          c = route.splice(route.length - 1, 1)[0];
+        node = this.getFromRoute(tree, route);
+        var newNode = objToNode(diff[ELEMENT]);
+        if (c >= node.childNodes.length) {
+          node.appendChild(newNode);
+        } else {
+          var reference = node.childNodes[c];
+          node.insertBefore(newNode, reference);
+        }
+      } else if (diff[ACTION] === ADD_TEXT_ELEMENT) {
+        var route = diff[ROUTE].slice(),
+          c = route.splice(route.length - 1, 1)[0],
+          newNode = document.createTextNode(diff[VALUE]);
+        node = this.getFromRoute(tree, route);
+        if (!node || !node.childNodes)
+          return false;
+        if (c >= node.childNodes.length) {
+          node.appendChild(newNode);
+        } else {
+          var reference = node.childNodes[c];
+          node.insertBefore(newNode, reference);
+        }
+      }
+      return true;
+    },
+
+    // ===== Undo a diff =====
+
+    undo: function (tree, diffs) {
+      diffs = diffs.slice();
+      var dobj = this;
+      if (!diffs.length) {
+        diffs = [diffs];
+      }
+      diffs.reverse();
+      diffs.forEach(function (diff) {
+        dobj.undoDiff(tree, diff);
+      });
+    },
+    undoDiff: function (tree, diff) {
+      if (diff[ACTION] === ADD_ATTRIBUTE) {
+        diff[ACTION] = REMOVE_ATTRIBUTE;
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === MODIFY_ATTRIBUTE) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === REMOVE_ATTRIBUTE) {
+        diff[ACTION] = ADD_ATTRIBUTE;
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === MODIFY_TEXT_ELEMENT) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === MODIFY_VALUE) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === MODIFY_DATA) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);        
+      } else if (diff[ACTION] === MODIFY_CHECKED) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === MODIFY_SELECTED) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === REPLACE_ELEMENT) {
+        swap(diff, OLD_VALUE, NEW_VALUE);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === RELOCATE_GROUP) {
+        swap(diff, FROM, TO);
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === REMOVE_ELEMENT) {
+        diff[ACTION] = ADD_ELEMENT;
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === ADD_ELEMENT) {
+        diff[ACTION] = REMOVE_ELEMENT;
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === REMOVE_TEXT_ELEMENT) {
+        diff[ACTION] = ADD_TEXT_ELEMENT;
+        this.applyDiff(tree, diff);
+      } else if (diff[ACTION] === ADD_TEXT_ELEMENT) {
+        diff[ACTION] = REMOVE_TEXT_ELEMENT;
+        this.applyDiff(tree, diff);
+      }
+    },
+  };
+
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = diffDOM;
+    }
+    exports.diffDOM = diffDOM;
+  } else {
+    // `window` in the browser, or `exports` on the server
+    this.diffDOM = diffDOM;
+  }
+
+}.call(this));

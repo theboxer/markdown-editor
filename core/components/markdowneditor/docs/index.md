@@ -43,6 +43,7 @@ For transforming markdown into HTML, _Markdown Editor_ uses the [Remarkable](htt
 - [Ace Editor](http://ace.c9.io/)
 - [Remarkable](https://github.com/jonschlinkert/remarkable)
 - [Cropper](https://github.com/fengyuanchen/cropper)
+- [DiffDOM](https://github.com/fiduswriter/diffDOM)
 
 ## Contribution
 I would love to thank [Roman](https://twitter.com/@renekopcem) & [Ryan](https://twitter.com/@rthrash) for providing unmeasurable support, amazing ideas and for helping with styling the editor.

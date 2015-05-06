@@ -16,6 +16,7 @@
     "dependencies": {
         "ace-builds": "",
         "remarkable": "",
-        "cropper": ""
+        "cropper": "",
+        "diff-dom": ""
     }
 }

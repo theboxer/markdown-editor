@@ -15,7 +15,8 @@ gulp.task('libjs', function () {
                 'src/custom_ace/gutter_toolbar.js',
                 'bower_components/ace-builds/src/ext-language_tools.js',
                 'bower_components/jquery/dist/jquery.min.js',
-                'bower_components/cropper/dist/cropper.min.js'
+                'bower_components/cropper/dist/cropper.min.js',
+                'bower_components/diff-dom/diffDOM.js'
             ])
             .pipe(plumber())
             .pipe(concat('dependencies.js'))
@@ -46,7 +47,7 @@ gulp.task('js', function () {
             .pipe(sourcemaps.init())
             .pipe(plumber())
             .pipe(concat('app.js'))
-            //.pipe(uglify())
+            .pipe(uglify())
             .pipe(sourcemaps.write())
             .pipe(gulp.dest('../../assets/components/markdowneditor/js/mgr'));
 });
