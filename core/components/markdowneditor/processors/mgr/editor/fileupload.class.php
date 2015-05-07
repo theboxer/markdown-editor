@@ -24,7 +24,7 @@ class MarkdownEditorUploadFileProcessor extends MarkdownEditorUploadProcessor
 
         $allowed = explode(',', $allowed);
 
-        if (in_array($this->extension, $allowed)) return true;
+        if (in_array(strtolower($this->extension), $allowed)) return true;
 
         return $this->modx->lexicon('markdowneditor.err.upload.unsupported_file');
     }

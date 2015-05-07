@@ -7,7 +7,7 @@ $gutter-pad:  37px;
   position: relative;
   border-radius: 3px;
   overflow: hidden;
-  background-color: $bg-color;
+  background-color: $bg-color !important;
 
   .ace_gutter {
     overflow: visible !important;
@@ -213,6 +213,11 @@ $gutter-pad:  37px;
   border: 0;
   font-size: 12px;
   line-height: 25px;
+  margin-top: -5px;
+
+  .modx-tv-form-element & {
+    margin-top: -10px;
+  }
 }
 
 .image-upload-wrapper {
@@ -260,16 +265,9 @@ label.link:hover {
 }
 
 .upload-bar {
-  margin-top: -5px;
-
   .fullscreen & {
     margin-top: 0;
   }
-
-  .modx-tv-form-element & {
-    margin-top: -10px;
-  }
-
 }
 
 .progress {
@@ -342,32 +340,33 @@ label.link:hover {
 }
 
 .ace_gutter {
-
-  i {
-    cursor: pointer;
-    position: relative;
-    top: -6px;
-    display: inline-block;
-    padding: 6px;
-    margin: 0 27px 0 -15px;
-    width: 14px;
-    height: 14px;
-    font-size: 14px;
-    line-height: 14px;
-    text-align: center;
-    vertical-align: middle;
-    border-radius: 50%;
-    border: 1px solid $light-color;
-    background: $bg-color;
-    opacity: 0.5;
-
-    .ace_dark & {
-      border: 1px solid $dark-color;
-    }
-
-    &:hover {
-      opacity: 1;
-      transition: all 0.15s ease;
+  .ace_gutter-cell {
+    i {
+      cursor: pointer;
+      position: relative;
+      top: -6px;
+      display: inline-block;
+      padding: 6px;
+      margin: 0 27px 0 -15px;
+      width: 14px;
+      height: 14px;
+      font-size: 14px;
+      line-height: 14px;
+      text-align: center;
+      vertical-align: middle;
+      border-radius: 50%;
+      border: 1px solid $light-color;
+      background: $bg-color;
+      opacity: 0.5;
+  
+      .ace_dark & {
+        border: 1px solid $dark-color;
+      }
+  
+      &:hover {
+        opacity: 1;
+        transition: all 0.15s ease;
+      }
     }
   }
 

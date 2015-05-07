@@ -27,6 +27,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,initComponent: function() {
         MarkdownEditor.superclass.initComponent.call(this);
 
+        this.diffDOM = new diffDOM();
+        
         if (this.mdElementId){
             Ext.onReady(this.render, this);
         }
@@ -48,7 +50,6 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     ,render: function(container, position) {
         this.textarea = Ext.get(this.mdElementId);
         this.mdElementName = this.textarea.dom.name;
-        this.diffDOM = new diffDOM();
 
         if (!this.textarea) return;
 
@@ -161,11 +162,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     }
 
     ,showPreview: function(){
-        this.preview.setDisplayed('block');
+        this.preview.parent().setDisplayed('block');
     }
 
     ,hidePreview: function(){
-        this.preview.setDisplayed('none');
+        this.preview.parent().setDisplayed('none');
     }
 
     ,buildUI: function() {
@@ -844,15 +845,15 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
     ,checkType: function(allowedTypes, file) {
         allowedTypes = allowedTypes.split(',');
-
-        return allowedTypes.indexOf(file.name.split('.').pop()) != -1;
+        var ext = file.name.split('.').pop();
+        return allowedTypes.indexOf(ext.toLowerCase()) != -1;
     }
 
     ,uploadFile: function(file, type, mobile) {
         type = type || 'file';
         mobile = mobile || 0;
 
-        var uploader = this.createUploader();
+        var uploader = this.createUploader(type, file.name);
 
         var formData = new FormData();
         formData.append('file', file);
