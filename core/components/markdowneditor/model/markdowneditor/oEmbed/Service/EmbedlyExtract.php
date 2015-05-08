@@ -27,6 +27,7 @@ final class EmbedlyExtract extends OEmbed implements iOEmbed
         $maxWidth = $this->getMaxWidth();
         if (!empty($maxWidth)) {
             $options['maxwidth'] = $maxWidth;
+            $options['width'] = $maxWidth;
         }
 
         $maxHeight = $this->getMaxHeight();

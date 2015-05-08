@@ -29,7 +29,8 @@ final class EmbedlyCards extends OEmbed implements iOEmbed
         $height = $this->getOption('max_width', 640);
         if ($height == '0') return '';
 
-        $height = intval($height) . 'px';
+        $height = intval($height) - 28;
+        $height = $height . 'px';
 
         return $height;
     }

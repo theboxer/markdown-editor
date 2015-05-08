@@ -77,7 +77,7 @@ abstract class OEmbed implements iOEmbed
     {
         $width = $this->getOption('max_width', 640);
 
-        return intval($width);
+        return intval($width) - 28;
     }
 
     /**

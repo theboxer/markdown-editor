@@ -60,7 +60,7 @@ trait Cards
             if ($template != null) break;
         }
 
-        $props['card_width'] = (intval($this->getOption('max_width', 640)) + 28) . 'px';
+        $props['card_width'] = intval($this->getOption('max_width', 640)) . 'px';
 
         return $template->process($props);
     }
