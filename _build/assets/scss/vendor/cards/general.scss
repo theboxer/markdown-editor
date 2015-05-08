@@ -76,7 +76,11 @@ $img-width: 100%;
         width: 175px;
         height: 175px;
         float: left;
-        padding: 10px 10px 10px 0;
+        
+        img {
+          height: 175px;
+          padding: 10px 10px 10px 0;
+        }
       }
     }
   }

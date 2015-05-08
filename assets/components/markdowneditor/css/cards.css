@@ -50,8 +50,10 @@
     .md-card .card .card-thumbnail.small {
       width: 175px;
       height: 175px;
-      float: left;
-      padding: 10px 10px 10px 0; }
+      float: left; }
+      .md-card .card .card-thumbnail.small img {
+        height: 175px;
+        padding: 10px 10px 10px 0; }
   .md-card .more {
     display: none; }
   .md-card .more-btn {
