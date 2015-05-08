@@ -596,12 +596,29 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             }
         }.bind(this);
 
+        var remarkable = this.remarkable;
+        remarkable.renderer.rules.code = (function() {
+            var original = remarkable.renderer.rules.code;
+            return function() {
+                var content = original.apply(this, arguments);
+                content = content.replace(/\[\[/g, '&#91;&#91;');
+                content = content.replace(/]]/g, '&#93;&#93;');
+                
+                return content;
+            };
+        })();
+        
         var oEmbed = function(md) {
             md.inline.ruler.push('oEmbed', this.oEmbedParser);
             md.renderer.rules.oEmbed = oEmbedRenderer;
         }.bind(this);
+        
+        var modxTags = function(md) {
+            md.inline.ruler.push('modxCode', this.modxCodeParser);
+        }.bind(this);
 
         this.remarkable.use(oEmbed);
+        this.remarkable.use(modxTags);
     }
 
     ,parse: function(input) {
@@ -760,6 +777,49 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         state.push(token);
 
+        return true;
+    }
+    
+    ,modxCodeParser: function(state, silent) {
+        var max, marker, matchStart, matchEnd,
+            pos = state.pos;
+
+        if (state.src.charCodeAt(pos) !== 0x60/* ` */) { return false; }
+        pos++;
+        if (state.src.charCodeAt(pos) !== 0x60/* ` */) { return false; }
+        pos++;
+        if (state.src.charCodeAt(pos) !== 0x60/* ` */) { return false; }
+        
+        pos++;
+        max = state.posMax;
+
+        marker = '```';
+
+        matchStart = matchEnd = pos;
+
+        while ((matchStart = state.src.indexOf('`', matchEnd)) !== -1) {
+            matchEnd = matchStart + 1;
+
+            while (matchEnd < max && state.src.charCodeAt(matchEnd) === 0x60/* ` */) { matchEnd++; }
+
+            if (matchEnd - matchStart === marker.length) {
+                if (!silent) {
+                    state.push({
+                        type: 'code',
+                        content: state.src.slice(pos, matchStart)
+                            .replace(/[ \n]+/g, ' ')
+                            .trim(),
+                        block: false,
+                        level: state.level
+                    });
+                }
+                state.pos = matchEnd;
+                return true;
+            }
+        }
+
+        if (!silent) { state.pending += marker; }
+        state.pos += marker.length;
         return true;
     }
 

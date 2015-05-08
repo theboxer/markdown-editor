@@ -108,6 +108,12 @@ oEmbed is a format which allows embedding a representation of an URL of a third-
 
 ## Code
 
+### Inline code
+
+```
+Look at this ```Inline code here...``` :)
+```
+
 ### Indented code
 
 Or indent several lines of code by at least four spaces, as in:
