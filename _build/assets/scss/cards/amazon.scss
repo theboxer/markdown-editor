@@ -1,0 +1,18 @@
+.amazon {
+  .price-details {
+
+    p {
+      margin-bottom: 0;
+    }
+    
+    .price {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .list-price {
+      text-decoration: line-through;
+    }
+  }
+}

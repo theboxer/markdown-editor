@@ -1,3 +1,12 @@
+.amazon .price-details p {
+  margin-bottom: 0; }
+.amazon .price-details .price {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 5px; }
+.amazon .price-details .list-price {
+  text-decoration: line-through; }
+
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 .md-card {
   font-family: Oxygen,Arial,"Helvetica Neue",Helvetica,sans-serif; }

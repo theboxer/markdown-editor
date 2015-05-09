@@ -34,7 +34,7 @@ gulp.task('noembed-css', function () {
 
 gulp.task('cards-css', function () {
     return gulp.src([
-            'scss/vendor/cards/*.scss'
+            'scss/cards/*.scss'
         ])
         .pipe(plumber())
         .pipe(sass())
@@ -64,5 +64,5 @@ gulp.task('css', function () {
 
 gulp.task('css:watch', ['css', 'cards-css'], function () {
     gulp.watch('scss/*.scss', ['css']);
-    gulp.watch('scss/vendor/cards/*.scss', ['cards-css']);
+    gulp.watch('scss/cards/*.scss', ['cards-css']);
 });

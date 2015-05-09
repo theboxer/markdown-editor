@@ -34,6 +34,11 @@ final class EmbedlyExtract extends OEmbed implements iOEmbed
         if (!empty($maxHeight)) {
             $options['maxheight'] = $maxHeight;
         }
+        
+        $noStyle = $this->getOption('nostyle', 'false', 'embedlyextract');
+        if ($noStyle === 'false') {
+            $options['nostyle'] = 'false';
+        }
 
         return 'http://api.embed.ly/1/extract?' . http_build_query($options) . '&url=';
     }
@@ -91,7 +96,7 @@ final class EmbedlyExtract extends OEmbed implements iOEmbed
             $result['color'] = $color;
         }
 
-        if (isset($result['authors'])) {
+        if (isset($result['authors']) && !empty($result['authors'])) {
             $result['author_name'] = $result['authors'][0]['name'];
             $result['author_url'] = $result['authors'][0]['url'];
         }
@@ -118,5 +123,60 @@ final class EmbedlyExtract extends OEmbed implements iOEmbed
 
             $result['thumbnail_width'] = $width;
         }
+        
+        if ((strtolower($result['provider_name']) == 'amazon') && isset($result['media']['html'])) {
+            $crawler = new \Symfony\Component\DomCrawler\Crawler();
+            $crawler->addContent($result['media']['html']);
+
+            try {
+                $img = $crawler->filter('tr > td')->first()->filter('img')->attr('src');
+            } catch (\Exception $e) {
+                $img = '';
+            }
+            
+            try {
+                $title = $crawler->filter('h3')->text();
+            } catch (\Exception $e) {
+                $title = '';
+            }
+            
+            try {
+                $subHead = $crawler->filter('span.subhead')->text();
+            } catch (\Exception $e) {
+                $subHead = '';
+            }
+            
+            try {
+                $listPrice = $crawler->filter('td.listprice')->text();
+            } catch (\Exception $e) {
+                $listPrice = '';
+            }
+            
+            try {
+                $price = $crawler->filter('td.price')->text();
+            } catch (\Exception $e) {
+                $price = '';
+            }
+            
+            try {
+                $saved = $crawler->filter('td.saved')->text();
+            } catch (\Exception $e) {
+                $saved = '';
+            }
+
+            if ($autoColor){
+                $result['color'] = 'rgb(254, 167, 7)';
+            }
+
+            $result['amazon'] = array(
+                'img' => $img,
+                'title' => $title,
+                'subHead' => $subHead,
+                'listPrice' => $listPrice,
+                'price' => $price,
+                'saved' => $saved,
+            );
+        }
+        
     }
 }
