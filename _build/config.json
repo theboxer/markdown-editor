@@ -173,7 +173,7 @@
       },
       {
         "key": "general.split",
-        "value": false,
+        "value": true,
         "type": "combo-boolean",
         "area": "markdowneditor.area.general"
       },
