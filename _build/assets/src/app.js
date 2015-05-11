@@ -579,12 +579,12 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                                 if (embedDiv) {
                                     embedDiv.update(r.data);
                                     embedDiv.dom.removeAttribute('id');
-
+                
                                     this.localCache.oEmbed[tokens[idx].url] = embedDiv.dom.outerHTML;
-
+                
                                     var textareaContent = Ext.get(Ext.DomHelper.createDom({tag: 'div', html: this.textarea.dom.value}));
                                     textareaContent.child('#' + embedID).update(r.data).dom.removeAttribute('id');
-
+                
                                     this.textarea.dom.value = textareaContent.dom.innerHTML;
                                 }
                             },

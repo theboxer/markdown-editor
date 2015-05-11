@@ -10,11 +10,14 @@ class OnBeforeDocFormSave extends Event {
         foreach ($resourceArray as $field => $v) {
             if (!strpos($field, '_markdown')) continue;
             $fieldName = str_replace('_markdown', '', $field);
-            $content = $resource->get($field);
+            $content = $resource->get($fieldName);
 
             $content = $this->embedContent($content);
 
             $resource->set($fieldName, $content);
+            if ($fieldName == 'ta') {
+                $resource->set('content', $content);
+            }
         }
 
         return;
@@ -32,11 +35,11 @@ class OnBeforeDocFormSave extends Event {
         }
 
         $matches = array();
-        preg_match_all('/\[embed ([^\] ]+)\]/', $clearedContent, $matches);
+        preg_match_all('/<div[^>]*>\[embed ([^\] ]+)\]<\/div>/', $clearedContent, $matches);
 
         if (isset($matches[1])) {
             foreach ($matches[1] as $key => $url) {
-                $html = $this->md->getOEmbed($url);
+                $html = '<div class="markdowneditor-oembed-content">' . $this->md->getOEmbed($url) . '</div>';
 
                 $content = str_replace($matches[0][$key], $html, $content);
             }
