@@ -124,58 +124,68 @@ final class EmbedlyExtract extends OEmbed implements iOEmbed
             $result['thumbnail_width'] = $width;
         }
         
-        if ((strtolower($result['provider_name']) == 'amazon') && isset($result['media']['html'])) {
-            $crawler = new \Symfony\Component\DomCrawler\Crawler();
-            $crawler->addContent($result['media']['html']);
+        if (strtolower($result['provider_name']) == 'amazon') {
+            
+            if (isset($result['media']['html'])) {
+                $crawler = new \Symfony\Component\DomCrawler\Crawler();
+                $crawler->addContent($result['media']['html']);
 
-            try {
-                $img = $crawler->filter('tr > td')->first()->filter('img')->attr('src');
-            } catch (\Exception $e) {
+                try {
+                    $img = $crawler->filter('tr > td')->first()->filter('img')->attr('src');
+                } catch (\Exception $e) {
+                    $img = '';
+                }
+
+                try {
+                    $subHead = $crawler->filter('span.subhead')->text();
+                } catch (\Exception $e) {
+                    $subHead = '';
+                }
+
+                try {
+                    $listPrice = $crawler->filter('td.listprice')->text();
+                } catch (\Exception $e) {
+                    $listPrice = '';
+                }
+
+                try {
+                    $price = $crawler->filter('td.price')->text();
+                } catch (\Exception $e) {
+                    $price = '';
+                }
+
+                try {
+                    $saved = $crawler->filter('td.saved')->text();
+                } catch (\Exception $e) {
+                    $saved = '';
+                }
+
+                $result['amazon'] = array(
+                    'img' => $img,
+                    'subHead' => $subHead,
+                    'listPrice' => $listPrice,
+                    'price' => $price,
+                    'saved' => $saved,
+                );
+            } else {
                 $img = '';
-            }
-            
-            try {
-                $title = $crawler->filter('h3')->text();
-            } catch (\Exception $e) {
-                $title = '';
-            }
-            
-            try {
-                $subHead = $crawler->filter('span.subhead')->text();
-            } catch (\Exception $e) {
-                $subHead = '';
-            }
-            
-            try {
-                $listPrice = $crawler->filter('td.listprice')->text();
-            } catch (\Exception $e) {
-                $listPrice = '';
-            }
-            
-            try {
-                $price = $crawler->filter('td.price')->text();
-            } catch (\Exception $e) {
-                $price = '';
-            }
-            
-            try {
-                $saved = $crawler->filter('td.saved')->text();
-            } catch (\Exception $e) {
-                $saved = '';
+                
+                if (isset($result['images'][0]['url'])) {
+                    $img = $result['images'][0]['url'];
+                }
+                
+                $result['amazon'] = array(
+                    'img' => $img,
+                    'subHead' => '',
+                    'listPrice' => '',
+                    'price' => '',
+                    'saved' => '',
+                );
             }
 
             if ($autoColor){
                 $result['color'] = 'rgb(254, 167, 7)';
             }
-
-            $result['amazon'] = array(
-                'img' => $img,
-                'title' => $title,
-                'subHead' => $subHead,
-                'listPrice' => $listPrice,
-                'price' => $price,
-                'saved' => $saved,
-            );
         }
         
     }

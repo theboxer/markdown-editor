@@ -6,6 +6,9 @@
   margin-bottom: 5px; }
 .amazon .price-details .list-price {
   text-decoration: line-through; }
+.amazon .subhead {
+  margin-bottom: 5px;
+  color: #7f7f7f; }
 
 @import url(http://fonts.googleapis.com/css?family=Oxygen:700,400);
 .md-card {
@@ -59,7 +62,8 @@
     .md-card .card .card-thumbnail.small {
       width: 175px;
       height: 175px;
-      float: left; }
+      float: left;
+      text-align: center; }
       .md-card .card .card-thumbnail.small img {
         height: 175px;
         padding: 10px 10px 10px 0; }
