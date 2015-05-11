@@ -113,6 +113,10 @@ $_lang['setting_markdowneditor.oembed.auto_card_color'] = 'Auto card\'s color';
 $_lang['setting_markdowneditor.oembed.auto_card_color_desc'] = 'If enabled and selected service supports auto color, color of the stripe will be generated from favicon of the embedding url.';
 $_lang['setting_markdowneditor.embedly.api_key'] = 'API key';
 $_lang['setting_markdowneditor.embedly.api_key_desc'] = 'Embedly API key, required for EmbedlyExtract and EmbedlyEmbed service.';
+$_lang['setting_markdowneditor.general.source'] = 'Source';
+$_lang['setting_markdowneditor.general.source_desc'] = 'Media source that will be used in media browser for inserting files and images.';
+$_lang['setting_markdowneditor.general.source_select'] = 'Source select';
+$_lang['setting_markdowneditor.general.source_select_desc'] = 'If enabled, user will be able to change source when inserting files or images.';
 
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded the size limit.';

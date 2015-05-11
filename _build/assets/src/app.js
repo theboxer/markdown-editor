@@ -534,6 +534,8 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.gutterToolbar.child('i.icon-archive').on('click', function () {
             MODx.load({
                 xtype: 'modx-browser-window'
+                ,source: parseInt(MODx.config['markdowneditor.general.source'])
+                ,hideSourceCombo: parseInt(MODx.config['markdowneditor.general.source_select'] || 0) != 1
                 ,onSelect: function(data){
                     var markup = '';
                     if (data.preview) markup = '!';

@@ -184,6 +184,18 @@
         "area": "markdowneditor.area.general"
       },
       {
+        "key": "general.source",
+        "value": 1,
+        "type": "modx-combo-source",
+        "area": "markdowneditor.area.general"
+      },
+      {
+        "key": "general.source_select",
+        "value": false,
+        "type": "modx-combo-boolean",
+        "area": "markdowneditor.area.general"
+      },
+      {
         "key": "oembed.service",
         "value": "Essence,EmbedlyCards",
         "area": "markdowneditor.area.oembed"

@@ -45,6 +45,18 @@ When enabled, _highlight.js_ will be automatically included on the frontend to p
 
 When enabled and in the standard MODX content editing window, the Markdown Editor will be in split in half with Markdown to the left and the HTML preview to the right.
 
+### Source
+**Key:** `markdowneditor.general.source`  
+**Default:** `1`
+
+Media source that will be used in media browser for inserting files and images.
+
+### Source select
+**Key:** `markdowneditor.general.source_select`  
+**Default:** `false`
+
+If enabled, user will be able to change source when inserting files or images.
+
 ### Split editor full screen
 **Key:** `markdowneditor.general.split_fullscreen`  
 **Default:** `true`
