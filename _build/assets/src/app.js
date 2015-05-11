@@ -485,6 +485,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         if (this.isMobileDevice()) {
             this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
             '<div class="inline-toolbar">' +
+                '<i class="icon icon-archive icon-fixed-width"></i>' +
                 '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
                 '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-fixed-width"></i></label>' +
                 '<i class="icon icon-code icon-fixed-width"></i>' +
@@ -492,6 +493,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         } else {
             this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
             '<div class="inline-toolbar">' +
+                '<i class="icon icon-archive icon-fixed-width"></i>' +
                 '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
                 '<i class="icon icon-code icon-fixed-width"></i>' +
             '</div>');
@@ -523,6 +525,21 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 xtype: 'markdowneditor-window-oembed'
                 ,success: function(values){
                     this.editor.insert('[embed ' + values.url + ']');
+                    this.editor.focus();
+                }
+                ,scope: this
+            }).show();
+        }.bind(this));
+        
+        this.gutterToolbar.child('i.icon-archive').on('click', function () {
+            MODx.load({
+                xtype: 'modx-browser-window'
+                ,onSelect: function(data){
+                    var markup = '';
+                    if (data.preview) markup = '!';
+                    markup = markup + '[' + data.name + '](' + data.fullRelativeUrl + ' "' + data.name + '")';
+
+                    this.editor.insert(markup);
                     this.editor.focus();
                 }
                 ,scope: this
