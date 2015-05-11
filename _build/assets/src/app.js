@@ -299,6 +299,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
             that.contentMD.parent().parent().addClass('split');
             that.editor.resize();
+            that.preview.fixHeight();
         };
 
         this.toolBox.child('.splitscreen-button').turnOff = function() {
