@@ -63,6 +63,18 @@
             
             
                 <li >
+                    <a href="../contributing">Contributing</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="../typography">Typography</a>
+                </li>
+            
+            
+            
+                <li >
                     <a href="../changelog">Changelog</a>
                 </li>
             
@@ -90,7 +102,7 @@
                 </li>
                 
                 <li>
-                    <a href="https://github.com/modxcms/markdown-editor">
+                    <a href="https://github.com/theboxer/markdown-editor">
                         
                             <i class="fa fa-github"></i>
                         
@@ -110,15 +122,18 @@
     
         <li class="main"><a href="#services">Services</a></li>
         
-            <li><a href="#essence">Essence</a></li>
+            <li class="sub"><a href="#essence">Essence</a></li>
         
-            <li><a href="#noembed">Noembed</a></li>
+            <li class="sub"><a href="#noembed">Noembed</a></li>
         
-            <li><a href="#embedly-extract">Embedly Extract</a></li>
+            <li class="sub"><a href="#embedly-extract">Embedly Extract</a></li>
         
-            <li><a href="#embedly-embed">Embedly Embed</a></li>
+            <li class="sub"><a href="#embedly-embed">Embedly Embed</a></li>
         
-            <li><a href="#embedly-cards">Embedly Cards</a></li>
+            <li class="sub"><a href="#embedly-cards">Embedly Cards</a></li>
+        
+    
+        <li class="main"><a href="#templates">Templates</a></li>
         
     
     </ul>
@@ -126,12 +141,58 @@
             <div class="col-md-9" role="main">
 
 <h1>oEmbed</h1>
+<p>oEmbed is a format which allows embedding a representation of an URL of a third-party site. Many sites support specific formatting of their content specifically for this purpose such as most popular image and video provides, but also sites like Amazon, MonoPrice, xkcd, and more.</p>
+<p><em>Markdown Editor</em> has supports several oEmbed endpoint services, to allow embedding as many as third-party sites as possible. </p>
+<p>Service that should be used for embedding content can be set via <a href="../systemsettings#oembed-service">system setting</a>. You can set more services (via a comma-delimited list) in the system setting. When doing so, other services will be used as a fallback fo previous service fails embedding.</p>
+<p><strong>Please be aware</strong> that embedded content is saved in its HTML form, so changing services will not change the representation of already-embedded content. To refresh embedded content with the new settings, you will need to re-save Resources with embeds.</p>
 <h2 id="services">Services</h2>
 <h3 id="essence">Essence</h3>
+<p>This service uses PHP library <a href="https://github.com/essence/essence/tree/2.0">Essence</a>. It can embed most common sites using their oEmbed endpoint. For presentation it uses card-style views.</p>
+<p>This service does not support <a href="../systemsetting#auto-cards-color">auto color</a>.</p>
 <h3 id="noembed">Noembed</h3>
+<p>This service is an implementation of the <a href="https://noembed.com/">Noembed</a> endpoint.</p>
+<h4 id="service-specific-system-settings">Service specific system settings</h4>
+<ul>
+<li><code>markdowneditor.noembed.nowrap</code> <ul>
+<li>Values: <code>on</code>/<code>off</code></li>
+<li>Enable or disable no wrap mode, by default it's enabled</li>
+</ul>
+</li>
+</ul>
 <h3 id="embedly-extract">Embedly Extract</h3>
+<p>This service is an implementation for the <a href="http://embed.ly/extract">Embed.ly Extract</a> API.
+To use this service, you must have a valid API key which can be obtain after registering at the <a href="http://embed.ly/">Embed.ly</a> site.
+They offer a free tier that should be enough for most users. It presents a card-style view.</p>
+<p>This service supports <a href="../systemsettings#auto-cards-color">auto color</a>.</p>
 <h3 id="embedly-embed">Embedly Embed</h3>
+<p>This service is an implementation for the <a href="http://embed.ly/embed">Embed.ly Embed</a> API.
+To use this service, you must have a valid API key which can be obtain after registering at the <a href="http://embed.ly/">Embed.ly</a> site.
+They offer a free tier that should be enough for most users. It presents a card-style view.</p>
+<p>This service does not support <a href="../systemsettings#auto-cards-color">auto color</a>.</p>
 <h3 id="embedly-cards">Embedly Cards</h3>
+<p>This is an implementation of <a href="http://embed.ly/cards">Embed.ly Cards</a>. 
+You can embed almost any third-party site with very nice, enhanced card styles specific to each service.</p>
+<p>However, this service uses JS functions on the front end to transform URLs into embedded content. This results in a noticeable delay for the content transformation when loading pages.</p>
+<h4 id="service-specific-system-settings_1">Service specific system settings</h4>
+<ul>
+<li><code>markdowneditor.embedlycards.card_controls</code> <ul>
+<li>Values: <code>0</code>/<code>1</code></li>
+<li>Enable or disable sharing button</li>
+</ul>
+</li>
+</ul>
+<h2 id="templates">Templates</h2>
+<p>All templates are inside the <code>core/components/markdowneditor/templates</code> directory. Templates use the first one found in the following order:</p>
+<ul>
+<li><code>md</code> prefixed chunk</li>
+<li>services/<em>serviceName</em>/providers/<em>providerName</em>.html</li>
+<li>services/<em>serviceName</em>/<em>embedType</em>.html</li>
+<li>providers/<em>providerName</em>.html</li>
+<li><em>embedType</em>.html</li>
+<li>general.html</li>
+</ul>
+<p>You can create a chunk with same name as a template and prefix it with <code>md</code> 
+(e.g., for Twitter, it would be <code>mdTwitter</code> or for a video type, it will be <code>mdVideo</code>) to define a quick custom template.</p>
 </div>
             
         </div>

@@ -118,3 +118,11 @@ div.source-links {
         width: 263px;
     }
 }
+
+.embedded-gist {
+    background-color: inherit;
+}
+
+.embedded-gist .gist-file {
+    border: none;
+}

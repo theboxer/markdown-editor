@@ -1,8 +1,8 @@
 
 /* Prettyify */
-$( document ).ready(function() {
-    prettyPrint();
-});
+//$( document ).ready(function() {
+//    prettyPrint();
+//});
 
 
 /* Scrollspy */

@@ -63,6 +63,18 @@
             
             
                 <li >
+                    <a href="contributing/">Contributing</a>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="typography/">Typography</a>
+                </li>
+            
+            
+            
+                <li >
                     <a href="changelog/">Changelog</a>
                 </li>
             
@@ -90,7 +102,7 @@
                 </li>
                 
                 <li>
-                    <a href="https://github.com/modxcms/markdown-editor">
+                    <a href="https://github.com/theboxer/markdown-editor">
                         
                             <i class="fa fa-github"></i>
                         
@@ -108,6 +120,15 @@
             <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
+        <li class="main"><a href="#why-markdown">Why Markdown</a></li>
+        
+    
+        <li class="main"><a href="#how-markdown-editor-works">How Markdown Editor Works</a></li>
+        
+    
+        <li class="main"><a href="#requirements">Requirements</a></li>
+        
+    
         <li class="main"><a href="#features">Features</a></li>
         
     
@@ -116,7 +137,10 @@
     
         <li class="main"><a href="#contribution">Contribution</a></li>
         
-            <li><a href="#all-contributors">All contributors</a></li>
+            <li class="sub"><a href="#all-contributors">All contributors</a></li>
+        
+    
+        <li class="main"><a href="#show-your-support">Show Your Support</a></li>
         
     
     </ul>
@@ -124,12 +148,26 @@
             <div class="col-md-9" role="main">
 
 <h1>Markdown Editor</h1>
-<p>Markdown Editor is a MODX component for creating content in Markdown format. It automatically parses input into the HTML.</p>
+<h2 id="why-markdown">Why Markdown</h2>
+<p>Content, and content marketing, is critical today. Sometimes, though, the systems to create content get in the way, overwhelming users and offering too many options. </p>
+<p>Simple, intuitive tools like <em>Markdown Editor</em> can make it easier to focus—to create sharp copy and to consistently use images and rich media. </p>
+<p>The <a href="http://daringfireball.net/projects/markdown/syntax#philosophy">core philosophy of Markdown</a> is focused on ease of use: be as easy-to-read and easy-to-write as feasible. If you have mastered web surfing, can type, and know how to copy/paste links to websites, you possess the technical skills you need to use <em>Markdown Editor</em>. </p>
+<h2 id="how-markdown-editor-works">How Markdown Editor Works</h2>
+<p><em>Markdown Editor</em> is a MODX Extra for creating content with <a href="http://daringfireball.net/projects/markdown/syntax">Markdown</a>. It parses Markdown-formatted text into HTML, and stores it as content for MODX websites.</p>
+<p><em>Markdown Editor</em> is great for creating articles, quick blogs, instructions, lists, and any other articles that require writing. It is also great for more technical documents like code tutorials because it supports <a href="https://help.github.com/articles/github-flavored-markdown/">Github Flavored Markdown</a>, or “GFM”.</p>
+<p><em>Markdown Editor</em> also supports embedding content from other sites just by inserting a simple link. No complex HTML or JavaScript code to deal with. To do this, it uses a technology called <a href="http://www.oembed.com/">oEmbed</a>. Inserting a simple link to sites like Twitter, Tumblr, MonoPrice, Amazon, Flickr, Vimeo, Youtube, Evernote, and dozens of more sites results in a beautifully formatted synopis “card” and link to those sites or images.</p>
+<h2 id="requirements">Requirements</h2>
+<p><em>Markdown Editor</em> requires </p>
+<ul>
+<li>MODX Revolution 2.3+</li>
+<li>PHP 5.4+</li>
+</ul>
 <h2 id="features">Features</h2>
 <ul>
 <li>Live preview</li>
 <li>Drag &amp; drop upload</li>
 <li>Image cropper</li>
+<li>Full screen focused writing mode</li>
 <li>oEmbed through multiple services</li>
 <li>Resource suggestion on ctrl+space</li>
 <li>Parsing MODX tag in live preview</li>
@@ -137,15 +175,15 @@
 <li>Auto include GFM &amp; Highlight on frontend</li>
 </ul>
 <h2 id="background">Background</h2>
-<p>Markdown Editor uses several libraries to deliver amazing experience with editing markdown content.</p>
-<p>Editor itself is build on top of the great JavaScript editor <a href="http://ace.c9.io/">Ace</a>. We uses Ace with the markdown mode and some very custom modifications to improve working with the markdown content.
-Editor has enhanced list support, resource hinting (<code>cmd/ctrl + space</code>) from page title, drag &amp; drop upload and more.</p>
-<p>For transforming markdown into HTML editor uses JavaScript library <a href="https://github.com/jonschlinkert/remarkable">Remarkable</a> with a support for GFM.
-Remarkable transforms makrdown to HTML blazingly fast, so you can enjoy real live preview.</p>
+<p><em>Markdown Editor</em> uses several libraries to deliver an amazing experience when editing Markdown content.</p>
+<p><em>Markdown Editor</em> itself is build on top of the great JavaScript editor <a href="http://ace.c9.io/">Ace</a>. It uses a customized version of Ace’s Markdown mode to improve working with the Markdown content. It also has enhanced list support, drag &amp; drop upload, and more.</p>
+<p>When creating content, you can quickly insert a link based on MODX Resource page titles by pressing <code>cmd/ctrl</code> + <code>space</code>. This will show a list of matching pages below your cursor based on the next characters you type. Use the arrow keys and the enter key or mouse and click to choose the page. It will insert a properly formatted link to that page using the correct Markdown and MODX syntax.</p>
+<p>For transforming markdown into HTML, <em>Markdown Editor</em> uses the <a href="https://github.com/jonschlinkert/remarkable">Remarkable</a> JavaScript library with a support for GFM. Remarkable transforms makrdown to HTML blazingly fast, so you can enjoy real live preview.</p>
 <ul>
-<li><a href="http://ace.c9.io/">Ace editor</a></li>
+<li><a href="http://ace.c9.io/">Ace Editor</a></li>
 <li><a href="https://github.com/jonschlinkert/remarkable">Remarkable</a></li>
 <li><a href="https://github.com/fengyuanchen/cropper">Cropper</a></li>
+<li><a href="https://github.com/fiduswriter/diffDOM">DiffDOM</a></li>
 </ul>
 <h2 id="contribution">Contribution</h2>
 <p>I would love to thank <a href="https://twitter.com/@renekopcem">Roman</a> &amp; <a href="https://twitter.com/@rthrash">Ryan</a> for providing unmeasurable support, amazing ideas and for helping with styling the editor.</p>
@@ -154,6 +192,9 @@ Remarkable transforms makrdown to HTML blazingly fast, so you can enjoy real liv
 <li><a href="https://twitter.com/@renekopcem">Roman Klos</a></li>
 <li><a href="https://twitter.com/@rthrash">Ryan Thrash</a></li>
 </ul>
+<h2 id="show-your-support">Show Your Support</h2>
+<p>If you enjoy using Markdown Editor, please consider supporting its ongoing development or showing thanks via <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=FE62UABYW2V6S">PayPal</a>. 
+Anything is appreciated!</p>
 </div>
             
         </div>

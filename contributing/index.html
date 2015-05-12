@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>License - Markdown Editor - Markdown Editor</title>
+	<title>Contributing - Markdown Editor - Markdown Editor</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -62,8 +62,8 @@
             
             
             
-                <li >
-                    <a href="../contributing">Contributing</a>
+                <li class="active">
+                    <a href=".">Contributing</a>
                 </li>
             
             
@@ -80,8 +80,8 @@
             
             
             
-                <li class="active">
-                    <a href=".">License</a>
+                <li >
+                    <a href="../license">License</a>
                 </li>
             
             
@@ -91,12 +91,12 @@
             <ul class="nav navbar-nav navbar-right">
                 
                 <li >
-                    <a rel="next" href="../changelog">
+                    <a rel="next" href="../systemsettings">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
-                <li class="disabled">
-                    <a rel="prev" >
+                <li >
+                    <a rel="prev" href="../typography">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -117,26 +117,54 @@
 
         <div class="container">
             
-            <div class="col-md-12" role="main">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main"><a href="#installation">Installation</a></li>
+        
+    
+        <li class="main"><a href="#code-style">Code style</a></li>
+        
+    
+        <li class="main"><a href="#submitting-pr">Submitting PR</a></li>
+        
+            <li class="sub"><a href="#template">Template</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
 
-<h1>License</h1>
-<p>The MIT License (MIT)</p>
-<p>Copyright (c) 2015 John Peca</p>
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:</p>
-<p>The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.</p>
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.</p>
+<h1>Contributing</h1>
+<p>Before contribution, please read this section carefully.  </p>
+<h2 id="installation">Installation</h2>
+<p>You can install Markdown Editor easily via <a href="https://github.com/TheBoxer/Git-Package-Management">GPM</a> or by any other harder way.</p>
+<p>Make sure you have NPM, bower, gulp and composer installed.</p>
+<p>Run:</p>
+<ul>
+<li><code>composer install</code> from repository root</li>
+<li><code>npm install</code> from <code>_build/assets</code></li>
+</ul>
+<p>For building JS/CSS you can use several gulp tasks (run from <code>_build/assets</code> directory):</p>
+<ul>
+<li><code>gulp watch</code> - builds all JS &amp; CSS and starts a watcher for JS &amp; CSS</li>
+<li><code>gulp build</code> - builds all JS &amp; CSS </li>
+</ul>
+<h2 id="code-style">Code style</h2>
+<p>Please follow <a href="http://www.php-fig.org/psr/psr-2/">PSR-2</a> Coding Style Guide.</p>
+<h2 id="submitting-pr">Submitting PR</h2>
+<p>When submitting a PR copy, paste and fill following template as a PR's description. </p>
+<h3 id="template">Template</h3>
+<pre><code>### What does it do ?
+Describe the technical changes you did.
+
+### Why is it needed ?
+Describe the issue you are solving.
+
+### Related issue(s)/PR(s)
+Let us know if this is related to any issue/pull request (see https://github.com/blog/1506-closing-issues-via-pull-requests)
+</code></pre>
+
 </div>
             
         </div>
