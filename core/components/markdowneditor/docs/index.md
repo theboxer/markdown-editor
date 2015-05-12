@@ -2,7 +2,7 @@
 
 Content, and content marketing, is critical today. Sometimes, though, the systems to create content get in the way, overwhelming users and offering too many options. 
 
-Simple, intuitive tools like _Markdown Editor_ can make it easer to focus—to create sharp copy and to consistently use images and rich media. 
+Simple, intuitive tools like _Markdown Editor_ can make it easier to focus—to create sharp copy and to consistently use images and rich media. 
 
 The [core philosophy of Markdown](http://daringfireball.net/projects/markdown/syntax#philosophy) is focused on ease of use: be as easy-to-read and easy-to-write as feasible. If you have mastered web surfing, can type, and know how to copy/paste links to websites, you possess the technical skills you need to use _Markdown Editor_. 
 
