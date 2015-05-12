@@ -135,7 +135,7 @@
       },
       {
         "key": "general.theme",
-        "value": "monokai",
+        "value": "github",
         "area": "markdowneditor.area.general"
       },
       {
