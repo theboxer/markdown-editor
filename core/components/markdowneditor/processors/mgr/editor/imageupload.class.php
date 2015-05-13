@@ -67,7 +67,7 @@ class MarkdownEditorUploadImageProcessor extends MarkdownEditorUploadProcessor
 
         $profileName = $this->getProperty('profile', '');
         if (!empty($profileName) && $crop == 1) {
-            $profiles = $this->modx->fromJSON($this->md->getOption('cropper.profiles', '[]'));
+            $profiles = $this->modx->fromJSON($this->md->getOption('cropper.profiles', null, '[]'));
 
             foreach ($profiles as $profile) {
                 if (!isset($profile['name']) || $profile['name'] != $profileName) continue;
