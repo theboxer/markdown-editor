@@ -48,9 +48,10 @@ For transforming markdown into HTML, _Markdown Editor_ uses the [Remarkable](htt
 ## Contribution
 I would love to thank [Roman](https://twitter.com/@renekopcem) & [Ryan](https://twitter.com/@rthrash) for providing unmeasurable support, amazing ideas and for helping with styling the editor.
 
-### All contributors
+### Contributors
 - [Roman Klos](https://twitter.com/@renekopcem)
 - [Ryan Thrash](https://twitter.com/@rthrash)
+- [All contributors](https://github.com/TheBoxer/markdown-editor/graphs/contributors)
 
 ## Show Your Support
 If you enjoy using Markdown Editor, please consider supporting its ongoing development or showing thanks via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FE62UABYW2V6S). 
