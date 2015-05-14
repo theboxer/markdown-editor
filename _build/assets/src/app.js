@@ -385,11 +385,11 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             fontFamily: MODx.config['markdowneditor.general.font_family'] || ''
         });
         this.editor.$blockScrolling = Infinity;
-        this.editor.getSession().setUseWrapMode(true);
-        this.editor.getSession().setWrapLimitRange();
+        this.editor.session.setUseWrapMode(true);
+        this.editor.session.setWrapLimitRange();
         this.editor.renderer.setScrollMargin(10, 10);
-        this.editor.getSession().setValue(this.textarea.getValue());
-        this.editor.getSession().setMode("ace/mode/markdowneditor");
+        this.editor.session.setValue(this.textarea.getValue());
+        this.editor.session.setMode("ace/mode/markdowneditor");
         this.editor.setTheme("ace/theme/" + (MODx.config['markdowneditor.general.theme'] || 'monokai'));
 
         if (this.contentMD.hasClass('ace_dark')) {

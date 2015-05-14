@@ -607,7 +607,7 @@ background-color: rgba(215, 215, 215, 0.031)\
 border: 1px solid #000000\
 }\
 .ace-clouds-midnight .ace_invisible {\
-color: #666\
+color: #BFBFBF\
 }\
 .ace-clouds-midnight .ace_keyword,\
 .ace-clouds-midnight .ace_meta,\
@@ -668,7 +668,7 @@ exports.isDark = true;
 exports.cssClass = "ace-cobalt";
 exports.cssText = ".ace-cobalt .ace_gutter {\
 background: #011e3a;\
-color: rgb(128,145,160)\
+color: #fff\
 }\
 .ace-cobalt .ace_print-margin {\
 width: 1px;\
@@ -1303,11 +1303,8 @@ font-weight: bold;\
 .ace-github .ace_cursor {\
 color: black;\
 }\
-.ace-github.ace_focus .ace_marker-layer .ace_active-line {\
-background: rgb(255, 255, 204);\
-}\
 .ace-github .ace_marker-layer .ace_active-line {\
-background: rgb(245, 245, 245);\
+background: rgb(255, 255, 204);\
 }\
 .ace-github .ace_marker-layer .ace_selection {\
 background: rgb(181, 213, 255);\
@@ -1336,9 +1333,6 @@ background-color : rgba(0, 0, 0, 0.07);\
 background: rgb(250, 250, 255);\
 border: 1px solid rgb(200, 200, 250);\
 }\
-.ace-github .ace_invisible {\
-color: #BFBFBF\
-}\
 .ace-github .ace_print-margin {\
 width: 1px;\
 background: #e8e8e8;\
@@ -1357,7 +1351,7 @@ exports.isDark = true;
 exports.cssClass = "ace-idle-fingers";
 exports.cssText = ".ace-idle-fingers .ace_gutter {\
 background: #3b3b3b;\
-color: rgb(153,153,153)\
+color: #fff\
 }\
 .ace-idle-fingers .ace_print-margin {\
 width: 1px;\
@@ -1495,9 +1489,6 @@ background-color: rgb(232, 242, 254)\
 }\
 .ace-katzenmilch .ace_marker-layer .ace_selected-word {\
 border: 1px solid rgba(100, 5, 208, 0.27)\
-}\
-.ace-katzenmilch .ace_invisible {\
-color: #BFBFBF\
 }\
 .ace-katzenmilch .ace_fold {\
 background-color: rgba(2, 95, 73, 0.97);\
@@ -1678,6 +1669,112 @@ var dom = require("../lib/dom");
 dom.importCssString(exports.cssText, exports.cssClass);
 });
 
+define("ace/theme/kr_theme",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
+
+exports.isDark = true;
+exports.cssClass = "ace-kr-theme";
+exports.cssText = ".ace-kr-theme .ace_gutter {\
+background: #1c1917;\
+color: #FCFFE0\
+}\
+.ace-kr-theme .ace_print-margin {\
+width: 1px;\
+background: #1c1917\
+}\
+.ace-kr-theme {\
+background-color: #0B0A09;\
+color: #FCFFE0\
+}\
+.ace-kr-theme .ace_cursor {\
+color: #FF9900\
+}\
+.ace-kr-theme .ace_marker-layer .ace_selection {\
+background: rgba(170, 0, 255, 0.45)\
+}\
+.ace-kr-theme.ace_multiselect .ace_selection.ace_start {\
+box-shadow: 0 0 3px 0px #0B0A09;\
+border-radius: 2px\
+}\
+.ace-kr-theme .ace_marker-layer .ace_step {\
+background: rgb(102, 82, 0)\
+}\
+.ace-kr-theme .ace_marker-layer .ace_bracket {\
+margin: -1px 0 0 -1px;\
+border: 1px solid rgba(255, 177, 111, 0.32)\
+}\
+.ace-kr-theme .ace_marker-layer .ace_active-line {\
+background: #38403D\
+}\
+.ace-kr-theme .ace_gutter-active-line {\
+background-color : #38403D\
+}\
+.ace-kr-theme .ace_marker-layer .ace_selected-word {\
+border: 1px solid rgba(170, 0, 255, 0.45)\
+}\
+.ace-kr-theme .ace_invisible {\
+color: rgba(255, 177, 111, 0.32)\
+}\
+.ace-kr-theme .ace_keyword,\
+.ace-kr-theme .ace_meta {\
+color: #949C8B\
+}\
+.ace-kr-theme .ace_constant,\
+.ace-kr-theme .ace_constant.ace_character,\
+.ace-kr-theme .ace_constant.ace_character.ace_escape,\
+.ace-kr-theme .ace_constant.ace_other {\
+color: rgba(210, 117, 24, 0.76)\
+}\
+.ace-kr-theme .ace_invalid {\
+color: #F8F8F8;\
+background-color: #A41300\
+}\
+.ace-kr-theme .ace_support {\
+color: #9FC28A\
+}\
+.ace-kr-theme .ace_support.ace_constant {\
+color: #C27E66\
+}\
+.ace-kr-theme .ace_fold {\
+background-color: #949C8B;\
+border-color: #FCFFE0\
+}\
+.ace-kr-theme .ace_support.ace_function {\
+color: #85873A\
+}\
+.ace-kr-theme .ace_storage {\
+color: #FFEE80\
+}\
+.ace-kr-theme .ace_string {\
+color: rgba(164, 161, 181, 0.8)\
+}\
+.ace-kr-theme .ace_string.ace_regexp {\
+color: rgba(125, 255, 192, 0.65)\
+}\
+.ace-kr-theme .ace_comment {\
+font-style: italic;\
+color: #706D5B\
+}\
+.ace-kr-theme .ace_variable {\
+color: #D1A796\
+}\
+.ace-kr-theme .ace_list,\
+.ace-kr-theme .ace_markup.ace_list {\
+background-color: #0F0040\
+}\
+.ace-kr-theme .ace_variable.ace_language {\
+color: #FF80E1\
+}\
+.ace-kr-theme .ace_meta.ace_tag {\
+color: #BABD9C\
+}\
+.ace-kr-theme .ace_indent-guide {\
+background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNgYGBgYFBXV/8PAAJoAXX4kT2EAAAAAElFTkSuQmCC) right repeat-y\
+}";
+
+var dom = require("../lib/dom");
+dom.importCssString(exports.cssText, exports.cssClass);
+});
+
 define("ace/theme/kuroir",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
 
 exports.isDark = false;
@@ -1720,9 +1817,6 @@ background-color: rgba(203, 220, 47, 0.22);\
 }\
 .ace-kuroir .ace_marker-layer .ace_selected-word {\
 border: 1px solid rgba(245, 170, 0, 0.57);\
-}\
-.ace-kuroir .ace_invisible {\
-color: #BFBFBF\
 }\
 .ace-kuroir .ace_fold {\
 border-color: #363636;\
@@ -3058,7 +3152,7 @@ border: 1px solid rgb(110, 119, 0);\
 border-bottom: 0;\
 box-shadow: inset 0 -1px rgb(110, 119, 0);\
 margin: -1px 0 0 -1px;\
-background: rgba(255, 235, 0, 0.1)\
+background: rgba(255, 235, 0, 0.1);\
 }\
 .ace-tomorrow-night-bright .ace_marker-layer .ace_active-line {\
 background: #2A2A2A\
@@ -3133,7 +3227,7 @@ color: #D54E53\
 color: #969896\
 }\
 .ace-tomorrow-night-bright .ace_c9searchresults.ace_keyword {\
-color: #C2C280\
+color: #C2C280;\
 }\
 .ace-tomorrow-night-bright .ace_indent-guide {\
 background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNgYGBgYFBXV/8PAAJoAXX4kT2EAAAAAElFTkSuQmCC) right repeat-y\

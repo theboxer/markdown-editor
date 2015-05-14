@@ -14,7 +14,7 @@
         "tests"
     ],
     "dependencies": {
-        "ace-builds": "",
+        "ace-builds": "1.1.7",
         "remarkable": "",
         "cropper": "",
         "diff-dom": ""
