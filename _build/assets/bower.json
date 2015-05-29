@@ -1,22 +1,22 @@
 {
-    "name": "markdown-editor",
-    "version": "1.0.0",
-    "authors": [
-        "John Peca <john@modx.com>"
-    ],
-    "license": "MIT",
-    "private": true,
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests"
-    ],
-    "dependencies": {
-        "ace-builds": "1.1.7",
-        "remarkable": "",
-        "cropper": "",
-        "diff-dom": ""
-    }
+  "name": "markdown-editor",
+  "version": "1.0.0",
+  "authors": [
+    "John Peca <john@modx.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ace-builds": "1.1.7",
+    "remarkable": "",
+    "cropper": "",
+    "diff-dom": ""
+  }
 }

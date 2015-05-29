@@ -550,6 +550,49 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
     }
 
     ,registerRemarkable: function() {
+        hljs.registerLanguage("modx", function(hljs) {
+            return {
+                cI: true,
+                c: [{
+                    cN: 'comment',
+                    b: '\\[\\[\\s*-',
+                    e: '\\]\\]',
+                    c: []
+                },{
+                    cN: 'variable',
+                    rE: true,
+                    b: '&',
+                    e: '=',
+                    c: []
+                },{
+                    cN: 'class',
+                    b: '\\[\\[',
+                    e: '[\\?]',
+                    rB: true,
+                    c: [{
+                        b: '\\[\\[',
+                        e: '[:@\\?]',
+                        rE: true,
+                        c: [{
+                            cN: 'title',
+                            b: '[a-zA-Z0-9]+'
+                        },{
+                            cN: 'string',
+                            b: '[\\$\\+!%]'
+                        }]
+                    },{
+                        cN: 'variable',
+                        b: '@[a-zA-Z0-9]+'
+                    },{
+                        cN: 'variable',
+                        b: ':[a-zA-Z0-9]+',
+                        e: '=',
+                        eE: true 
+                    }]
+                }]
+            };
+        });
+        
         this.remarkable = new Remarkable({
             html: true,
             highlight: function (str, lang) {
