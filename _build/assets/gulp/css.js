@@ -44,9 +44,11 @@ gulp.task('cards-css', function () {
 
 gulp.task('css-highlight', function () {
     return gulp.src([
-            'src/vendor/highlight/styles/github.css'
+            'src/vendor/highlight/styles/github.css',
+            'scss/highlight-modx/modx.scss'
         ])
         .pipe(plumber())
+        .pipe(sass())
         .pipe(concat('highlight.css'))
         .pipe(gulp.dest('../../assets/components/markdowneditor/css'));
 });

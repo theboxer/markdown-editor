@@ -559,7 +559,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                     e: '\\]\\]',
                     c: []
                 },{
-                    cN: 'variable',
+                    cN: 'modx-property-name',
                     rE: true,
                     b: '&',
                     e: '=',
@@ -567,27 +567,27 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
                 },{
                     cN: 'class',
                     b: '\\[\\[',
-                    e: '[\\?]',
+                    e: '[\\?\\]]',
                     rB: true,
                     c: [{
                         b: '\\[\\[',
-                        e: '[:@\\?]',
+                        e: '[:@\\?\\]]',
                         rE: true,
                         c: [{
-                            cN: 'title',
+                            cN: 'modx-tag-name',
                             b: '[a-zA-Z0-9]+'
                         },{
-                            cN: 'string',
-                            b: '[\\$\\+!%]'
+                            cN: 'modx-prefix',
+                            b: '[\\$\\+!%\\*~]'
                         }]
                     },{
-                        cN: 'variable',
+                        cN: 'modx-property-set',
                         b: '@[a-zA-Z0-9]+'
                     },{
-                        cN: 'variable',
+                        cN: 'modx-output-modifier',
                         b: ':[a-zA-Z0-9]+',
                         e: '=',
-                        eE: true 
+                        eE: true
                     }]
                 }]
             };

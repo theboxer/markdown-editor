@@ -30328,7 +30328,7 @@ define("ace/mode/markdowneditor_highlight_rules",["require","exports","module","
 
     var escaped = function(ch) {
         return "(?:[^" + lang.escapeRegExp(ch) + "\\\\]|\\\\.)*";
-    }
+    };
 
     function github_embed(tag, prefix) {
         return { // Github style block
@@ -30502,6 +30502,223 @@ define("ace/mode/markdowneditor_highlight_rules",["require","exports","module","
             regex : "^\\s*```",
             next  : "pop"
         }]);
+
+        this.$rules['modxtag-comment'] = [
+            {
+                token : "comment.modx",
+                regex : "[^\\[\\]]+",
+                merge : true
+            },{
+                token : "comment.modx",
+                regex : "\\[\\[\\-.*?\\]\\]"
+            },{
+                token : "comment.modx",
+                regex : "\\s+",
+                merge : true
+            },
+            {
+                token : "comment.modx",
+                regex : "\\]\\]",
+                next: "pop"
+            }
+        ];
+        this.$rules['modxtag-start'] = [
+            {
+                token : ["modx-prefix", "modx-prefix", "modx-tag-name"],
+                regex : "(!)?([%|*|~|\\+|\\$]|(?:\\+\\+)|(?:\\*#))?([-_a-zA-Z0-9\\.]+)",
+                push : [
+                    {include: "modxtag-filter"},
+                    {include: "modxtag-propertyset"},
+                    {
+                        token: "modx",
+                        regex: "\\?",
+                        push: [
+                            {token : "text.modx", regex : "\\s+"},
+                            {include: 'modxtag-property-string'},
+                            {token: "", regex: "$"},
+                            {token: '', regex: '', next: 'pop'}
+                        ]
+                    },
+                    {token : "text.modx", regex : "\\s+"},
+                    {token: "", regex: "$"},
+                    {token: '', regex: '', next: 'pop'}
+                ]
+            },
+            {
+                token : "modx",
+                regex : "\\[\\[",
+                push : 'modxtag-start'
+            },
+            {
+                token : "text",
+                regex : "\\s+"
+            },
+            {
+                token : "modx",
+                regex : "\\]\\]",
+                next: "pop"
+            },
+            {defaultToken: 'text.modx'}
+        ];
+        this.$rules['modxtag-propertyset2'] = [
+            {
+                token : ['modx-property-set', "modx-property-set"],
+                regex : "(@)([-_a-zA-Z0-9\\.]+|\\[\\[.*?\\]\\])",
+                next : 'modxtag-filter'
+            },
+            {
+                token : "text",
+                regex : "\\s+"
+            },
+            {token: "", regex: "$"},
+            {
+                token: "empty",
+                regex: "",
+                next: "modxtag-filter"
+            }
+        ];
+        this.$rules['modxtag-propertyset'] = [
+            {
+                token : 'modx-property-set',
+                regex : "@",
+                push : [
+                    {
+                        token: "modx-property-set",
+                        regex: "[-_a-zA-Z0-9\\.]+|\\[\\[.*?\\]\\]"
+                    },
+                    {
+                        token: "empty",
+                        regex: "",
+                        next: "pop"
+                    }
+                ]
+            },
+            {
+                token : "text",
+                regex : "\\s+"
+            }
+        ];
+        this.$rules['modxtag-filter'] = [
+            {
+                token : 'modx-output-modifier',
+                regex : ":",
+                push : [
+                    {
+                        token: "modx-output-modifier",
+                        regex: "[-_a-zA-Z0-9]+|\\[\\[.*?\\]\\]",
+                        push: "modxtag-filter-eq"
+                    },
+                    {
+                        token: "empty",
+                        regex: "",
+                        next: "pop"
+                    }
+                ]
+            },
+            {
+                token : "text",
+                regex : "\\s+"
+            }
+        ];
+        this.$rules['modxtag-filter-eq'] = [
+            {
+                token : ["modx"],
+                regex : "="
+            },{
+                token : 'modx',
+                regex : '`',
+                push: "modxtag-filter-value"
+            },
+            {
+                token : "text",
+                regex : "\\s+"
+            },
+            {
+                token: "empty",
+                regex: "",
+                next: "pop"
+            }
+        ];
+        this.$rules["modxtag-property-string"] = [
+            {
+                token : "modx-property-name",
+                regex: "&"
+            },
+            {
+                token: "modx-property-name",
+                regex: "[-_a-zA-Z0-9]+"
+            },
+            {
+                token : "modx",
+                regex : '`',
+                push : "modxtag-attribute-value"
+            }, {
+                token : "modx",
+                regex : "="
+            }, {
+                token : "modx",
+                regex : "[-_a-zA-Z0-9]+"
+            },
+            {
+                token : "comment.modx",
+                regex : "\\[\\[\\-.*?\\]\\]"
+            },
+            {
+                token : "property-string.text.modx",
+                regex : "\\s+"
+            }
+        ];
+        this.$rules["modxtag-attribute-value"] = [
+            {
+                token : "modx",
+                regex : "[^`\\[]+",
+                merge : true
+            },{
+                token : "modx",
+                regex : "[^`]+",
+                merge : true
+            },{
+                token : "modx",
+                regex : "`",
+                next  : "pop",
+                merge : true
+            }
+        ];
+        this.$rules["modxtag-filter-value"] = [
+            {
+                token : "modx",
+                regex : "[^`\\[]+",
+                merge : true
+            },{
+                token : "modx",
+                regex : "\\[\\[.*?\\]\\]",
+                merge : true
+            }, {
+                token : "modx",
+                regex : "\\\\$",
+                next  : "pop",
+                merge : true
+            }, {
+                token : "modx",
+                regex : "`",
+                next  : "pop",
+                merge : true
+            }
+        ];
+
+        for (var rule in this.$rules) {
+            this.$rules[rule].unshift({
+                token : "comment.modx", // opening tag
+                regex : "\\[\\[\\-",
+                push : 'modxtag-comment',
+                merge: true
+            }, {
+                token : "modx", // opening tag
+                regex : "\\[\\[",
+                push : 'modxtag-start',
+                merge : false
+            });
+        }
 
         this.normalizeRules();
     };
