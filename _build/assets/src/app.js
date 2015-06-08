@@ -67,7 +67,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         var previewButtonOff = Ext.get(Ext.DomHelper.append(content.parent(),{
             tag: 'div',
             class: 'preview-button-off',
-            html: '<i class="icon icon-eye-slash icon-large"></i>',
+            html: '<i class="icon icon-eye-slash icon-large" title="' + _('markdowneditor.toolbox.hide_preview') + '"></i>',
             hidden: true
         }));
 
@@ -279,15 +279,15 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             cn: [{
                 tag: 'div',
                 class: 'preview-button',
-                html: '<i class="icon icon-eye icon-large"></i>'
+                html: '<i class="icon icon-eye icon-large" title="' + _('markdowneditor.toolbox.preview') + '"></i>'
             },{
                 tag: 'div',
                 class: 'splitscreen-button',
-                html: '<i class="icon icon-pause icon-large"></i>'
+                html: '<i class="icon icon-pause icon-large" title="' + _('markdowneditor.toolbox.split_screen') + '"></i>'
             },{
                 tag: 'div',
                 class: 'fullscreen-button',
-                html: '<i class="icon icon-expand icon-large"></i>'
+                html: '<i class="icon icon-expand icon-large" title="' + _('markdowneditor.toolbox.fullscree') + '"></i>'
             }]
         }));
 
@@ -483,19 +483,19 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
         this.gutterToolbar = Ext.get(cell);
 
         if (this.isMobileDevice()) {
-            this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
+            this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width" title="' + _('markdowneditor.toolbox.toolbox') + '"></i>' +
             '<div class="inline-toolbar">' +
-                '<i class="icon icon-archive icon-fixed-width"></i>' +
-                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
-                '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-fixed-width"></i></label>' +
-                '<i class="icon icon-code icon-fixed-width"></i>' +
+                '<i class="icon icon-archive icon-fixed-width" title="' + _('markdowneditor.toolbox.media_browser') + '"></i>' +
+                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width" title="' + _('markdowneditor.toolbox.media_upload') + '"></i></label>' +
+                '<label for="'+this.statusBar.id+'-file-mobile"><i class="icon icon-camera icon-fixed-width" title="' + _('markdowneditor.toolbox.camera_upload') + '"></i></label>' +
+                '<i class="icon icon-code icon-fixed-width" title="' + _('markdowneditor.toolbox.oembed') + '"></i>' +
             '</div>');
         } else {
-            this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width"></i>' +
+            this.gutterToolbar.update('<i class="icon icon-plus icon-fixed-width" title="' + _('markdowneditor.toolbox.toolbox') + '"></i>' +
             '<div class="inline-toolbar">' +
-                '<i class="icon icon-archive icon-fixed-width"></i>' +
-                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width"></i></label>' +
-                '<i class="icon icon-code icon-fixed-width"></i>' +
+                '<i class="icon icon-archive icon-fixed-width" title="' + _('markdowneditor.toolbox.media_browser') + '"></i>' +
+                '<label for="'+this.statusBar.id+'-file"><i class="icon icon-upload icon-fixed-width" title="' + _('markdowneditor.toolbox.media_upload') + '"></i></label>' +
+                '<i class="icon icon-code icon-fixed-width" title="' + _('markdowneditor.toolbox.oembed') + '"></i>' +
             '</div>');
         }
 

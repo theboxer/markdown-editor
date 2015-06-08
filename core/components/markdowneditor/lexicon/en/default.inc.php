@@ -26,6 +26,14 @@ $_lang['markdowneditor.cropper.upload'] = 'Upload';
 $_lang['markdowneditor.cropper.crop_upload'] = 'Crop & Upload';
 
 $_lang['markdowneditor.toolbox.preview'] = 'Preview';
+$_lang['markdowneditor.toolbox.fullscree'] = 'Toggle Full screen';
+$_lang['markdowneditor.toolbox.split_screen'] = 'Toggle Split screen';
+$_lang['markdowneditor.toolbox.hide_preview'] = 'Close preview';
+$_lang['markdowneditor.toolbox.toolbox'] = 'Toggle Tool box';
+$_lang['markdowneditor.toolbox.media_browser'] = 'Browse media';
+$_lang['markdowneditor.toolbox.media_upload'] = 'Upload media';
+$_lang['markdowneditor.toolbox.oembed'] = 'Embed URL';
+$_lang['markdowneditor.toolbox.camera_upload'] = 'Take a picture';
 
 $_lang['markdowneditor.oembed.embed_url'] = 'Embed URL';
 $_lang['markdowneditor.oembed.url'] = 'URL';
