@@ -233,6 +233,11 @@
         "key": "embedly.api_key",
         "value": "",
         "area": "markdowneditor.area.embedly"
+      },
+      {
+        "key": "init.condition",
+        "value": "",
+        "area": "markdowneditor.area.init"
       }
     ]
   },

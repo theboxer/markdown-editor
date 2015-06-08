@@ -3,13 +3,6 @@ namespace MarkdownEditor\Event;
 
 class OnRichTextEditorInit extends Event {
 
-    public function init()
-    {
-        if ($this->sp['editor'] != 'MarkdownEditor') return false;
-
-        return parent::init();
-    }
-
     public function process() {
         $this->modx->controller->addLexiconTopic('markdowneditor:default');
 

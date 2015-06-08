@@ -1,3 +1,4 @@
+- Add system setting to custom init Markdown Editor
 - Add titles for toolbar icons
 
 ## MarkdownEditor 1.0.0

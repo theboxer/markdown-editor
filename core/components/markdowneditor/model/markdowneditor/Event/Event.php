@@ -35,6 +35,27 @@ abstract class Event {
 
         $useEditor = $this->modx->getOption('use_editor', false);
         $whichEditor = $this->modx->getOption('which_editor', '');
+        
+        if ($useEditor && $whichEditor != 'MarkdownEditor') {
+            $initCondition = $this->md->getOption('init.condition');
+            if (empty($initCondition)) $initCondition = '[]';
+            
+            $initCondition = $this->modx->fromJSON($initCondition);
+            
+            if (!empty($initCondition)) {
+                $c = $this->modx->newQuery('modResource');
+                $c->where([
+                    ['id' => $this->sp['resource']->id],
+                    $initCondition,
+                ]);
+                
+                $check = $this->modx->getObject('modResource', $c);
+                if ($check) {
+                    $this->modx->setOption('which_editor', 'MarkdownEditor');
+                    $whichEditor = 'MarkdownEditor';
+                }
+            }
+        }
 
         if ($useEditor && $whichEditor == 'MarkdownEditor') return true;
 

@@ -48,6 +48,7 @@ $_lang['area_markdowneditor.area.resizer'] = 'Resizer';
 $_lang['area_markdowneditor.area.general'] = 'General';
 $_lang['area_markdowneditor.area.oembed'] = 'oEmbed';
 $_lang['area_markdowneditor.area.embedly'] = 'Embedly';
+$_lang['area_markdowneditor.area.init'] = 'Init';
 
 $_lang['setting_markdowneditor.lp.parse_modx_tags'] = 'Parse MODX Tags';
 $_lang['setting_markdowneditor.lp.parse_modx_tags_desc'] = 'If set to yes, Markdown Editor will also parse MODX tags in preview. This option will send an Ajax request to the server each time you update content.';
@@ -125,7 +126,8 @@ $_lang['setting_markdowneditor.general.source'] = 'Source';
 $_lang['setting_markdowneditor.general.source_desc'] = 'Media source that will be used in media browser for inserting files and images.';
 $_lang['setting_markdowneditor.general.source_select'] = 'Source select';
 $_lang['setting_markdowneditor.general.source_select_desc'] = 'If enabled, user will be able to change source when inserting files or images.';
-
+$_lang['setting_markdowneditor.init.condition'] = 'Condition';
+$_lang['setting_markdowneditor.init.condition_desc'] = 'This condition will be used to init Markdown editor. Use JSON syntax.';
 
 $_lang['markdowneditor.err.upload.too_big'] = 'File exceeded the size limit.';
 $_lang['markdowneditor.err.upload.unsupported_image'] = 'Unsupported image type.';
