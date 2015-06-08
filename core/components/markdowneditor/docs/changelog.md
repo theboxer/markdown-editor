@@ -1,5 +1,6 @@
-## MarkdownEditor 1.0.0
+- Add titles for toolbar icons
 
+## MarkdownEditor 1.0.0
 - Live preview
 - Drag & drop upload
 - Image cropper
