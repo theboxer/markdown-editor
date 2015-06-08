@@ -1,5 +1,7 @@
 - Add system setting to custom init Markdown Editor
 - Add titles for toolbar icons
+- Highlight MODX tags in Markdown Editor
+- Add modx as language for highlight rules in highlight.js
 
 ## MarkdownEditor 1.0.0
 - Live preview
