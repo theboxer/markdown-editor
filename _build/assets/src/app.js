@@ -730,7 +730,9 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
             var newPreview = document.createElement('div');
             newPreview.innerHTML = output;
             
-            this.diffDOM.apply(this.preview.dom, this.diffDOM.diff(this.preview.dom, newPreview));
+            try {
+                this.diffDOM.apply(this.preview.dom, this.diffDOM.diff(this.preview.dom, newPreview));
+            } catch (err) {}
             
             this.preview.fixHeight();
             
