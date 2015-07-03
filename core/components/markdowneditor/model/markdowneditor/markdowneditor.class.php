@@ -126,4 +126,52 @@ class MarkdownEditor {
     {
         require_once $this->getOption('modelPath') . 'vendor/autoload.php';
     }
+
+    /**
+     * @param $id
+     * @param $element
+     * @param $namespace
+     * @param $markdown
+     * @return bool
+     */
+    public function saveMarkdown($id, $element, $namespace, $markdown)
+    {
+        /** @var MarkdownEditorContent $content */
+        $content = $this->modx->getObject('MarkdownEditorContent', [
+            'object_id' => $id,
+            'element_name' => $element,
+            'namespace' => $namespace
+        ]);
+        
+        if (!$content) {
+            $content = $this->modx->newObject('MarkdownEditorContent');
+            $content->set('object_id', $id);
+            $content->set('element_name', $element);
+            $content->set('namespace', $namespace);
+        }
+
+        $content->set('content', $markdown);
+        return $content->save();
+    }
+
+    /**
+     * @param $id
+     * @param $element
+     * @param $namespace
+     * @return string
+     */
+    public function loadMarkdown($id, $element, $namespace)
+    {
+        /** @var MarkdownEditorContent $content */
+        $content = $this->modx->getObject('MarkdownEditorContent', [
+            'object_id' => $id,
+            'element_name' => $element,
+            'namespace' => $namespace
+        ]);
+        
+        if (!$content) return '';
+
+        return $content->content;
+        
+    }
 }

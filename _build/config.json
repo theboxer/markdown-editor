@@ -249,7 +249,7 @@
     "license": "docs/license.md",
     "changelog": "docs/changelog.md",
     "resolver": {
-      "after": ["resolve.whicheditor.php"]
+      "after": ["resolve.update.php", "resolve.whicheditor.php"]
     }
   }
 }

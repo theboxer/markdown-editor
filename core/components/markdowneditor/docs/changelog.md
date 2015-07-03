@@ -1,3 +1,4 @@
+- Store markdown in Resource properties
 - Fix error during loading MD editor when Resource content is removed from Resource panel
 - Add system setting to custom init Markdown Editor
 - Add titles for toolbar icons

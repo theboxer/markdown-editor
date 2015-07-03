@@ -99,18 +99,7 @@ class OnDocFormSave extends Event {
             if (!strpos($field, '_markdown')) continue;
             $fieldName = str_replace('_markdown', '', $field);
 
-            $content = $this->modx->getObject('MarkdownEditorContent', array(
-                'object_id' => $this->resource->id,
-                'element_name' => $fieldName,
-                'namespace' => 'core',
-            ));
-
-            if (empty($content)) {
-                $content = $this->modx->newObject('MarkdownEditorContent');
-                $content->set('object_id', $this->resource->id);
-                $content->set('element_name', $fieldName);
-                $content->set('namespace', 'core');
-            }
+            $markdown = $this->modx->fromJSON($this->resource->getProperty('markdown', 'markdowneditor', '[]'));
 
             if ($mode == \modSystemEvent::MODE_NEW) {
                 if ($underResource) {
@@ -124,10 +113,10 @@ class OnDocFormSave extends Event {
                 }
             }
 
-            $content->set('content', $value);
-
-            $content->save();
-
+            $markdown[$fieldName] = $value;
+            $this->resource->setProperty('markdown', $this->modx->toJSON($markdown), 'markdowneditor');
+            $this->resource->save();
+            
             $this->resource->{$field} = '';
         }
 

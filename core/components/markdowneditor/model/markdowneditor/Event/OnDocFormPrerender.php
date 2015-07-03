@@ -8,16 +8,10 @@ class OnDocFormPrerender extends Event {
         $mdContent = array();
 
         if ($resource) {
-            $c = $this->modx->newQuery('MarkdownEditorContent');
-            $c->where(array(
-                'object_id' => $resource->id,
-                'namespace' => 'core'
-            ));
-
-            /** @var \MarkdownEditorContent[] $contents */
-            $contents = $this->modx->getIterator('MarkdownEditorContent', $c);
-            foreach ($contents as $content) {
-                $mdContent[$content->element_name] = $content->content;
+            $markdown = $this->modx->fromJSON($resource->getProperty('markdown', 'markdowneditor', '[]'));
+            
+            foreach ($markdown as $element => $content) {
+                $mdContent[$element] = $content;
             }
         }
 
