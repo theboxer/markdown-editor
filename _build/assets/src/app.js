@@ -29,7 +29,7 @@ Ext.extend(markdownEditor.Editor,Ext.Component,{
 
         this.diffDOM = new diffDOM();
         
-        if (this.mdElementId){
+        if (this.mdElementId && Ext.get(this.mdElementId)){
             Ext.onReady(this.render, this);
         }
     }
