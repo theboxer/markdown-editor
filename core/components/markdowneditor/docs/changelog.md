@@ -1,3 +1,4 @@
+- Add HTML blocks help to docs
 - Init jQuery in noConflict mode
 - Fix text replication when inserting HTML
 - Store markdown in Resource properties
