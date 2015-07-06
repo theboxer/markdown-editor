@@ -161,6 +161,9 @@
             <li class="sub"><a href="#syntax-highlighting">Syntax highlighting</a></li>
         
     
+        <li class="main"><a href="#html-blocks">HTML blocks</a></li>
+        
+    
         <li class="main"><a href="#tables">Tables</a></li>
         
             <li class="sub"><a href="#aligned-text">Aligned text</a></li>
@@ -307,6 +310,19 @@ grunt.initConfig({
 };
 ```
 </code></pre>
+<h2 id="html-blocks">HTML blocks</h2>
+<p>HTML blocks (e.g. div, table, pre, p) must be separated from surrounding content by blank lines and the start and end of the block should not be indented with tabs or spaces </p>
+<pre><code class="markdown">**Bold** text
+
+&lt;div&gt;
+
+**Bold** text
+
+&lt;/div&gt;
+
+**Bold** text
+</code></pre>
+
 <h2 id="tables">Tables</h2>
 <p>Tables are created by adding pipes as dividers between each cell, and by adding a line of dashes (also separated by bars) beneath the header. Note that the pipes do not need to be vertically aligned.</p>
 <pre><code class="markdown">| Option | Description |
