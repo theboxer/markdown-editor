@@ -1,3 +1,4 @@
+- Init jQuery in noConflict mode
 - Fix text replication when inserting HTML
 - Store markdown in Resource properties
 - Fix error during loading MD editor when Resource content is removed from Resource panel

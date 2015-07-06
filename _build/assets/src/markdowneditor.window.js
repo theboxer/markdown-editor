@@ -137,7 +137,7 @@ markdownEditor.window.Cropper = function(config) {
             'show': {
                 fn: function() {
                     var cropperOptions = {};
-                    this.$cropperEl = $('#' + this.id + ' ' + config.cropperSelector);
+                    this.$cropperEl = md$('#' + this.id + ' ' + config.cropperSelector);
 
                     cropperOptions.crop = function (data) {
                         this.imageData = [

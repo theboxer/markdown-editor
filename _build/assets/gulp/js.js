@@ -16,7 +16,8 @@ gulp.task('libjs', function () {
                 'bower_components/ace-builds/src/ext-language_tools.js',
                 'bower_components/jquery/dist/jquery.min.js',
                 'bower_components/cropper/dist/cropper.min.js',
-                'bower_components/diff-dom/diffDOM.js'
+                'bower_components/diff-dom/diffDOM.js',
+                'src/vendor/appender.js'
             ])
             .pipe(plumber())
             .pipe(concat('dependencies.js'))
