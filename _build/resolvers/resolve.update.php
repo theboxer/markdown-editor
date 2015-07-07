@@ -29,7 +29,10 @@ if ($object->xpdo) {
                       LIMIT 1,1) = `modTransportPackage`.`signature`",
             ));
             $c->where(array(
-                'modTransportPackage.package_name' => 'markdowneditor',
+                array(
+                    'modTransportPackage.package_name' => 'markdowneditor',
+                    'OR:modTransportPackage.package_name:=' => 'Markdown Editor',
+                ),
                 'installed:IS NOT' => null
             ));
 

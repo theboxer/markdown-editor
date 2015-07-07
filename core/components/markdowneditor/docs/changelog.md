@@ -1,3 +1,4 @@
+## MarkdownEditor 1.1.0
 - Add HTML blocks help to docs
 - Init jQuery in noConflict mode
 - Fix text replication when inserting HTML
