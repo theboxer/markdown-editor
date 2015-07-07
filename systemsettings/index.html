@@ -145,6 +145,11 @@
             <li class="sub"><a href="#split-editor-full-screen">Split editor full screen</a></li>
         
     
+        <li class="main"><a href="#init">Init</a></li>
+        
+            <li class="sub"><a href="#init-condition">Init condition</a></li>
+        
+    
         <li class="main"><a href="#live-preview">Live preview</a></li>
         
             <li class="sub"><a href="#parse-modx-tags">Parse MODX Tags</a></li>
@@ -265,6 +270,11 @@
 <p><strong>Key:</strong> <code>markdowneditor.general.split_fullscreen</code><br />
 <strong>Default:</strong> <code>true</code></p>
 <p>When enabled and in full screen editing mode, editor will be in split mode by default when entering full screen.</p>
+<h2 id="init">Init</h2>
+<h3 id="init-condition">Init condition</h3>
+<p><strong>Key:</strong> <code>markdowneditor.init.condition</code>  </p>
+<p>The xPDO condition (in JSON) that will be used to initialize Markdown Editor. With this setting MarkdownEditor can be used for example just for blog resources and for everything other you can use WYSIWYG.
+To achieve that, set <code>which_editor</code> to your favourite WYSIWYG editor (for example TinyMCE-RTE) and if your blog resource has id <code>9</code> use this as an init condition: <code>{"parent": 9}</code>.</p>
 <h2 id="live-preview">Live preview</h2>
 <h3 id="parse-modx-tags">Parse MODX Tags</h3>
 <p><strong>Key:</strong> <code>markdowneditor.lp.parse_modx_tags</code><br />
