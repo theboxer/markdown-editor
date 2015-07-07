@@ -63,6 +63,13 @@ If enabled, user will be able to change source when inserting files or images.
 
 When enabled and in full screen editing mode, editor will be in split mode by default when entering full screen.
 
+## Init
+### Init condition
+**Key:** `markdowneditor.init.condition`  
+
+The xPDO condition (in JSON) that will be used to initialize Markdown Editor. With this setting MarkdownEditor can be used for example just for blog resources and for everything other you can use WYSIWYG.
+To achieve that, set `which_editor` to your favourite WYSIWYG editor (for example TinyMCE-RTE) and if your blog resource has id `9` use this as an init condition: `{"parent": 9}`.
+
 ## Live preview
 ### Parse MODX Tags
 **Key:** `markdowneditor.lp.parse_modx_tags`  
