@@ -5,7 +5,7 @@ class OnWebPageInit extends Event {
 
     public function init()
     {
-        return true;
+        return (bool)$this->md->getOption('general.load_front_end', null, false);
     }
 
     public function process() {

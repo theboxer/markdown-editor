@@ -166,6 +166,11 @@
         "area": "markdowneditor.area.general"
       },
       {
+        "key": "general.load_front_end",
+        "value": false,
+        "area": "markdowneditor.area.general"
+      },
+      {
         "key": "general.include_highlight",
         "value": true,
         "type": "combo-boolean",
