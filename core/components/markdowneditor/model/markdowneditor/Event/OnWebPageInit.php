@@ -17,7 +17,6 @@ class OnWebPageInit extends Event {
         $includeHightLight = (int) $this->md->getOption('general.include_highlight', null, 1);
         if ($includeHightLight) {
             $this->modx->regClientCSS($this->md->getOption('cssUrl') . 'highlight.css');
-            $this->modx->regClientStartupScript($this->md->getOption('jsUrl') . 'highlight.pack.js');
         }
 
         $oEmbedServices = $this->md->getEmbedServiceInstances();
@@ -35,6 +34,10 @@ class OnWebPageInit extends Event {
             foreach ($oEmbedHTML as $html) {
                 $this->modx->regClientHTMLBlock($html);
             }
+        }
+
+        if ($includeHightLight) {
+            $this->modx->regClientStartupScript($this->md->getOption('jsUrl') . 'highlight.pack.js');
         }
 
         return;
