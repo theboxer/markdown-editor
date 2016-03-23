@@ -18153,7 +18153,7 @@ exports.UndoManager = UndoManager;
                 });
             })();
         
-/*! remarkable 1.5.0 https://github.com//jonschlinkert/remarkable @license MIT */!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Remarkable=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! remarkable 1.6.0 https://github.com/jonschlinkert/remarkable @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Remarkable = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // List of valid entities
 //
 // Generate with ./support/entities.js script
@@ -20589,25 +20589,32 @@ module.exports = [
 ];
 
 },{}],5:[function(require,module,exports){
-// Utilities
-//
 'use strict';
 
+/**
+ * Utility functions
+ */
 
-function _class(obj) { return Object.prototype.toString.call(obj); }
-
-function isString(obj) { return _class(obj) === '[object String]'; }
-
-var _hasOwnProperty = Object.prototype.hasOwnProperty;
-
-function has(object, key) {
-  return object ? _hasOwnProperty.call(object, key) : false;
+function typeOf(obj) {
+  return Object.prototype.toString.call(obj);
 }
 
-// Merge objects
+function isString(obj) {
+  return typeOf(obj) === '[object String]';
+}
+
+var hasOwn = Object.prototype.hasOwnProperty;
+
+function has(object, key) {
+  return object
+    ? hasOwn.call(object, key)
+    : false;
+}
+
+// Extend objects
 //
 function assign(obj /*from1, from2, from3, ...*/) {
-  var sources = Array.prototype.slice.call(arguments, 1);
+  var sources = [].slice.call(arguments, 1);
 
   sources.forEach(function (source) {
     if (!source) { return; }
@@ -20737,6 +20744,7 @@ module.exports = {
     breaks:       false,        // Convert '\n' in paragraphs into <br>
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
+    linkTarget:   '',           // set target to open link in
 
     // Enable some language-neutral replacements + quotes beautification
     typographer:  false,
@@ -20809,6 +20817,7 @@ module.exports = {
     breaks:       false,        // Convert '\n' in paragraphs into <br>
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
+    linkTarget:   '',           // set target to open link in
 
     // Enable some language-neutral replacements + quotes beautification
     typographer:  false,
@@ -20889,26 +20898,26 @@ module.exports = {
     breaks:       false,        // Convert '\n' in paragraphs into <br>
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
+    linkTarget:   '',           // set target to open link in
 
     // Enable some language-neutral replacements + quotes beautification
     typographer:  false,
 
     // Double + single quotes replacement pairs, when typographer enabled,
     // and smartquotes on. Set doubles to '«»' for Russian, '„“' for German.
-    quotes: '“”‘’',
+    quotes:       '“”‘’',
 
     // Highlighter function. Should return escaped HTML,
     // or '' if input not changed
     //
     // function (/*str, lang*/) { return ''; }
     //
-    highlight: null,
+    highlight:     null,
 
-    maxNesting:   20            // Internal protection, recursion limit
+    maxNesting:    20            // Internal protection, recursion limit
   },
 
   components: {
-
     // Don't restrict core/block/inline rules
     core: {},
     block: {},
@@ -20919,19 +20928,15 @@ module.exports = {
 },{}],9:[function(require,module,exports){
 'use strict';
 
-
 var replaceEntities = require('../common/utils').replaceEntities;
-
 
 module.exports = function normalizeLink(url) {
   var normalized = replaceEntities(url);
-
-  // We don't care much about result of mailformed URIs,
-  // but shoud not throw exception.
+  // We shouldn't care about the result of malformed URIs,
+  // and should not throw an exception.
   try {
     normalized = decodeURI(normalized);
-  } catch (__) {}
-
+  } catch (err) {}
   return encodeURI(normalized);
 };
 
@@ -20946,17 +20951,22 @@ module.exports = function normalizeReference(str) {
 };
 
 },{}],11:[function(require,module,exports){
-// Parse link destination
-//
-// on success it returns a string and updates state.pos;
-// on failure it returns null
-//
 'use strict';
 
 
 var normalizeLink = require('./normalize_link');
 var unescapeMd    = require('../common/utils').unescapeMd;
 
+/**
+ * Parse link destination
+ *
+ *   - on success it returns a string and updates state.pos;
+ *   - on failure it returns null
+ *
+ * @param  {Object} state
+ * @param  {Number} pos
+ * @api private
+ */
 
 module.exports = function parseLinkDestination(state, pos) {
   var code, level, link,
@@ -20995,8 +21005,7 @@ module.exports = function parseLinkDestination(state, pos) {
 
     if (code === 0x20) { break; }
 
-    // ascii control characters
-    if (code < 0x20 || code === 0x7F) { break; }
+    if (code > 0x08 && code < 0x0e) { break; }
 
     if (code === 0x5C /* \ */ && pos + 1 < max) {
       pos += 2;
@@ -21018,7 +21027,7 @@ module.exports = function parseLinkDestination(state, pos) {
 
   if (start === pos) { return false; }
 
-  link = normalizeLink(unescapeMd(state.src.slice(start, pos)));
+  link = unescapeMd(state.src.slice(start, pos));
   if (!state.parser.validateLink(link)) { return false; }
 
   state.linkContent = link;
@@ -21027,12 +21036,18 @@ module.exports = function parseLinkDestination(state, pos) {
 };
 
 },{"../common/utils":5,"./normalize_link":9}],12:[function(require,module,exports){
-// Parse link label
-//
-// this function assumes that first character ("[") already matches;
-// returns the end of the label
-//
 'use strict';
+
+/**
+ * Parse link labels
+ *
+ * This function assumes that first character (`[`) already matches;
+ * returns the end of the label.
+ *
+ * @param  {Object} state
+ * @param  {Number} start
+ * @api private
+ */
 
 module.exports = function parseLinkLabel(state, start) {
   var level, found, marker,
@@ -21082,16 +21097,21 @@ module.exports = function parseLinkLabel(state, start) {
 };
 
 },{}],13:[function(require,module,exports){
-// Parse link title
-//
-// on success it returns a string and updates state.pos;
-// on failure it returns null
-//
 'use strict';
 
 
 var unescapeMd = require('../common/utils').unescapeMd;
 
+/**
+ * Parse link title
+ *
+ *   - on success it returns a string and updates state.pos;
+ *   - on failure it returns null
+ *
+ * @param  {Object} state
+ * @param  {Number} pos
+ * @api private
+ */
 
 module.exports = function parseLinkTitle(state, pos) {
   var code,
@@ -21125,47 +21145,62 @@ module.exports = function parseLinkTitle(state, pos) {
 };
 
 },{"../common/utils":5}],14:[function(require,module,exports){
-// Main perser class
-
 'use strict';
 
+/**
+ * Local dependencies
+ */
 
 var assign       = require('./common/utils').assign;
-var isString     = require('./common/utils').isString;
 var Renderer     = require('./renderer');
 var ParserCore   = require('./parser_core');
 var ParserBlock  = require('./parser_block');
 var ParserInline = require('./parser_inline');
 var Ruler        = require('./ruler');
 
+/**
+ * Preset configs
+ */
+
 var config = {
-  'default': require('./configs/default'),
-  full: require('./configs/full'),
-  commonmark: require('./configs/commonmark')
+  'default':    require('./configs/default'),
+  'full':       require('./configs/full'),
+  'commonmark': require('./configs/commonmark')
 };
 
+/**
+ * The `StateCore` class manages state.
+ *
+ * @param {Object} `instance` Remarkable instance
+ * @param {String} `str` Markdown string
+ * @param {Object} `env`
+ */
 
-function StateCore(self, src, env) {
-  this.src = src;
+function StateCore(instance, str, env) {
+  this.src = str;
   this.env = env;
-  this.options = self.options;
+  this.options = instance.options;
   this.tokens = [];
   this.inlineMode = false;
 
-  this.inline = self.inline;
-  this.block = self.block;
-  this.renderer = self.renderer;
-  this.typographer = self.typographer;
+  this.inline = instance.inline;
+  this.block = instance.block;
+  this.renderer = instance.renderer;
+  this.typographer = instance.typographer;
 }
 
-// Main class
-//
-function Remarkable(presetName, options) {
-  if (!options) {
-    if (!isString(presetName)) {
-      options = presetName || {};
-      presetName = 'default';
-    }
+/**
+ * The main `Remarkable` class. Create an instance of
+ * `Remarkable` with a `preset` and/or `options`.
+ *
+ * @param {String} `preset` If no preset is given, `default` is used.
+ * @param {Object} `options`
+ */
+
+function Remarkable(preset, options) {
+  if (typeof preset !== 'string') {
+    options = preset;
+    preset = 'default';
   }
 
   this.inline   = new ParserInline();
@@ -21175,28 +21210,36 @@ function Remarkable(presetName, options) {
   this.ruler    = new Ruler();
 
   this.options  = {};
-  this.configure(config[presetName]);
-
-  if (options) { this.set(options); }
+  this.configure(config[preset]);
+  this.set(options || {});
 }
 
+/**
+ * Set options as an alternative to passing them
+ * to the constructor.
+ *
+ * ```js
+ * md.set({typographer: true});
+ * ```
+ * @param {Object} `options`
+ * @api public
+ */
 
-// Set options, if you did not passed those to constructor
-//
 Remarkable.prototype.set = function (options) {
   assign(this.options, options);
 };
 
+/**
+ * Batch loader for components rules states, and options
+ *
+ * @param  {Object} `presets`
+ */
 
-// Batch loader for components rules states & options
-//
 Remarkable.prototype.configure = function (presets) {
   var self = this;
 
   if (!presets) { throw new Error('Wrong `remarkable` preset, check name/content'); }
-
   if (presets.options) { self.set(presets.options); }
-
   if (presets.components) {
     Object.keys(presets.components).forEach(function (name) {
       if (presets.components[name].rules) {
@@ -21206,76 +21249,111 @@ Remarkable.prototype.configure = function (presets) {
   }
 };
 
+/**
+ * Use a plugin.
+ *
+ * ```js
+ * var md = new Remarkable();
+ *
+ * md.use(plugin1)
+ *   .use(plugin2, opts)
+ *   .use(plugin3);
+ * ```
+ *
+ * @param  {Function} `plugin`
+ * @param  {Object} `options`
+ * @return {Object} `Remarkable` for chaining
+ */
 
-// Sugar for curried plugins init:
-//
-// var md = new Remarkable();
-//
-// md.use(plugin1)
-//   .use(plugin2, opts)
-//   .use(plugin3);
-//
-Remarkable.prototype.use = function (plugin, opts) {
-  plugin(this, opts);
+Remarkable.prototype.use = function (plugin, options) {
+  plugin(this, options);
   return this;
 };
 
 
-// Parse input string, returns tokens array. Modify `env` with
-// definitions data.
-//
-Remarkable.prototype.parse = function (src, env) {
-  var state = new StateCore(this, src, env);
+/**
+ * Parse the input `string` and return a tokens array.
+ * Modifies `env` with definitions data.
+ *
+ * @param  {String} `string`
+ * @param  {Object} `env`
+ * @return {Array} Array of tokens
+ */
 
+Remarkable.prototype.parse = function (str, env) {
+  var state = new StateCore(this, str, env);
   this.core.process(state);
-
   return state.tokens;
 };
 
-// Main method that does all magic :)
-//
-Remarkable.prototype.render = function (src, env) {
-  env = env || {};
+/**
+ * The main `.render()` method that does all the magic :)
+ *
+ * @param  {String} `string`
+ * @param  {Object} `env`
+ * @return {String} Rendered HTML.
+ */
 
-  return this.renderer.render(this.parse(src, env), this.options, env);
+Remarkable.prototype.render = function (str, env) {
+  env = env || {};
+  return this.renderer.render(this.parse(str, env), this.options, env);
 };
 
+/**
+ * Parse the given content `string` as a single string.
+ *
+ * @param  {String} `string`
+ * @param  {Object} `env`
+ * @return {Array} Array of tokens
+ */
 
-// Parse content as single string
-//
-Remarkable.prototype.parseInline = function (src, env) {
-  var state = new StateCore(this, src, env);
-
+Remarkable.prototype.parseInline = function (str, env) {
+  var state = new StateCore(this, str, env);
   state.inlineMode = true;
   this.core.process(state);
-
   return state.tokens;
 };
 
-// Render single string, without wrapping it to paragraphs
-//
-Remarkable.prototype.renderInline = function (src, env) {
-  env = env || {};
+/**
+ * Render a single content `string`, without wrapping it
+ * to paragraphs
+ *
+ * @param  {String} `str`
+ * @param  {Object} `env`
+ * @return {String}
+ */
 
-  return this.renderer.render(this.parseInline(src, env), this.options, env);
+Remarkable.prototype.renderInline = function (str, env) {
+  env = env || {};
+  return this.renderer.render(this.parseInline(str, env), this.options, env);
 };
 
+/**
+ * Expose `Remarkable`
+ */
 
 module.exports = Remarkable;
 
-// Expose helpers, useful for custom renderer functions
+/**
+ * Expose `utils`, Useful helper functions for custom
+ * rendering.
+ */
+
 module.exports.utils = require('./common/utils');
 
 },{"./common/utils":5,"./configs/commonmark":6,"./configs/default":7,"./configs/full":8,"./parser_block":15,"./parser_core":16,"./parser_inline":17,"./renderer":18,"./ruler":19}],15:[function(require,module,exports){
-// Block parser
-
-
 'use strict';
 
+/**
+ * Local dependencies
+ */
 
-var Ruler           = require('./ruler');
-var StateBlock      = require('./rules_block/state_block');
+var Ruler      = require('./ruler');
+var StateBlock = require('./rules_block/state_block');
 
+/**
+ * Parser rules
+ */
 
 var _rules = [
   [ 'code',       require('./rules_block/code') ],
@@ -21292,34 +21370,48 @@ var _rules = [
   [ 'paragraph',  require('./rules_block/paragraph') ]
 ];
 
+/**
+ * Block Parser class
+ *
+ * @api private
+ */
 
-// Block Parser class
-//
 function ParserBlock() {
   this.ruler = new Ruler();
-
   for (var i = 0; i < _rules.length; i++) {
-    this.ruler.push(_rules[i][0], _rules[i][1], { alt: (_rules[i][2] || []).slice() });
+    this.ruler.push(_rules[i][0], _rules[i][1], {
+      alt: (_rules[i][2] || []).slice()
+    });
   }
 }
 
+/**
+ * Generate tokens for the given input range.
+ *
+ * @param  {Object} `state` Has properties like `src`, `parser`, `options` etc
+ * @param  {Number} `startLine`
+ * @param  {Number} `endLine`
+ * @api private
+ */
 
-// Generate tokens for input range
-//
 ParserBlock.prototype.tokenize = function (state, startLine, endLine) {
-  var ok, i,
-      rules = this.ruler.getRules(''),
-      len = rules.length,
-      line = startLine,
-      hasEmptyLines = false;
+  var rules = this.ruler.getRules('');
+  var len = rules.length;
+  var line = startLine;
+  var hasEmptyLines = false;
+  var ok, i;
 
   while (line < endLine) {
     state.line = line = state.skipEmptyLines(line);
-    if (line >= endLine) { break; }
+    if (line >= endLine) {
+      break;
+    }
 
     // Termination condition for nested calls.
     // Nested calls currently used for blockquotes & lists
-    if (state.tShift[line] < state.blkIndent) { break; }
+    if (state.tShift[line] < state.blkIndent) {
+      break;
+    }
 
     // Try all possible rules.
     // On success, rule should:
@@ -21330,7 +21422,9 @@ ParserBlock.prototype.tokenize = function (state, startLine, endLine) {
 
     for (i = 0; i < len; i++) {
       ok = rules[i](state, line, endLine, false);
-      if (ok) { break; }
+      if (ok) {
+        break;
+      }
     }
 
     // set state.tight iff we had an empty line before current tag
@@ -21359,22 +21453,31 @@ var TABS_SCAN_RE = /[\n\t]/g;
 var NEWLINES_RE  = /\r[\n\u0085]|[\u2424\u2028\u0085]/g;
 var SPACES_RE    = /\u00a0/g;
 
-ParserBlock.prototype.parse = function (src, options, env, outTokens) {
-  var state, lineStart = 0, lastTabPos = 0;
+/**
+ * Tokenize the given `str`.
+ *
+ * @param  {String} `str` Source string
+ * @param  {Object} `options`
+ * @param  {Object} `env`
+ * @param  {Array} `outTokens`
+ * @api private
+ */
 
-  if (!src) { return []; }
+ParserBlock.prototype.parse = function (str, options, env, outTokens) {
+  var state, lineStart = 0, lastTabPos = 0;
+  if (!str) { return []; }
 
   // Normalize spaces
-  src = src.replace(SPACES_RE, ' ');
+  str = str.replace(SPACES_RE, ' ');
 
   // Normalize newlines
-  src = src.replace(NEWLINES_RE, '\n');
+  str = str.replace(NEWLINES_RE, '\n');
 
   // Replace tabs with proper number of spaces (1..4)
-  if (src.indexOf('\t') >= 0) {
-    src = src.replace(TABS_SCAN_RE, function (match, offset) {
+  if (str.indexOf('\t') >= 0) {
+    str = str.replace(TABS_SCAN_RE, function (match, offset) {
       var result;
-      if (src.charCodeAt(offset) === 0x0A) {
+      if (str.charCodeAt(offset) === 0x0A) {
         lineStart = offset + 1;
         lastTabPos = 0;
         return match;
@@ -21385,28 +21488,28 @@ ParserBlock.prototype.parse = function (src, options, env, outTokens) {
     });
   }
 
-  state = new StateBlock(
-    src,
-    this,
-    options,
-    env,
-    outTokens
-  );
-
+  state = new StateBlock(str, this, options, env, outTokens);
   this.tokenize(state, state.line, state.lineMax);
 };
 
+/**
+ * Expose `ParserBlock`
+ */
 
 module.exports = ParserBlock;
 
-},{"./ruler":19,"./rules_block/blockquote":20,"./rules_block/code":21,"./rules_block/deflist":22,"./rules_block/fences":23,"./rules_block/footnote":24,"./rules_block/heading":25,"./rules_block/hr":26,"./rules_block/htmlblock":27,"./rules_block/lheading":28,"./rules_block/list":29,"./rules_block/paragraph":30,"./rules_block/state_block":31,"./rules_block/table":32}],16:[function(require,module,exports){
-// Class of top level (`core`)  rules
-//
+},{"./ruler":19,"./rules_block/blockquote":21,"./rules_block/code":22,"./rules_block/deflist":23,"./rules_block/fences":24,"./rules_block/footnote":25,"./rules_block/heading":26,"./rules_block/hr":27,"./rules_block/htmlblock":28,"./rules_block/lheading":29,"./rules_block/list":30,"./rules_block/paragraph":31,"./rules_block/state_block":32,"./rules_block/table":33}],16:[function(require,module,exports){
 'use strict';
 
+/**
+ * Local dependencies
+ */
 
-var Ruler  = require('./ruler');
+var Ruler = require('./ruler');
 
+/**
+ * Core parser `rules`
+ */
 
 var _rules = [
   [ 'block',          require('./rules_core/block')          ],
@@ -21420,43 +21523,55 @@ var _rules = [
   [ 'linkify',        require('./rules_core/linkify')        ]
 ];
 
+/**
+ * Class for top level (`core`) parser rules
+ *
+ * @api private
+ */
 
 function Core() {
   this.options = {};
-
   this.ruler = new Ruler();
-
   for (var i = 0; i < _rules.length; i++) {
     this.ruler.push(_rules[i][0], _rules[i][1]);
   }
 }
 
+/**
+ * Process rules with the given `state`
+ *
+ * @param  {Object} `state`
+ * @api private
+ */
 
 Core.prototype.process = function (state) {
   var i, l, rules;
-
   rules = this.ruler.getRules('');
-
   for (i = 0, l = rules.length; i < l; i++) {
     rules[i](state);
   }
 };
 
+/**
+ * Expose `Core`
+ */
 
 module.exports = Core;
 
-},{"./ruler":19,"./rules_core/abbr":33,"./rules_core/abbr2":34,"./rules_core/block":35,"./rules_core/footnote_tail":36,"./rules_core/inline":37,"./rules_core/linkify":38,"./rules_core/references":39,"./rules_core/replacements":40,"./rules_core/smartquotes":41}],17:[function(require,module,exports){
-// Inline parser
-
+},{"./ruler":19,"./rules_core/abbr":34,"./rules_core/abbr2":35,"./rules_core/block":36,"./rules_core/footnote_tail":37,"./rules_core/inline":38,"./rules_core/linkify":39,"./rules_core/references":40,"./rules_core/replacements":41,"./rules_core/smartquotes":42}],17:[function(require,module,exports){
 'use strict';
 
+/**
+ * Local dependencies
+ */
 
-var Ruler           = require('./ruler');
-var StateInline     = require('./rules_inline/state_inline');
-var replaceEntities = require('./common/utils').replaceEntities;
+var Ruler       = require('./ruler');
+var StateInline = require('./rules_inline/state_inline');
+var utils       = require('./common/utils');
 
-////////////////////////////////////////////////////////////////////////////////
-// Parser rules
+/**
+ * Inline Parser `rules`
+ */
 
 var _rules = [
   [ 'text',            require('./rules_inline/text') ],
@@ -21477,43 +21592,37 @@ var _rules = [
   [ 'entity',          require('./rules_inline/entity') ]
 ];
 
+/**
+ * Inline Parser class. Note that link validation is stricter
+ * in Remarkable than what is specified by CommonMark. If you
+ * want to change this you can use a custom validator.
+ *
+ * @api private
+ */
 
-var BAD_PROTOCOLS = [ 'vbscript', 'javascript', 'file' ];
-
-function validateLink(url) {
-  var str = url.trim().toLowerCase();
-
-  // Care about digital entities "javascript&#x3A;alert(1)"
-  str = replaceEntities(str);
-
-  if (str.indexOf(':') >= 0 && BAD_PROTOCOLS.indexOf(str.split(':')[0]) >= 0) {
-    return false;
-  }
-  return true;
-}
-
-// Inline Parser class
-//
 function ParserInline() {
-  // By default CommonMark allows too much in links
-  // If you need to restrict it - override this with your validator.
-  this.validateLink = validateLink;
-
   this.ruler = new Ruler();
-
   for (var i = 0; i < _rules.length; i++) {
     this.ruler.push(_rules[i][0], _rules[i][1]);
   }
+
+  // Can be overridden with a custom validator
+  this.validateLink = validateLink;
 }
 
+/**
+ * Skip a single token by running all rules in validation mode.
+ * Returns `true` if any rule reports success.
+ *
+ * @param  {Object} `state`
+ * @api privage
+ */
 
-// Skip single token by running all rules in validation mode;
-// returns `true` if any rule reported success
-//
 ParserInline.prototype.skipToken = function (state) {
-  var i, cached_pos, pos = state.pos,
-      rules = this.ruler.getRules(''),
-      len = rules.length;
+  var rules = this.ruler.getRules('');
+  var len = rules.length;
+  var pos = state.pos;
+  var i, cached_pos;
 
   if ((cached_pos = state.cacheGet(pos)) > 0) {
     state.pos = cached_pos;
@@ -21531,27 +21640,33 @@ ParserInline.prototype.skipToken = function (state) {
   state.cacheSet(pos, state.pos);
 };
 
+/**
+ * Generate tokens for the given input range.
+ *
+ * @param  {Object} `state`
+ * @api private
+ */
 
-// Generate tokens for input range
-//
 ParserInline.prototype.tokenize = function (state) {
-  var ok, i,
-      rules = this.ruler.getRules(''),
-      len = rules.length,
-      end = state.posMax;
+  var rules = this.ruler.getRules('');
+  var len = rules.length;
+  var end = state.posMax;
+  var ok, i;
 
   while (state.pos < end) {
 
     // Try all possible rules.
-    // On success, rule should:
+    // On success, the rule should:
     //
     // - update `state.pos`
     // - update `state.tokens`
     // - return true
-
     for (i = 0; i < len; i++) {
       ok = rules[i](state, false);
-      if (ok) { break; }
+
+      if (ok) {
+        break;
+      }
     }
 
     if (ok) {
@@ -21567,78 +21682,443 @@ ParserInline.prototype.tokenize = function (state) {
   }
 };
 
+/**
+ * Parse the given input string.
+ *
+ * @param  {String} `str`
+ * @param  {Object} `options`
+ * @param  {Object} `env`
+ * @param  {Array} `outTokens`
+ * @api private
+ */
 
-// Parse input string.
-//
 ParserInline.prototype.parse = function (str, options, env, outTokens) {
   var state = new StateInline(str, this, options, env, outTokens);
-
   this.tokenize(state);
 };
 
+/**
+ * Validate the given `url` by checking for bad protocols.
+ *
+ * @param  {String} `url`
+ * @return {Boolean}
+ */
+
+function validateLink(url) {
+  var BAD_PROTOCOLS = [ 'vbscript', 'javascript', 'file' ];
+  var str = url.trim().toLowerCase();
+  // Care about digital entities "javascript&#x3A;alert(1)"
+  str = utils.replaceEntities(str);
+  if (str.indexOf(':') !== -1 && BAD_PROTOCOLS.indexOf(str.split(':')[0]) !== -1) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Expose `ParserInline`
+ */
 
 module.exports = ParserInline;
 
-},{"./common/utils":5,"./ruler":19,"./rules_inline/autolink":42,"./rules_inline/backticks":43,"./rules_inline/del":44,"./rules_inline/emphasis":45,"./rules_inline/entity":46,"./rules_inline/escape":47,"./rules_inline/footnote_inline":48,"./rules_inline/footnote_ref":49,"./rules_inline/htmltag":50,"./rules_inline/ins":51,"./rules_inline/links":52,"./rules_inline/mark":53,"./rules_inline/newline":54,"./rules_inline/state_inline":55,"./rules_inline/sub":56,"./rules_inline/sup":57,"./rules_inline/text":58}],18:[function(require,module,exports){
+},{"./common/utils":5,"./ruler":19,"./rules_inline/autolink":43,"./rules_inline/backticks":44,"./rules_inline/del":45,"./rules_inline/emphasis":46,"./rules_inline/entity":47,"./rules_inline/escape":48,"./rules_inline/footnote_inline":49,"./rules_inline/footnote_ref":50,"./rules_inline/htmltag":51,"./rules_inline/ins":52,"./rules_inline/links":53,"./rules_inline/mark":54,"./rules_inline/newline":55,"./rules_inline/state_inline":56,"./rules_inline/sub":57,"./rules_inline/sup":58,"./rules_inline/text":59}],18:[function(require,module,exports){
 'use strict';
 
+/**
+ * Local dependencies
+ */
 
-var assign          = require('./common/utils').assign;
+var utils = require('./common/utils');
+var rules = require('./rules');
+
+/**
+ * Expose `Renderer`
+ */
+
+module.exports = Renderer;
+
+/**
+ * Renderer class. Renders HTML and exposes `rules` to allow
+ * local modifications.
+ */
+
+function Renderer() {
+  this.rules = utils.assign({}, rules);
+
+  // exported helper, for custom rules only
+  this.getBreak = rules.getBreak;
+}
+
+/**
+ * Render a string of inline HTML with the given `tokens` and
+ * `options`.
+ *
+ * @param  {Array} `tokens`
+ * @param  {Object} `options`
+ * @param  {Object} `env`
+ * @return {String}
+ * @api public
+ */
+
+Renderer.prototype.renderInline = function (tokens, options, env) {
+  var _rules = this.rules;
+  var len = tokens.length, i = 0;
+  var result = '';
+
+  while (len--) {
+    result += _rules[tokens[i].type](tokens, i++, options, env, this);
+  }
+
+  return result;
+};
+
+/**
+ * Render a string of HTML with the given `tokens` and
+ * `options`.
+ *
+ * @param  {Array} `tokens`
+ * @param  {Object} `options`
+ * @param  {Object} `env`
+ * @return {String}
+ * @api public
+ */
+
+Renderer.prototype.render = function (tokens, options, env) {
+  var _rules = this.rules;
+  var len = tokens.length, i = -1;
+  var result = '';
+
+  while (++i < len) {
+    if (tokens[i].type === 'inline') {
+      result += this.renderInline(tokens[i].children, options, env);
+    } else {
+      result += _rules[tokens[i].type](tokens, i, options, env, this);
+    }
+  }
+  return result;
+};
+
+},{"./common/utils":5,"./rules":20}],19:[function(require,module,exports){
+'use strict';
+
+/**
+ * Ruler is a helper class for building responsibility chains from
+ * parse rules. It allows:
+ *
+ *   - easy stack rules chains
+ *   - getting main chain and named chains content (as arrays of functions)
+ *
+ * Helper methods, should not be used directly.
+ * @api private
+ */
+
+function Ruler() {
+  // List of added rules. Each element is:
+  //
+  // { name: XXX,
+  //   enabled: Boolean,
+  //   fn: Function(),
+  //   alt: [ name2, name3 ] }
+  //
+  this.__rules__ = [];
+
+  // Cached rule chains.
+  //
+  // First level - chain name, '' for default.
+  // Second level - digital anchor for fast filtering by charcodes.
+  //
+  this.__cache__ = null;
+}
+
+/**
+ * Find the index of a rule by `name`.
+ *
+ * @param  {String} `name`
+ * @return {Number} Index of the given `name`
+ * @api private
+ */
+
+Ruler.prototype.__find__ = function (name) {
+  var len = this.__rules__.length;
+  var i = -1;
+
+  while (len--) {
+    if (this.__rules__[++i].name === name) {
+      return i;
+    }
+  }
+  return -1;
+};
+
+/**
+ * Build the rules lookup cache
+ *
+ * @api private
+ */
+
+Ruler.prototype.__compile__ = function () {
+  var self = this;
+  var chains = [ '' ];
+
+  // collect unique names
+  self.__rules__.forEach(function (rule) {
+    if (!rule.enabled) {
+      return;
+    }
+
+    rule.alt.forEach(function (altName) {
+      if (chains.indexOf(altName) < 0) {
+        chains.push(altName);
+      }
+    });
+  });
+
+  self.__cache__ = {};
+
+  chains.forEach(function (chain) {
+    self.__cache__[chain] = [];
+    self.__rules__.forEach(function (rule) {
+      if (!rule.enabled) {
+        return;
+      }
+
+      if (chain && rule.alt.indexOf(chain) < 0) {
+        return;
+      }
+      self.__cache__[chain].push(rule.fn);
+    });
+  });
+};
+
+/**
+ * Ruler public methods
+ * ------------------------------------------------
+ */
+
+/**
+ * Replace rule function
+ *
+ * @param  {String} `name` Rule name
+ * @param  {Function `fn`
+ * @param  {Object} `options`
+ * @api private
+ */
+
+Ruler.prototype.at = function (name, fn, options) {
+  var idx = this.__find__(name);
+  var opt = options || {};
+
+  if (idx === -1) {
+    throw new Error('Parser rule not found: ' + name);
+  }
+
+  this.__rules__[idx].fn = fn;
+  this.__rules__[idx].alt = opt.alt || [];
+  this.__cache__ = null;
+};
+
+/**
+ * Add a rule to the chain before given the `ruleName`.
+ *
+ * @param  {String}   `beforeName`
+ * @param  {String}   `ruleName`
+ * @param  {Function} `fn`
+ * @param  {Object}   `options`
+ * @api private
+ */
+
+Ruler.prototype.before = function (beforeName, ruleName, fn, options) {
+  var idx = this.__find__(beforeName);
+  var opt = options || {};
+
+  if (idx === -1) {
+    throw new Error('Parser rule not found: ' + beforeName);
+  }
+
+  this.__rules__.splice(idx, 0, {
+    name: ruleName,
+    enabled: true,
+    fn: fn,
+    alt: opt.alt || []
+  });
+
+  this.__cache__ = null;
+};
+
+/**
+ * Add a rule to the chain after the given `ruleName`.
+ *
+ * @param  {String}   `afterName`
+ * @param  {String}   `ruleName`
+ * @param  {Function} `fn`
+ * @param  {Object}   `options`
+ * @api private
+ */
+
+Ruler.prototype.after = function (afterName, ruleName, fn, options) {
+  var idx = this.__find__(afterName);
+  var opt = options || {};
+
+  if (idx === -1) {
+    throw new Error('Parser rule not found: ' + afterName);
+  }
+
+  this.__rules__.splice(idx + 1, 0, {
+    name: ruleName,
+    enabled: true,
+    fn: fn,
+    alt: opt.alt || []
+  });
+
+  this.__cache__ = null;
+};
+
+/**
+ * Add a rule to the end of chain.
+ *
+ * @param  {String}   `ruleName`
+ * @param  {Function} `fn`
+ * @param  {Object}   `options`
+ * @return {String}
+ */
+
+Ruler.prototype.push = function (ruleName, fn, options) {
+  var opt = options || {};
+
+  this.__rules__.push({
+    name: ruleName,
+    enabled: true,
+    fn: fn,
+    alt: opt.alt || []
+  });
+
+  this.__cache__ = null;
+};
+
+/**
+ * Enable a rule or list of rules.
+ *
+ * @param  {String|Array} `list` Name or array of rule names to enable
+ * @param  {Boolean} `strict` If `true`, all non listed rules will be disabled.
+ * @api private
+ */
+
+Ruler.prototype.enable = function (list, strict) {
+  list = !Array.isArray(list)
+    ? [ list ]
+    : list;
+
+  // In strict mode disable all existing rules first
+  if (strict) {
+    this.__rules__.forEach(function (rule) {
+      rule.enabled = false;
+    });
+  }
+
+  // Search by name and enable
+  list.forEach(function (name) {
+    var idx = this.__find__(name);
+    if (idx < 0) {
+      throw new Error('Rules manager: invalid rule name ' + name);
+    }
+    this.__rules__[idx].enabled = true;
+  }, this);
+
+  this.__cache__ = null;
+};
+
+
+/**
+ * Disable a rule or list of rules.
+ *
+ * @param  {String|Array} `list` Name or array of rule names to disable
+ * @api private
+ */
+
+Ruler.prototype.disable = function (list) {
+  list = !Array.isArray(list)
+    ? [ list ]
+    : list;
+
+  // Search by name and disable
+  list.forEach(function (name) {
+    var idx = this.__find__(name);
+    if (idx < 0) {
+      throw new Error('Rules manager: invalid rule name ' + name);
+    }
+    this.__rules__[idx].enabled = false;
+  }, this);
+
+  this.__cache__ = null;
+};
+
+/**
+ * Get a rules list as an array of functions.
+ *
+ * @param  {String} `chainName`
+ * @return {Object}
+ * @api private
+ */
+
+Ruler.prototype.getRules = function (chainName) {
+  if (this.__cache__ === null) {
+    this.__compile__();
+  }
+  return this.__cache__[chainName];
+};
+
+/**
+ * Expose `Ruler`
+ */
+
+module.exports = Ruler;
+
+},{}],20:[function(require,module,exports){
+'use strict';
+
+/**
+ * Local dependencies
+ */
+
 var has             = require('./common/utils').has;
 var unescapeMd      = require('./common/utils').unescapeMd;
 var replaceEntities = require('./common/utils').replaceEntities;
 var escapeHtml      = require('./common/utils').escapeHtml;
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Helpers
-
-function nextToken(tokens, idx) {
-  if (++idx >= tokens.length - 2) { return idx; }
-  if ((tokens[idx].type === 'paragraph_open' && tokens[idx].tight) &&
-      (tokens[idx + 1].type === 'inline' && tokens[idx + 1].content.length === 0) &&
-      (tokens[idx + 2].type === 'paragraph_close' && tokens[idx + 2].tight)) {
-    return nextToken(tokens, idx + 2);
-  }
-  return idx;
-}
-
-
-// check if we need to hide '\n' before next token
-function getBreak(tokens, idx) {
-  idx = nextToken(tokens, idx);
-  if (idx < tokens.length &&
-      tokens[idx].type === 'list_item_close') {
-    return '';
-  }
-
-  return '\n';
-}
-
-////////////////////////////////////////////////////////////////////////////////
+/**
+ * Renderer rules cache
+ */
 
 var rules = {};
 
-
+/**
+ * Blockquotes
+ */
 
 rules.blockquote_open = function (/* tokens, idx, options, env */) {
   return '<blockquote>\n';
 };
+
 rules.blockquote_close = function (tokens, idx /*, options, env */) {
   return '</blockquote>' + getBreak(tokens, idx);
 };
 
+/**
+ * Code
+ */
 
 rules.code = function (tokens, idx /*, options, env */) {
   if (tokens[idx].block) {
     return '<pre><code>' + escapeHtml(tokens[idx].content) + '</code></pre>' + getBreak(tokens, idx);
   }
-
   return '<code>' + escapeHtml(tokens[idx].content) + '</code>';
 };
 
+/**
+ * Fenced code blocks
+ */
 
-rules.fence = function (tokens, idx, options, env, self) {
+rules.fence = function (tokens, idx, options, env, instance) {
   var token = tokens[idx];
   var langClass = '';
   var langPrefix = options.langPrefix;
@@ -21656,8 +22136,8 @@ rules.fence = function (tokens, idx, options, env, self) {
 
     fenceName = token.params.split(/\s+/g)[0];
 
-    if (has(self.rules.fence_custom, fenceName)) {
-      return self.rules.fence_custom[fenceName](tokens, idx, options, env, self);
+    if (has(instance.rules.fence_custom, fenceName)) {
+      return instance.rules.fence_custom[fenceName](tokens, idx, options, env, instance);
     }
 
     langName = escapeHtml(replaceEntities(unescapeMd(fenceName)));
@@ -21670,13 +22150,17 @@ rules.fence = function (tokens, idx, options, env, self) {
     highlighted = escapeHtml(token.content);
   }
 
-
-  return  '<pre><code' + langClass + '>'
+  return '<pre><code' + langClass + '>'
         + highlighted
-        + '</code></pre>' + getBreak(tokens, idx);
+        + '</code></pre>'
+        + getBreak(tokens, idx);
 };
 
 rules.fence_custom = {};
+
+/**
+ * Headings
+ */
 
 rules.heading_open = function (tokens, idx /*, options, env */) {
   return '<h' + tokens[idx].hLevel + '>';
@@ -21685,11 +22169,17 @@ rules.heading_close = function (tokens, idx /*, options, env */) {
   return '</h' + tokens[idx].hLevel + '>\n';
 };
 
+/**
+ * Horizontal rules
+ */
 
 rules.hr = function (tokens, idx, options /*, env */) {
   return (options.xhtmlOut ? '<hr />' : '<hr>') + getBreak(tokens, idx);
 };
 
+/**
+ * Bullets
+ */
 
 rules.bullet_list_open = function (/* tokens, idx, options, env */) {
   return '<ul>\n';
@@ -21697,22 +22187,34 @@ rules.bullet_list_open = function (/* tokens, idx, options, env */) {
 rules.bullet_list_close = function (tokens, idx /*, options, env */) {
   return '</ul>' + getBreak(tokens, idx);
 };
+
+/**
+ * List items
+ */
+
 rules.list_item_open = function (/* tokens, idx, options, env */) {
   return '<li>';
 };
 rules.list_item_close = function (/* tokens, idx, options, env */) {
   return '</li>\n';
 };
+
+/**
+ * Ordered list items
+ */
+
 rules.ordered_list_open = function (tokens, idx /*, options, env */) {
   var token = tokens[idx];
-  return '<ol'
-    + (token.order > 1 ? ' start="' + token.order + '"' : '')
-    + '>\n';
+  var order = token.order > 1 ? ' start="' + token.order + '"' : '';
+  return '<ol' + order + '>\n';
 };
 rules.ordered_list_close = function (tokens, idx /*, options, env */) {
   return '</ol>' + getBreak(tokens, idx);
 };
 
+/**
+ * Paragraphs
+ */
 
 rules.paragraph_open = function (tokens, idx /*, options, env */) {
   return tokens[idx].tight ? '' : '<p>';
@@ -21722,15 +22224,22 @@ rules.paragraph_close = function (tokens, idx /*, options, env */) {
   return (tokens[idx].tight ? '' : '</p>') + (addBreak ? getBreak(tokens, idx) : '');
 };
 
+/**
+ * Links
+ */
 
-rules.link_open = function (tokens, idx /*, options, env */) {
+rules.link_open = function (tokens, idx, options /* env */) {
   var title = tokens[idx].title ? (' title="' + escapeHtml(replaceEntities(tokens[idx].title)) + '"') : '';
-  return '<a href="' + escapeHtml(tokens[idx].href) + '"' + title + '>';
+  var target = options.linkTarget ? (' target="' + options.linkTarget + '"') : '';
+  return '<a href="' + escapeHtml(tokens[idx].href) + '"' + title + target + '>';
 };
 rules.link_close = function (/* tokens, idx, options, env */) {
   return '</a>';
 };
 
+/**
+ * Images
+ */
 
 rules.image = function (tokens, idx, options /*, env */) {
   var src = ' src="' + escapeHtml(tokens[idx].src) + '"';
@@ -21740,6 +22249,9 @@ rules.image = function (tokens, idx, options /*, env */) {
   return '<img' + src + alt + title + suffix + '>';
 };
 
+/**
+ * Tables
+ */
 
 rules.table_open = function (/* tokens, idx, options, env */) {
   return '<table>\n';
@@ -21784,6 +22296,9 @@ rules.td_close = function (/* tokens, idx, options, env */) {
   return '</td>';
 };
 
+/**
+ * Bold
+ */
 
 rules.strong_open = function (/* tokens, idx, options, env */) {
   return '<strong>';
@@ -21791,6 +22306,11 @@ rules.strong_open = function (/* tokens, idx, options, env */) {
 rules.strong_close = function (/* tokens, idx, options, env */) {
   return '</strong>';
 };
+
+/**
+ * Italicize
+ */
+
 rules.em_open = function (/* tokens, idx, options, env */) {
   return '<em>';
 };
@@ -21798,6 +22318,9 @@ rules.em_close = function (/* tokens, idx, options, env */) {
   return '</em>';
 };
 
+/**
+ * Strikethrough
+ */
 
 rules.del_open = function (/* tokens, idx, options, env */) {
   return '<del>';
@@ -21806,6 +22329,9 @@ rules.del_close = function (/* tokens, idx, options, env */) {
   return '</del>';
 };
 
+/**
+ * Insert
+ */
 
 rules.ins_open = function (/* tokens, idx, options, env */) {
   return '<ins>';
@@ -21814,6 +22340,9 @@ rules.ins_close = function (/* tokens, idx, options, env */) {
   return '</ins>';
 };
 
+/**
+ * Highlight
+ */
 
 rules.mark_open = function (/* tokens, idx, options, env */) {
   return '<mark>';
@@ -21822,6 +22351,9 @@ rules.mark_close = function (/* tokens, idx, options, env */) {
   return '</mark>';
 };
 
+/**
+ * Super- and sub-script
+ */
 
 rules.sub = function (tokens, idx /*, options, env */) {
   return '<sub>' + escapeHtml(tokens[idx].content) + '</sub>';
@@ -21830,6 +22362,9 @@ rules.sup = function (tokens, idx /*, options, env */) {
   return '<sup>' + escapeHtml(tokens[idx].content) + '</sup>';
 };
 
+/**
+ * Breaks
+ */
 
 rules.hardbreak = function (tokens, idx, options /*, env */) {
   return options.xhtmlOut ? '<br />\n' : '<br>\n';
@@ -21838,11 +22373,17 @@ rules.softbreak = function (tokens, idx, options /*, env */) {
   return options.breaks ? (options.xhtmlOut ? '<br />\n' : '<br>\n') : '\n';
 };
 
+/**
+ * Text
+ */
 
 rules.text = function (tokens, idx /*, options, env */) {
   return escapeHtml(tokens[idx].content);
 };
 
+/**
+ * Content
+ */
 
 rules.htmlblock = function (tokens, idx /*, options, env */) {
   return tokens[idx].content;
@@ -21851,6 +22392,9 @@ rules.htmltag = function (tokens, idx /*, options, env */) {
   return tokens[idx].content;
 };
 
+/**
+ * Abbreviations, initialism
+ */
 
 rules.abbr_open = function (tokens, idx /*, options, env */) {
   return '<abbr title="' + escapeHtml(replaceEntities(tokens[idx].title)) + '">';
@@ -21859,6 +22403,9 @@ rules.abbr_close = function (/* tokens, idx, options, env */) {
   return '</abbr>';
 };
 
+/**
+ * Footnotes
+ */
 
 rules.footnote_ref = function (tokens, idx) {
   var n = Number(tokens[idx].id + 1).toString();
@@ -21869,9 +22416,10 @@ rules.footnote_ref = function (tokens, idx) {
   return '<sup class="footnote-ref"><a href="#fn' + n + '" id="' + id + '">[' + n + ']</a></sup>';
 };
 rules.footnote_block_open = function (tokens, idx, options) {
-  return (options.xhtmlOut ? '<hr class="footnotes-sep" />\n' : '<hr class="footnotes-sep">\n') +
-         '<section class="footnotes">\n' +
-         '<ol class="footnotes-list">\n';
+  var hr = options.xhtmlOut
+    ? '<hr class="footnotes-sep" />\n'
+    : '<hr class="footnotes-sep">\n';
+  return  hr + '<section class="footnotes">\n<ol class="footnotes-list">\n';
 };
 rules.footnote_block_close = function () {
   return '</ol>\n</section>\n';
@@ -21892,6 +22440,9 @@ rules.footnote_anchor = function (tokens, idx) {
   return ' <a href="#' + id + '" class="footnote-backref">↩</a>';
 };
 
+/**
+ * Definition lists
+ */
 
 rules.dl_open = function() {
   return '<dl>\n';
@@ -21912,258 +22463,46 @@ rules.dd_close = function() {
   return '</dd>\n';
 };
 
+/**
+ * Helper functions
+ */
 
-// Renderer class
-function Renderer() {
-  // Clone rules object to allow local modifications
-  this.rules = assign({}, rules);
-  // exported helper, for custom rules only
-  this.getBreak = getBreak;
+function nextToken(tokens, idx) {
+  if (++idx >= tokens.length - 2) {
+    return idx;
+  }
+  if ((tokens[idx].type === 'paragraph_open' && tokens[idx].tight) &&
+      (tokens[idx + 1].type === 'inline' && tokens[idx + 1].content.length === 0) &&
+      (tokens[idx + 2].type === 'paragraph_close' && tokens[idx + 2].tight)) {
+    return nextToken(tokens, idx + 2);
+  }
+  return idx;
 }
 
+/**
+ * Check to see if `\n` is needed before the next token.
+ *
+ * @param  {Array} `tokens`
+ * @param  {Number} `idx`
+ * @return {String} Empty string or newline
+ * @api private
+ */
 
-Renderer.prototype.renderInline = function (tokens, options, env) {
-  var result = '',
-      _rules = this.rules;
-
-  for (var i = 0, len = tokens.length; i < len; i++) {
-    result += _rules[tokens[i].type](tokens, i, options, env, this);
+var getBreak = rules.getBreak = function getBreak(tokens, idx) {
+  idx = nextToken(tokens, idx);
+  if (idx < tokens.length && tokens[idx].type === 'list_item_close') {
+    return '';
   }
-
-  return result;
+  return '\n';
 };
 
+/**
+ * Expose `rules`
+ */
 
-Renderer.prototype.render = function (tokens, options, env) {
-  var i, len,
-      result = '',
-      _rules = this.rules;
+module.exports = rules;
 
-  for (i = 0, len = tokens.length; i < len; i++) {
-    if (tokens[i].type === 'inline') {
-      result += this.renderInline(tokens[i].children, options, env);
-    } else {
-      result += _rules[tokens[i].type](tokens, i, options, env, this);
-    }
-  }
-
-  return result;
-};
-
-module.exports = Renderer;
-
-},{"./common/utils":5}],19:[function(require,module,exports){
-// Ruler is helper class to build responsibility chains from parse rules.
-// It allows:
-//
-// - easy stack rules chains
-// - getting main chain and named chains content (as arrays of functions)
-//
-'use strict';
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-function Ruler() {
-  // List of added rules. Each element is:
-  //
-  // {
-  //   name: XXX,
-  //   enabled: Boolean,
-  //   fn: Function(),
-  //   alt: [ name2, name3 ]
-  // }
-  //
-  this.__rules__ = [];
-
-  // Cached rule chains.
-  //
-  // First level - chain name, '' for default.
-  // Second level - diginal anchor for fast filtering by charcodes.
-  //
-  this.__cache__ = null;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Helper methods, should not be used directly
-
-
-// Find rule index by name
-//
-Ruler.prototype.__find__ = function (name) {
-  for (var i = 0; i < this.__rules__.length; i++) {
-    if (this.__rules__[i].name === name) {
-      return i;
-    }
-  }
-  return -1;
-};
-
-
-// Build rules lookup cache
-//
-Ruler.prototype.__compile__ = function () {
-  var self = this;
-  var chains = [ '' ];
-
-  // collect unique names
-  self.__rules__.forEach(function (rule) {
-    if (!rule.enabled) { return; }
-
-    rule.alt.forEach(function (altName) {
-      if (chains.indexOf(altName) < 0) {
-        chains.push(altName);
-      }
-    });
-  });
-
-  self.__cache__ = {};
-
-  chains.forEach(function (chain) {
-    self.__cache__[chain] = [];
-    self.__rules__.forEach(function (rule) {
-      if (!rule.enabled) { return; }
-
-      if (chain && rule.alt.indexOf(chain) < 0) { return; }
-
-      self.__cache__[chain].push(rule.fn);
-    });
-  });
-};
-
-
-////////////////////////////////////////////////////////////////////////////////
-// Public methods
-
-
-// Replace rule function
-//
-Ruler.prototype.at = function (name, fn, options) {
-  var index = this.__find__(name);
-  var opt = options || {};
-
-  if (index === -1) { throw new Error('Parser rule not found: ' + name); }
-
-  this.__rules__[index].fn = fn;
-  this.__rules__[index].alt = opt.alt || [];
-  this.__cache__ = null;
-};
-
-
-// Add rule to chain before one with given name.
-//
-Ruler.prototype.before = function (beforeName, ruleName, fn, options) {
-  var index = this.__find__(beforeName);
-  var opt = options || {};
-
-  if (index === -1) { throw new Error('Parser rule not found: ' + beforeName); }
-
-  this.__rules__.splice(index, 0, {
-    name: ruleName,
-    enabled: true,
-    fn: fn,
-    alt: opt.alt || []
-  });
-
-  this.__cache__ = null;
-};
-
-
-// Add rule to chain after one with given name.
-//
-Ruler.prototype.after = function (afterName, ruleName, fn, options) {
-  var index = this.__find__(afterName);
-  var opt = options || {};
-
-  if (index === -1) { throw new Error('Parser rule not found: ' + afterName); }
-
-  this.__rules__.splice(index + 1, 0, {
-    name: ruleName,
-    enabled: true,
-    fn: fn,
-    alt: opt.alt || []
-  });
-
-  this.__cache__ = null;
-};
-
-// Add rule to the end of chain.
-//
-Ruler.prototype.push = function (ruleName, fn, options) {
-  var opt = options || {};
-
-  this.__rules__.push({
-    name: ruleName,
-    enabled: true,
-    fn: fn,
-    alt: opt.alt || []
-  });
-
-  this.__cache__ = null;
-};
-
-
-// Enable list of rules by names. If `strict` is true, then all non listed
-// rules will be disabled.
-//
-Ruler.prototype.enable = function (list, strict) {
-  if (!Array.isArray(list)) {
-    list = [ list ];
-  }
-
-  // In strict mode disable all existing rules first
-  if (strict) {
-    this.__rules__.forEach(function (rule) {
-      rule.enabled = false;
-    });
-  }
-
-  // Search by name and enable
-  list.forEach(function (name) {
-    var idx = this.__find__(name);
-
-    if (idx < 0) { throw new Error('Rules manager: invalid rule name ' + name); }
-    this.__rules__[idx].enabled = true;
-
-  }, this);
-
-  this.__cache__ = null;
-};
-
-
-// Disable list of rules by names.
-//
-Ruler.prototype.disable = function (list) {
-  if (!Array.isArray(list)) {
-    list = [ list ];
-  }
-
-  // Search by name and disable
-  list.forEach(function (name) {
-    var idx = this.__find__(name);
-
-    if (idx < 0) { throw new Error('Rules manager: invalid rule name ' + name); }
-    this.__rules__[idx].enabled = false;
-
-  }, this);
-
-  this.__cache__ = null;
-};
-
-
-// Get rules list as array of functions.
-//
-Ruler.prototype.getRules = function (chainName) {
-  if (this.__cache__ === null) {
-    this.__compile__();
-  }
-
-  return this.__cache__[chainName];
-};
-
-module.exports = Ruler;
-
-},{}],20:[function(require,module,exports){
+},{"./common/utils":5}],21:[function(require,module,exports){
 // Block quotes
 
 'use strict';
@@ -22298,7 +22637,7 @@ module.exports = function blockquote(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // Code block (4 spaces padded)
 
 'use strict';
@@ -22336,7 +22675,7 @@ module.exports = function code(state, startLine, endLine/*, silent*/) {
   return true;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 // Definition lists
 
 'use strict';
@@ -22545,7 +22884,7 @@ module.exports = function deflist(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 // fences (``` lang, ~~~ lang)
 
 'use strict';
@@ -22638,7 +22977,7 @@ module.exports = function fences(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 // Process footnote reference list
 
 'use strict';
@@ -22707,7 +23046,7 @@ module.exports = function footnote(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 // heading (#, ##, ...)
 
 'use strict';
@@ -22767,7 +23106,7 @@ module.exports = function heading(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 // Horizontal rule
 
 'use strict';
@@ -22814,7 +23153,7 @@ module.exports = function hr(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // HTML block
 
 'use strict';
@@ -22890,7 +23229,7 @@ module.exports = function htmlblock(state, startLine, endLine, silent) {
   return true;
 };
 
-},{"../common/html_blocks":2}],28:[function(require,module,exports){
+},{"../common/html_blocks":2}],29:[function(require,module,exports){
 // lheading (---, ===)
 
 'use strict';
@@ -22947,7 +23286,7 @@ module.exports = function lheading(state, startLine, endLine/*, silent*/) {
   return true;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // Lists
 
 'use strict';
@@ -23215,7 +23554,7 @@ module.exports = function list(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 // Paragraph
 
 'use strict';
@@ -23276,7 +23615,7 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
   return true;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 // Parser state class
 
 'use strict';
@@ -23407,7 +23746,7 @@ StateBlock.prototype.getLines = function getLines(begin, end, indent, keepLastLF
   // Opt: don't use push queue for single line;
   if (line + 1 === end) {
     first = this.bMarks[line] + Math.min(this.tShift[line], indent);
-    last = keepLastLF ? this.bMarks[end] : this.eMarks[end - 1];
+    last = keepLastLF ? this.eMarks[line] + 1 : this.eMarks[line];
     return this.src.slice(first, last);
   }
 
@@ -23436,7 +23775,7 @@ StateBlock.prototype.getLines = function getLines(begin, end, indent, keepLastLF
 
 module.exports = StateBlock;
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 // GFM table, non-standard
 
 'use strict';
@@ -23572,7 +23911,7 @@ module.exports = function table(state, startLine, endLine, silent) {
   return true;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 // Parse abbreviation definitions, i.e. `*[abbr]: description`
 //
 
@@ -23644,7 +23983,7 @@ module.exports = function abbr(state) {
   }
 };
 
-},{"../helpers/parse_link_label":12,"../rules_inline/state_inline":55}],34:[function(require,module,exports){
+},{"../helpers/parse_link_label":12,"../rules_inline/state_inline":56}],35:[function(require,module,exports){
 // Enclose abbreviations in <abbr> tags
 //
 'use strict';
@@ -23734,7 +24073,7 @@ module.exports = function abbr2(state) {
   }
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = function block(state) {
@@ -23753,7 +24092,7 @@ module.exports = function block(state) {
   }
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 
@@ -23850,7 +24189,7 @@ module.exports = function footnote_block(state) {
   });
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 module.exports = function inline(state) {
@@ -23865,7 +24204,7 @@ module.exports = function inline(state) {
   }
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 // Replace link-like texts with link nodes.
 //
 // Currently restricted by `inline.validateLink()` to http/https/ftp
@@ -23896,7 +24235,7 @@ function createLinkifier() {
     url: true,
     email: true,
     twitter: false,
-    replaceFn: function (autolinker, match) {
+    replaceFn: function (linker, match) {
       // Only collect matched strings but don't change anything.
       switch (match.getType()) {
         /*eslint default-case:0*/
@@ -24028,7 +24367,7 @@ module.exports = function linkify(state) {
   }
 };
 
-},{"autolinker":59}],39:[function(require,module,exports){
+},{"autolinker":60}],40:[function(require,module,exports){
 'use strict';
 
 
@@ -24128,8 +24467,8 @@ module.exports = function references(state) {
   }
 };
 
-},{"../helpers/normalize_reference":10,"../helpers/parse_link_destination":11,"../helpers/parse_link_label":12,"../helpers/parse_link_title":13,"../rules_inline/state_inline":55}],40:[function(require,module,exports){
-// Simple typographyc replacements
+},{"../helpers/normalize_reference":10,"../helpers/parse_link_destination":11,"../helpers/parse_link_label":12,"../helpers/parse_link_title":13,"../rules_inline/state_inline":56}],41:[function(require,module,exports){
+// Simple typographical replacements
 //
 'use strict';
 
@@ -24175,16 +24514,17 @@ module.exports = function replace(state) {
         text = replaceScopedAbbr(text);
 
         if (RARE_RE.test(text)) {
-          text = text.replace(/\+-/g, '±')
-                      // .., ..., ....... -> …
-                      // but ?..... & !..... -> ?.. & !..
-                      .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
-                      .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
-                      // em-dash
-                      .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
-                      // en-dash
-                      .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
-                      .replace(/(^|[^-\s])--([^-\s]|$)/mg, '$1\u2013$2');
+          text = text
+            .replace(/\+-/g, '±')
+            // .., ..., ....... -> …
+            // but ?..... & !..... -> ?.. & !..
+            .replace(/\.{2,}/g, '…').replace(/([?!])…/g, '$1..')
+            .replace(/([?!]){4,}/g, '$1$1$1').replace(/,{2,}/g, ',')
+            // em-dash
+            .replace(/(^|[^-])---([^-]|$)/mg, '$1\u2014$2')
+            // en-dash
+            .replace(/(^|\s)--(\s|$)/mg, '$1\u2013$2')
+            .replace(/(^|[^-\s])--([^-\s]|$)/mg, '$1\u2013$2');
         }
 
         token.content = text;
@@ -24193,7 +24533,7 @@ module.exports = function replace(state) {
   }
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 // Convert straight quotation marks to typographic ones
 //
 'use strict';
@@ -24308,7 +24648,7 @@ module.exports = function smartquotes(state) {
   }
 };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 // Process autolinks '<protocol:...>'
 
 'use strict';
@@ -24388,7 +24728,7 @@ module.exports = function autolink(state, silent) {
   return false;
 };
 
-},{"../common/url_schemas":4,"../helpers/normalize_link":9}],43:[function(require,module,exports){
+},{"../common/url_schemas":4,"../helpers/normalize_link":9}],44:[function(require,module,exports){
 // Parse backticks
 
 'use strict';
@@ -24436,7 +24776,7 @@ module.exports = function backticks(state, silent) {
   return true;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 // Process ~~deleted text~~
 
 'use strict';
@@ -24522,7 +24862,7 @@ module.exports = function del(state, silent) {
   return true;
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 // Process *this* and _that_
 
 'use strict';
@@ -24673,7 +25013,7 @@ module.exports = function emphasis(state, silent) {
   return true;
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
 'use strict';
@@ -24723,7 +25063,7 @@ module.exports = function entity(state, silent) {
   return true;
 };
 
-},{"../common/entities":1,"../common/utils":5}],47:[function(require,module,exports){
+},{"../common/entities":1,"../common/utils":5}],48:[function(require,module,exports){
 // Proceess escaped chars and hardbreaks
 
 'use strict';
@@ -24774,7 +25114,7 @@ module.exports = function escape(state, silent) {
   return true;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 // Process inline footnotes (^[...])
 
 'use strict';
@@ -24829,7 +25169,7 @@ module.exports = function footnote_inline(state, silent) {
   return true;
 };
 
-},{"../helpers/parse_link_label":12}],49:[function(require,module,exports){
+},{"../helpers/parse_link_label":12}],50:[function(require,module,exports){
 // Process footnote references ([^...])
 
 'use strict';
@@ -24893,7 +25233,7 @@ module.exports = function footnote_ref(state, silent) {
   return true;
 };
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 // Process html tags
 
 'use strict';
@@ -24944,7 +25284,7 @@ module.exports = function htmltag(state, silent) {
   return true;
 };
 
-},{"../common/html_re":3}],51:[function(require,module,exports){
+},{"../common/html_re":3}],52:[function(require,module,exports){
 // Process ++inserted text++
 
 'use strict';
@@ -25030,7 +25370,7 @@ module.exports = function ins(state, silent) {
   return true;
 };
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 // Process [links](<to> "stuff")
 
 'use strict';
@@ -25151,7 +25491,12 @@ module.exports = function links(state, silent) {
 
     // covers label === '' and label === undefined
     // (collapsed reference link and shortcut reference link respectively)
-    if (!label) { label = state.src.slice(labelStart, labelEnd); }
+    if (!label) {
+      if (typeof label === 'undefined') {
+        pos = labelEnd + 1;
+      }
+      label = state.src.slice(labelStart, labelEnd);
+    }
 
     ref = state.env.references[normalizeReference(label)];
     if (!ref) {
@@ -25197,7 +25542,7 @@ module.exports = function links(state, silent) {
   return true;
 };
 
-},{"../helpers/normalize_reference":10,"../helpers/parse_link_destination":11,"../helpers/parse_link_label":12,"../helpers/parse_link_title":13}],53:[function(require,module,exports){
+},{"../helpers/normalize_reference":10,"../helpers/parse_link_destination":11,"../helpers/parse_link_label":12,"../helpers/parse_link_title":13}],54:[function(require,module,exports){
 // Process ==highlighted text==
 
 'use strict';
@@ -25283,7 +25628,7 @@ module.exports = function del(state, silent) {
   return true;
 };
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 // Proceess '\n'
 
 'use strict';
@@ -25333,7 +25678,7 @@ module.exports = function newline(state, silent) {
   return true;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 // Inline parser state
 
 'use strict';
@@ -25417,7 +25762,7 @@ StateInline.prototype.cacheGet = function (key) {
 
 module.exports = StateInline;
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // Process ~subscript~
 
 'use strict';
@@ -25477,7 +25822,7 @@ module.exports = function sub(state, silent) {
   return true;
 };
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // Process ^superscript^
 
 'use strict';
@@ -25537,7 +25882,7 @@ module.exports = function sup(state, silent) {
   return true;
 };
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 // Skip text characters for text token, place those to pending buffer
 // and increment current pos
 
@@ -25592,16 +25937,16 @@ module.exports = function text(state, silent) {
   return true;
 };
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
+    // AMD. Register as an anonymous module unless amdModuleId is set
     define([], function () {
-      return (root.returnExportsGlobal = factory());
+      return (root['Autolinker'] = factory());
     });
   } else if (typeof exports === 'object') {
     // Node. Does not work with strict CommonJS, but
-    // only CommonJS-like enviroments that support module.exports,
+    // only CommonJS-like environments that support module.exports,
     // like Node.
     module.exports = factory();
   } else {
@@ -25609,643 +25954,221 @@ module.exports = function text(state, silent) {
   }
 }(this, function () {
 
-	/*!
-	 * Autolinker.js
-	 * 0.15.0
-	 *
-	 * Copyright(c) 2014 Gregory Jacobs <greg@greg-jacobs.com>
-	 * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
-	 *
-	 * https://github.com/gregjacobs/Autolinker.js
-	 */
+/*!
+ * Autolinker.js
+ * 0.15.3
+ *
+ * Copyright(c) 2015 Gregory Jacobs <greg@greg-jacobs.com>
+ * MIT Licensed. http://www.opensource.org/licenses/mit-license.php
+ *
+ * https://github.com/gregjacobs/Autolinker.js
+ */
+/**
+ * @class Autolinker
+ * @extends Object
+ * 
+ * Utility class used to process a given string of text, and wrap the URLs, email addresses, and Twitter handles in 
+ * the appropriate anchor (&lt;a&gt;) tags to turn them into links.
+ * 
+ * Any of the configuration options may be provided in an Object (map) provided to the Autolinker constructor, which
+ * will configure how the {@link #link link()} method will process the links.
+ * 
+ * For example:
+ * 
+ *     var autolinker = new Autolinker( {
+ *         newWindow : false,
+ *         truncate  : 30
+ *     } );
+ *     
+ *     var html = autolinker.link( "Joe went to www.yahoo.com" );
+ *     // produces: 'Joe went to <a href="http://www.yahoo.com">yahoo.com</a>'
+ * 
+ * 
+ * The {@link #static-link static link()} method may also be used to inline options into a single call, which may
+ * be more convenient for one-off uses. For example:
+ * 
+ *     var html = Autolinker.link( "Joe went to www.yahoo.com", {
+ *         newWindow : false,
+ *         truncate  : 30
+ *     } );
+ *     // produces: 'Joe went to <a href="http://www.yahoo.com">yahoo.com</a>'
+ * 
+ * 
+ * ## Custom Replacements of Links
+ * 
+ * If the configuration options do not provide enough flexibility, a {@link #replaceFn} may be provided to fully customize
+ * the output of Autolinker. This function is called once for each URL/Email/Twitter handle match that is encountered.
+ * 
+ * For example:
+ * 
+ *     var input = "...";  // string with URLs, Email Addresses, and Twitter Handles
+ *     
+ *     var linkedText = Autolinker.link( input, {
+ *         replaceFn : function( autolinker, match ) {
+ *             console.log( "href = ", match.getAnchorHref() );
+ *             console.log( "text = ", match.getAnchorText() );
+ *         
+ *             switch( match.getType() ) {
+ *                 case 'url' : 
+ *                     console.log( "url: ", match.getUrl() );
+ *                     
+ *                     if( match.getUrl().indexOf( 'mysite.com' ) === -1 ) {
+ *                         var tag = autolinker.getTagBuilder().build( match );  // returns an `Autolinker.HtmlTag` instance, which provides mutator methods for easy changes
+ *                         tag.setAttr( 'rel', 'nofollow' );
+ *                         tag.addClass( 'external-link' );
+ *                         
+ *                         return tag;
+ *                         
+ *                     } else {
+ *                         return true;  // let Autolinker perform its normal anchor tag replacement
+ *                     }
+ *                     
+ *                 case 'email' :
+ *                     var email = match.getEmail();
+ *                     console.log( "email: ", email );
+ *                     
+ *                     if( email === "my@own.address" ) {
+ *                         return false;  // don't auto-link this particular email address; leave as-is
+ *                     } else {
+ *                         return;  // no return value will have Autolinker perform its normal anchor tag replacement (same as returning `true`)
+ *                     }
+ *                 
+ *                 case 'twitter' :
+ *                     var twitterHandle = match.getTwitterHandle();
+ *                     console.log( twitterHandle );
+ *                     
+ *                     return '<a href="http://newplace.to.link.twitter.handles.to/">' + twitterHandle + '</a>';
+ *             }
+ *         }
+ *     } );
+ * 
+ * 
+ * The function may return the following values:
+ * 
+ * - `true` (Boolean): Allow Autolinker to replace the match as it normally would.
+ * - `false` (Boolean): Do not replace the current match at all - leave as-is.
+ * - Any String: If a string is returned from the function, the string will be used directly as the replacement HTML for
+ *   the match.
+ * - An {@link Autolinker.HtmlTag} instance, which can be used to build/modify an HTML tag before writing out its HTML text.
+ * 
+ * @constructor
+ * @param {Object} [config] The configuration options for the Autolinker instance, specified in an Object (map).
+ */
+var Autolinker = function( cfg ) {
+	Autolinker.Util.assign( this, cfg );  // assign the properties of `cfg` onto the Autolinker instance. Prototype properties will be used for missing configs.
+};
+
+
+Autolinker.prototype = {
+	constructor : Autolinker,  // fix constructor property
+	
 	/**
-	 * @class Autolinker
-	 * @extends Object
+	 * @cfg {Boolean} urls
 	 * 
-	 * Utility class used to process a given string of text, and wrap the URLs, email addresses, and Twitter handles in 
-	 * the appropriate anchor (&lt;a&gt;) tags to turn them into links.
-	 * 
-	 * Any of the configuration options may be provided in an Object (map) provided to the Autolinker constructor, which
-	 * will configure how the {@link #link link()} method will process the links.
-	 * 
-	 * For example:
-	 * 
-	 *     var autolinker = new Autolinker( {
-	 *         newWindow : false,
-	 *         truncate  : 30
-	 *     } );
-	 *     
-	 *     var html = autolinker.link( "Joe went to www.yahoo.com" );
-	 *     // produces: 'Joe went to <a href="http://www.yahoo.com">yahoo.com</a>'
-	 * 
-	 * 
-	 * The {@link #static-link static link()} method may also be used to inline options into a single call, which may
-	 * be more convenient for one-off uses. For example:
-	 * 
-	 *     var html = Autolinker.link( "Joe went to www.yahoo.com", {
-	 *         newWindow : false,
-	 *         truncate  : 30
-	 *     } );
-	 *     // produces: 'Joe went to <a href="http://www.yahoo.com">yahoo.com</a>'
-	 * 
-	 * 
-	 * ## Custom Replacements of Links
-	 * 
-	 * If the configuration options do not provide enough flexibility, a {@link #replaceFn} may be provided to fully customize
-	 * the output of Autolinker. This function is called once for each URL/Email/Twitter handle match that is encountered.
-	 * 
-	 * For example:
-	 * 
-	 *     var input = "...";  // string with URLs, Email Addresses, and Twitter Handles
-	 *     
-	 *     var linkedText = Autolinker.link( input, {
-	 *         replaceFn : function( autolinker, match ) {
-	 *             console.log( "href = ", match.getAnchorHref() );
-	 *             console.log( "text = ", match.getAnchorText() );
-	 *         
-	 *             switch( match.getType() ) {
-	 *                 case 'url' : 
-	 *                     console.log( "url: ", match.getUrl() );
-	 *                     
-	 *                     if( match.getUrl().indexOf( 'mysite.com' ) === -1 ) {
-	 *                         var tag = autolinker.getTagBuilder().build( match );  // returns an `Autolinker.HtmlTag` instance, which provides mutator methods for easy changes
-	 *                         tag.setAttr( 'rel', 'nofollow' );
-	 *                         tag.addClass( 'external-link' );
-	 *                         
-	 *                         return tag;
-	 *                         
-	 *                     } else {
-	 *                         return true;  // let Autolinker perform its normal anchor tag replacement
-	 *                     }
-	 *                     
-	 *                 case 'email' :
-	 *                     var email = match.getEmail();
-	 *                     console.log( "email: ", email );
-	 *                     
-	 *                     if( email === "my@own.address" ) {
-	 *                         return false;  // don't auto-link this particular email address; leave as-is
-	 *                     } else {
-	 *                         return;  // no return value will have Autolinker perform its normal anchor tag replacement (same as returning `true`)
-	 *                     }
-	 *                 
-	 *                 case 'twitter' :
-	 *                     var twitterHandle = match.getTwitterHandle();
-	 *                     console.log( twitterHandle );
-	 *                     
-	 *                     return '<a href="http://newplace.to.link.twitter.handles.to/">' + twitterHandle + '</a>';
-	 *             }
-	 *         }
-	 *     } );
-	 * 
-	 * 
-	 * The function may return the following values:
-	 * 
-	 * - `true` (Boolean): Allow Autolinker to replace the match as it normally would.
-	 * - `false` (Boolean): Do not replace the current match at all - leave as-is.
-	 * - Any String: If a string is returned from the function, the string will be used directly as the replacement HTML for
-	 *   the match.
-	 * - An {@link Autolinker.HtmlTag} instance, which can be used to build/modify an HTML tag before writing out its HTML text.
-	 * 
-	 * @constructor
-	 * @param {Object} [config] The configuration options for the Autolinker instance, specified in an Object (map).
+	 * `true` if miscellaneous URLs should be automatically linked, `false` if they should not be.
 	 */
-	var Autolinker = function( cfg ) {
-		Autolinker.Util.assign( this, cfg );  // assign the properties of `cfg` onto the Autolinker instance. Prototype properties will be used for missing configs.
-
-		this.matchValidator = new Autolinker.MatchValidator();
-	};
-
-
-	Autolinker.prototype = {
-		constructor : Autolinker,  // fix constructor property
-
-		/**
-		 * @cfg {Boolean} urls
-		 * 
-		 * `true` if miscellaneous URLs should be automatically linked, `false` if they should not be.
-		 */
-		urls : true,
-
-		/**
-		 * @cfg {Boolean} email
-		 * 
-		 * `true` if email addresses should be automatically linked, `false` if they should not be.
-		 */
-		email : true,
-
-		/**
-		 * @cfg {Boolean} twitter
-		 * 
-		 * `true` if Twitter handles ("@example") should be automatically linked, `false` if they should not be.
-		 */
-		twitter : true,
-
-		/**
-		 * @cfg {Boolean} newWindow
-		 * 
-		 * `true` if the links should open in a new window, `false` otherwise.
-		 */
-		newWindow : true,
-
-		/**
-		 * @cfg {Boolean} stripPrefix
-		 * 
-		 * `true` if 'http://' or 'https://' and/or the 'www.' should be stripped from the beginning of URL links' text, 
-		 * `false` otherwise.
-		 */
-		stripPrefix : true,
-
-		/**
-		 * @cfg {Number} truncate
-		 * 
-		 * A number for how many characters long URLs/emails/twitter handles should be truncated to inside the text of 
-		 * a link. If the URL/email/twitter is over this number of characters, it will be truncated to this length by 
-		 * adding a two period ellipsis ('..') to the end of the string.
-		 * 
-		 * For example: A url like 'http://www.yahoo.com/some/long/path/to/a/file' truncated to 25 characters might look
-		 * something like this: 'yahoo.com/some/long/pat..'
-		 */
-
-		/**
-		 * @cfg {String} className
-		 * 
-		 * A CSS class name to add to the generated links. This class will be added to all links, as well as this class
-		 * plus url/email/twitter suffixes for styling url/email/twitter links differently.
-		 * 
-		 * For example, if this config is provided as "myLink", then:
-		 * 
-		 * - URL links will have the CSS classes: "myLink myLink-url"
-		 * - Email links will have the CSS classes: "myLink myLink-email", and
-		 * - Twitter links will have the CSS classes: "myLink myLink-twitter"
-		 */
-		className : "",
-
-		/**
-		 * @cfg {Function} replaceFn
-		 * 
-		 * A function to individually process each URL/Email/Twitter match found in the input string.
-		 * 
-		 * See the class's description for usage.
-		 * 
-		 * This function is called with the following parameters:
-		 * 
-		 * @cfg {Autolinker} replaceFn.autolinker The Autolinker instance, which may be used to retrieve child objects from (such
-		 *   as the instance's {@link #getTagBuilder tag builder}).
-		 * @cfg {Autolinker.match.Match} replaceFn.match The Match instance which can be used to retrieve information about the
-		 *   {@link Autolinker.match.Url URL}/{@link Autolinker.match.Email email}/{@link Autolinker.match.Twitter Twitter}
-		 *   match that the `replaceFn` is currently processing.
-		 */
-
-
-		/**
-		 * @private
-		 * @property {RegExp} htmlCharacterEntitiesRegex
-		 *
-		 * The regular expression that matches common HTML character entities.
-		 * 
-		 * Ignoring &amp; as it could be part of a query string -- handling it separately.
-		 */
-		htmlCharacterEntitiesRegex: /(&nbsp;|&#160;|&lt;|&#60;|&gt;|&#62;)/gi,
-
-		/**
-		 * @private
-		 * @property {RegExp} matcherRegex
-		 * 
-		 * The regular expression that matches URLs, email addresses, and Twitter handles.
-		 * 
-		 * This regular expression has the following capturing groups:
-		 * 
-		 * 1. Group that is used to determine if there is a Twitter handle match (i.e. \@someTwitterUser). Simply check for its 
-		 *    existence to determine if there is a Twitter handle match. The next couple of capturing groups give information 
-		 *    about the Twitter handle match.
-		 * 2. The whitespace character before the \@sign in a Twitter handle. This is needed because there are no lookbehinds in
-		 *    JS regular expressions, and can be used to reconstruct the original string in a replace().
-		 * 3. The Twitter handle itself in a Twitter match. If the match is '@someTwitterUser', the handle is 'someTwitterUser'.
-		 * 4. Group that matches an email address. Used to determine if the match is an email address, as well as holding the full 
-		 *    address. Ex: 'me@my.com'
-		 * 5. Group that matches a URL in the input text. Ex: 'http://google.com', 'www.google.com', or just 'google.com'.
-		 *    This also includes a path, url parameters, or hash anchors. Ex: google.com/path/to/file?q1=1&q2=2#myAnchor
-		 * 6. Group that matches a protocol URL (i.e. 'http://google.com'). This is used to match protocol URLs with just a single
-		 *    word, like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
-		 * 7. A protocol-relative ('//') match for the case of a 'www.' prefixed URL. Will be an empty string if it is not a 
-		 *    protocol-relative match. We need to know the character before the '//' in order to determine if it is a valid match
-		 *    or the // was in a string we don't want to auto-link.
-		 * 8. A protocol-relative ('//') match for the case of a known TLD prefixed URL. Will be an empty string if it is not a 
-		 *    protocol-relative match. See #6 for more info. 
-		 */
-		matcherRegex : (function() {
-			var twitterRegex = /(^|[^\w])@(\w{1,15})/,              // For matching a twitter handle. Ex: @gregory_jacobs
-
-			    emailRegex = /(?:[\-;:&=\+\$,\w\.]+@)/,             // something@ for email addresses (a.k.a. local-part)
-
-			    protocolRegex = /(?:[A-Za-z][-.+A-Za-z0-9]+:(?![A-Za-z][-.+A-Za-z0-9]+:\/\/)(?!\d+\/?)(?:\/\/)?)/,  // match protocol, allow in format "http://" or "mailto:". However, do not match the first part of something like 'link:http://www.google.com' (i.e. don't match "link:"). Also, make sure we don't interpret 'google.com:8000' as if 'google.com' was a protocol here (i.e. ignore a trailing port number in this regex)
-			    wwwRegex = /(?:www\.)/,                             // starting with 'www.'
-			    domainNameRegex = /[A-Za-z0-9\.\-]*[A-Za-z0-9\-]/,  // anything looking at all like a domain, non-unicode domains, not ending in a period
-			    tldRegex = /\.(?:international|construction|contractors|enterprises|photography|productions|foundation|immobilien|industries|management|properties|technology|christmas|community|directory|education|equipment|institute|marketing|solutions|vacations|bargains|boutique|builders|catering|cleaning|clothing|computer|democrat|diamonds|graphics|holdings|lighting|partners|plumbing|supplies|training|ventures|academy|careers|company|cruises|domains|exposed|flights|florist|gallery|guitars|holiday|kitchen|neustar|okinawa|recipes|rentals|reviews|shiksha|singles|support|systems|agency|berlin|camera|center|coffee|condos|dating|estate|events|expert|futbol|kaufen|luxury|maison|monash|museum|nagoya|photos|repair|report|social|supply|tattoo|tienda|travel|viajes|villas|vision|voting|voyage|actor|build|cards|cheap|codes|dance|email|glass|house|mango|ninja|parts|photo|shoes|solar|today|tokyo|tools|watch|works|aero|arpa|asia|best|bike|blue|buzz|camp|club|cool|coop|farm|fish|gift|guru|info|jobs|kiwi|kred|land|limo|link|menu|mobi|moda|name|pics|pink|post|qpon|rich|ruhr|sexy|tips|vote|voto|wang|wien|wiki|zone|bar|bid|biz|cab|cat|ceo|com|edu|gov|int|kim|mil|net|onl|org|pro|pub|red|tel|uno|wed|xxx|xyz|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw)\b/,   // match our known top level domains (TLDs)
-
-			    // Allow optional path, query string, and hash anchor, not ending in the following characters: "?!:,.;"
-			    // http://blog.codinghorror.com/the-problem-with-urls/
-			    urlSuffixRegex = /[\-A-Za-z0-9+&@#\/%=~_()|'$*\[\]?!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|'$*\[\]]/;
-
-			return new RegExp( [
-				'(',  // *** Capturing group $1, which can be used to check for a twitter handle match. Use group $3 for the actual twitter handle though. $2 may be used to reconstruct the original string in a replace() 
-					// *** Capturing group $2, which matches the whitespace character before the '@' sign (needed because of no lookbehinds), and 
-					// *** Capturing group $3, which matches the actual twitter handle
-					twitterRegex.source,
-				')',
-
-				'|',
-
-				'(',  // *** Capturing group $4, which is used to determine an email match
-					emailRegex.source,
-					domainNameRegex.source,
-					tldRegex.source,
-				')',
-
-				'|',
-
-				'(',  // *** Capturing group $5, which is used to match a URL
-					'(?:', // parens to cover match for protocol (optional), and domain
-						'(',  // *** Capturing group $6, for a protocol-prefixed url (ex: http://google.com)
-							protocolRegex.source,
-							domainNameRegex.source,
-						')',
-
-						'|',
-
-						'(?:',  // non-capturing paren for a 'www.' prefixed url (ex: www.google.com)
-							'(.?//)?',  // *** Capturing group $7 for an optional protocol-relative URL. Must be at the beginning of the string or start with a non-word character
-							wwwRegex.source,
-							domainNameRegex.source,
-						')',
-
-						'|',
-
-						'(?:',  // non-capturing paren for known a TLD url (ex: google.com)
-							'(.?//)?',  // *** Capturing group $8 for an optional protocol-relative URL. Must be at the beginning of the string or start with a non-word character
-							domainNameRegex.source,
-							tldRegex.source,
-						')',
-					')',
-
-					'(?:' + urlSuffixRegex.source + ')?',  // match for path, query string, and/or hash anchor - optional
-				')'
-			].join( "" ), 'gi' );
-		} )(),
-
-		/**
-		 * @private
-		 * @property {RegExp} charBeforeProtocolRelMatchRegex
-		 * 
-		 * The regular expression used to retrieve the character before a protocol-relative URL match.
-		 * 
-		 * This is used in conjunction with the {@link #matcherRegex}, which needs to grab the character before a protocol-relative
-		 * '//' due to the lack of a negative look-behind in JavaScript regular expressions. The character before the match is stripped
-		 * from the URL.
-		 */
-		charBeforeProtocolRelMatchRegex : /^(.)?\/\//,
-
-		/**
-		 * @private
-		 * @property {Autolinker.MatchValidator} matchValidator
-		 * 
-		 * The MatchValidator object, used to filter out any false positives from the {@link #matcherRegex}. See
-		 * {@link Autolinker.MatchValidator} for details.
-		 */
-
-		/**
-		 * @private
-		 * @property {Autolinker.HtmlParser} htmlParser
-		 * 
-		 * The HtmlParser instance used to skip over HTML tags, while finding text nodes to process. This is lazily instantiated
-		 * in the {@link #getHtmlParser} method.
-		 */
-
-		/**
-		 * @private
-		 * @property {Autolinker.AnchorTagBuilder} tagBuilder
-		 * 
-		 * The AnchorTagBuilder instance used to build the URL/email/Twitter replacement anchor tags. This is lazily instantiated
-		 * in the {@link #getTagBuilder} method.
-		 */
-
-
-		/**
-		 * Automatically links URLs, email addresses, and Twitter handles found in the given chunk of HTML. 
-		 * Does not link URLs found within HTML tags.
-		 * 
-		 * For instance, if given the text: `You should go to http://www.yahoo.com`, then the result
-		 * will be `You should go to &lt;a href="http://www.yahoo.com"&gt;http://www.yahoo.com&lt;/a&gt;`
-		 * 
-		 * This method finds the text around any HTML elements in the input `textOrHtml`, which will be the text that is processed.
-		 * Any original HTML elements will be left as-is, as well as the text that is already wrapped in anchor (&lt;a&gt;) tags.
-		 * 
-		 * @param {String} textOrHtml The HTML or text to link URLs, email addresses, and Twitter handles within (depending on if
-		 *   the {@link #urls}, {@link #email}, and {@link #twitter} options are enabled).
-		 * @return {String} The HTML, with URLs/emails/Twitter handles automatically linked.
-		 */
-		link : function( textOrHtml ) {
-			var me = this,  // for closure
-			    htmlParser = this.getHtmlParser(),
-			    htmlCharacterEntitiesRegex = this.htmlCharacterEntitiesRegex,
-			    anchorTagStackCount = 0,  // used to only process text around anchor tags, and any inner text/html they may have
-			    resultHtml = [];
-
-			htmlParser.parse( textOrHtml, {
-				// Process HTML nodes in the input `textOrHtml`
-				processHtmlNode : function( tagText, tagName, isClosingTag ) {
-					if( tagName === 'a' ) {
-						if( !isClosingTag ) {  // it's the start <a> tag
-							anchorTagStackCount++;
-						} else {   // it's the end </a> tag
-							anchorTagStackCount = Math.max( anchorTagStackCount - 1, 0 );  // attempt to handle extraneous </a> tags by making sure the stack count never goes below 0
-						}
-					}
-					resultHtml.push( tagText );  // now add the text of the tag itself verbatim
-				},
-
-				// Process text nodes in the input `textOrHtml`
-				processTextNode : function( text ) {
-					if( anchorTagStackCount === 0 ) {
-						// If we're not within an <a> tag, process the text node
-						var unescapedText = Autolinker.Util.splitAndCapture( text, htmlCharacterEntitiesRegex );  // split at HTML entities, but include the HTML entities in the results array
-
-						for ( var i = 0, len = unescapedText.length; i < len; i++ ) {
-							var textToProcess = unescapedText[ i ],
-							    processedTextNode = me.processTextNode( textToProcess );
-
-							resultHtml.push( processedTextNode );
-						}
-
-					} else {
-						// `text` is within an <a> tag, simply append the text - we do not want to autolink anything 
-						// already within an <a>...</a> tag
-						resultHtml.push( text );
-					}
-				}
-			} );
-
-			return resultHtml.join( "" );
-		},
-
-
-		/**
-		 * Lazily instantiates and returns the {@link #htmlParser} instance for this Autolinker instance.
-		 * 
-		 * @protected
-		 * @return {Autolinker.HtmlParser}
-		 */
-		getHtmlParser : function() {
-			var htmlParser = this.htmlParser;
-
-			if( !htmlParser ) {
-				htmlParser = this.htmlParser = new Autolinker.HtmlParser();
-			}
-
-			return htmlParser;
-		},
-
-
-		/**
-		 * Returns the {@link #tagBuilder} instance for this Autolinker instance, lazily instantiating it
-		 * if it does not yet exist.
-		 * 
-		 * This method may be used in a {@link #replaceFn} to generate the {@link Autolinker.HtmlTag HtmlTag} instance that 
-		 * Autolinker would normally generate, and then allow for modifications before returning it. For example:
-		 * 
-		 *     var html = Autolinker.link( "Test google.com", {
-		 *         replaceFn : function( autolinker, match ) {
-		 *             var tag = autolinker.getTagBuilder().build( match );  // returns an {@link Autolinker.HtmlTag} instance
-		 *             tag.setAttr( 'rel', 'nofollow' );
-		 *             
-		 *             return tag;
-		 *         }
-		 *     } );
-		 *     
-		 *     // generated html:
-		 *     //   Test <a href="http://google.com" target="_blank" rel="nofollow">google.com</a>
-		 * 
-		 * @return {Autolinker.AnchorTagBuilder}
-		 */
-		getTagBuilder : function() {
-			var tagBuilder = this.tagBuilder;
-
-			if( !tagBuilder ) {
-				tagBuilder = this.tagBuilder = new Autolinker.AnchorTagBuilder( {
-					newWindow   : this.newWindow,
-					truncate    : this.truncate,
-					className   : this.className
-				} );
-			}
-
-			return tagBuilder;
-		},
-
-
-		/**
-		 * Process the text that lies inbetween HTML tags. This method does the actual wrapping of URLs with
-		 * anchor tags.
-		 * 
-		 * @private
-		 * @param {String} text The text to auto-link.
-		 * @return {String} The text with anchor tags auto-filled.
-		 */
-		processTextNode : function( text ) {
-			var me = this;  // for closure
-
-			return text.replace( this.matcherRegex, function( matchStr, $1, $2, $3, $4, $5, $6, $7, $8 ) {
-				var matchDescObj = me.processCandidateMatch( matchStr, $1, $2, $3, $4, $5, $6, $7, $8 );  // match description object
-
-				// Return out with no changes for match types that are disabled (url, email, twitter), or for matches that are 
-				// invalid (false positives from the matcherRegex, which can't use look-behinds since they are unavailable in JS).
-				if( !matchDescObj ) {
-					return matchStr;
-
-				} else {
-					// Generate the replacement text for the match
-					var matchReturnVal = me.createMatchReturnVal( matchDescObj.match, matchDescObj.matchStr );
-					return matchDescObj.prefixStr + matchReturnVal + matchDescObj.suffixStr;
-				}
-			} );
-		},
-
-
-		/**
-		 * Processes a candidate match from the {@link #matcherRegex}. 
-		 * 
-		 * Not all matches found by the regex are actual URL/email/Twitter matches, as determined by the {@link #matchValidator}. In
-		 * this case, the method returns `null`. Otherwise, a valid Object with `prefixStr`, `match`, and `suffixStr` is returned.
-		 * 
-		 * @private
-		 * @param {String} matchStr The full match that was found by the {@link #matcherRegex}.
-		 * @param {String} twitterMatch The matched text of a Twitter handle, if the match is a Twitter match.
-		 * @param {String} twitterHandlePrefixWhitespaceChar The whitespace char before the @ sign in a Twitter handle match. This 
-		 *   is needed because of no lookbehinds in JS regexes, and is need to re-include the character for the anchor tag replacement.
-		 * @param {String} twitterHandle The actual Twitter user (i.e the word after the @ sign in a Twitter match).
-		 * @param {String} emailAddressMatch The matched email address for an email address match.
-		 * @param {String} urlMatch The matched URL string for a URL match.
-		 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to match
-		 *   something like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
-		 * @param {String} wwwProtocolRelativeMatch The '//' for a protocol-relative match from a 'www' url, with the character that 
-		 *   comes before the '//'.
-		 * @param {String} tldProtocolRelativeMatch The '//' for a protocol-relative match from a TLD (top level domain) match, with 
-		 *   the character that comes before the '//'.
-		 *   
-		 * @return {Object} A "match description object". This will be `null` if the match was invalid, or if a match type is disabled.
-		 *   Otherwise, this will be an Object (map) with the following properties:
-		 * @return {String} return.prefixStr The char(s) that should be prepended to the replacement string. These are char(s) that
-		 *   were needed to be included from the regex match that were ignored by processing code, and should be re-inserted into 
-		 *   the replacement stream.
-		 * @return {String} return.suffixStr The char(s) that should be appended to the replacement string. These are char(s) that
-		 *   were needed to be included from the regex match that were ignored by processing code, and should be re-inserted into 
-		 *   the replacement stream.
-		 * @return {String} return.matchStr The `matchStr`, fixed up to remove characters that are no longer needed (which have been
-		 *   added to `prefixStr` and `suffixStr`).
-		 * @return {Autolinker.match.Match} return.match The Match object that represents the match that was found.
-		 */
-		processCandidateMatch : function( 
-			matchStr, twitterMatch, twitterHandlePrefixWhitespaceChar, twitterHandle, 
-			emailAddressMatch, urlMatch, protocolUrlMatch, wwwProtocolRelativeMatch, tldProtocolRelativeMatch
-		) {
-			var protocolRelativeMatch = wwwProtocolRelativeMatch || tldProtocolRelativeMatch,
-			    match,  // Will be an Autolinker.match.Match object
-
-			    prefixStr = "",       // A string to use to prefix the anchor tag that is created. This is needed for the Twitter handle match
-			    suffixStr = "";       // A string to suffix the anchor tag that is created. This is used if there is a trailing parenthesis that should not be auto-linked.
-
-
-			// Return out with `null` for match types that are disabled (url, email, twitter), or for matches that are 
-			// invalid (false positives from the matcherRegex, which can't use look-behinds since they are unavailable in JS).
-			if(
-				( twitterMatch && !this.twitter ) || ( emailAddressMatch && !this.email ) || ( urlMatch && !this.urls ) ||
-				!this.matchValidator.isValidMatch( urlMatch, protocolUrlMatch, protocolRelativeMatch ) 
-			) {
-				return null;
-			}
-
-			// Handle a closing parenthesis at the end of the match, and exclude it if there is not a matching open parenthesis
-			// in the match itself. 
-			if( this.matchHasUnbalancedClosingParen( matchStr ) ) {
-				matchStr = matchStr.substr( 0, matchStr.length - 1 );  // remove the trailing ")"
-				suffixStr = ")";  // this will be added after the generated <a> tag
-			}
-
-
-			if( emailAddressMatch ) {
-				match = new Autolinker.match.Email( { matchedText: matchStr, email: emailAddressMatch } );
-
-			} else if( twitterMatch ) {
-				// fix up the `matchStr` if there was a preceding whitespace char, which was needed to determine the match 
-				// itself (since there are no look-behinds in JS regexes)
-				if( twitterHandlePrefixWhitespaceChar ) {
-					prefixStr = twitterHandlePrefixWhitespaceChar;
-					matchStr = matchStr.slice( 1 );  // remove the prefixed whitespace char from the match
-				}
-				match = new Autolinker.match.Twitter( { matchedText: matchStr, twitterHandle: twitterHandle } );
-
-			} else {  // url match
-				// If it's a protocol-relative '//' match, remove the character before the '//' (which the matcherRegex needed
-				// to match due to the lack of a negative look-behind in JavaScript regular expressions)
-				if( protocolRelativeMatch ) {
-					var charBeforeMatch = protocolRelativeMatch.match( this.charBeforeProtocolRelMatchRegex )[ 1 ] || "";
-
-					if( charBeforeMatch ) {  // fix up the `matchStr` if there was a preceding char before a protocol-relative match, which was needed to determine the match itself (since there are no look-behinds in JS regexes)
-						prefixStr = charBeforeMatch;
-						matchStr = matchStr.slice( 1 );  // remove the prefixed char from the match
-					}
-				}
-
-				match = new Autolinker.match.Url( {
-					matchedText : matchStr,
-					url : matchStr,
-					protocolUrlMatch : !!protocolUrlMatch,
-					protocolRelativeMatch : !!protocolRelativeMatch,
-					stripPrefix : this.stripPrefix
-				} );
-			}
-
-			return {
-				prefixStr : prefixStr,
-				suffixStr : suffixStr,
-				matchStr  : matchStr,
-				match     : match
-			};
-		},
-
-
-		/**
-		 * Determines if a match found has an unmatched closing parenthesis. If so, this parenthesis will be removed
-		 * from the match itself, and appended after the generated anchor tag in {@link #processTextNode}.
-		 * 
-		 * A match may have an extra closing parenthesis at the end of the match because the regular expression must include parenthesis
-		 * for URLs such as "wikipedia.com/something_(disambiguation)", which should be auto-linked. 
-		 * 
-		 * However, an extra parenthesis *will* be included when the URL itself is wrapped in parenthesis, such as in the case of
-		 * "(wikipedia.com/something_(disambiguation))". In this case, the last closing parenthesis should *not* be part of the URL 
-		 * itself, and this method will return `true`.
-		 * 
-		 * @private
-		 * @param {String} matchStr The full match string from the {@link #matcherRegex}.
-		 * @return {Boolean} `true` if there is an unbalanced closing parenthesis at the end of the `matchStr`, `false` otherwise.
-		 */
-		matchHasUnbalancedClosingParen : function( matchStr ) {
-			var lastChar = matchStr.charAt( matchStr.length - 1 );
-
-			if( lastChar === ')' ) {
-				var openParensMatch = matchStr.match( /\(/g ),
-				    closeParensMatch = matchStr.match( /\)/g ),
-				    numOpenParens = ( openParensMatch && openParensMatch.length ) || 0,
-				    numCloseParens = ( closeParensMatch && closeParensMatch.length ) || 0;
-
-				if( numOpenParens < numCloseParens ) {
-					return true;
-				}
-			}
-
-			return false;
-		},
-
-
-		/**
-		 * Creates the return string value for a given match in the input string, for the {@link #processTextNode} method.
-		 * 
-		 * This method handles the {@link #replaceFn}, if one was provided.
-		 * 
-		 * @private
-		 * @param {Autolinker.match.Match} match The Match object that represents the match.
-		 * @param {String} matchStr The original match string, after having been preprocessed to fix match edge cases (see
-		 *   the `prefixStr` and `suffixStr` vars in {@link #processTextNode}.
-		 * @return {String} The string that the `match` should be replaced with. This is usually the anchor tag string, but
-		 *   may be the `matchStr` itself if the match is not to be replaced.
-		 */
-		createMatchReturnVal : function( match, matchStr ) {
-			// Handle a custom `replaceFn` being provided
-			var replaceFnResult;
-			if( this.replaceFn ) {
-				replaceFnResult = this.replaceFn.call( this, this, match );  // Autolinker instance is the context, and the first arg
-			}
-
-			if( typeof replaceFnResult === 'string' ) {
-				return replaceFnResult;  // `replaceFn` returned a string, use that
-
-			} else if( replaceFnResult === false ) {
-				return matchStr;  // no replacement for the match
-
-			} else if( replaceFnResult instanceof Autolinker.HtmlTag ) {
-				return replaceFnResult.toString();
-
-			} else {  // replaceFnResult === true, or no/unknown return value from function
-				// Perform Autolinker's default anchor tag generation
-				var tagBuilder = this.getTagBuilder(),
-				    anchorTag = tagBuilder.build( match );  // returns an Autolinker.HtmlTag instance
-
-				return anchorTag.toString();
-			}
-		}
-
-	};
-
-
+	urls : true,
+	
+	/**
+	 * @cfg {Boolean} email
+	 * 
+	 * `true` if email addresses should be automatically linked, `false` if they should not be.
+	 */
+	email : true,
+	
+	/**
+	 * @cfg {Boolean} twitter
+	 * 
+	 * `true` if Twitter handles ("@example") should be automatically linked, `false` if they should not be.
+	 */
+	twitter : true,
+	
+	/**
+	 * @cfg {Boolean} newWindow
+	 * 
+	 * `true` if the links should open in a new window, `false` otherwise.
+	 */
+	newWindow : true,
+	
+	/**
+	 * @cfg {Boolean} stripPrefix
+	 * 
+	 * `true` if 'http://' or 'https://' and/or the 'www.' should be stripped from the beginning of URL links' text, 
+	 * `false` otherwise.
+	 */
+	stripPrefix : true,
+	
+	/**
+	 * @cfg {Number} truncate
+	 * 
+	 * A number for how many characters long URLs/emails/twitter handles should be truncated to inside the text of 
+	 * a link. If the URL/email/twitter is over this number of characters, it will be truncated to this length by 
+	 * adding a two period ellipsis ('..') to the end of the string.
+	 * 
+	 * For example: A url like 'http://www.yahoo.com/some/long/path/to/a/file' truncated to 25 characters might look
+	 * something like this: 'yahoo.com/some/long/pat..'
+	 */
+	truncate : undefined,
+	
+	/**
+	 * @cfg {String} className
+	 * 
+	 * A CSS class name to add to the generated links. This class will be added to all links, as well as this class
+	 * plus url/email/twitter suffixes for styling url/email/twitter links differently.
+	 * 
+	 * For example, if this config is provided as "myLink", then:
+	 * 
+	 * - URL links will have the CSS classes: "myLink myLink-url"
+	 * - Email links will have the CSS classes: "myLink myLink-email", and
+	 * - Twitter links will have the CSS classes: "myLink myLink-twitter"
+	 */
+	className : "",
+	
+	/**
+	 * @cfg {Function} replaceFn
+	 * 
+	 * A function to individually process each URL/Email/Twitter match found in the input string.
+	 * 
+	 * See the class's description for usage.
+	 * 
+	 * This function is called with the following parameters:
+	 * 
+	 * @cfg {Autolinker} replaceFn.autolinker The Autolinker instance, which may be used to retrieve child objects from (such
+	 *   as the instance's {@link #getTagBuilder tag builder}).
+	 * @cfg {Autolinker.match.Match} replaceFn.match The Match instance which can be used to retrieve information about the
+	 *   {@link Autolinker.match.Url URL}/{@link Autolinker.match.Email email}/{@link Autolinker.match.Twitter Twitter}
+	 *   match that the `replaceFn` is currently processing.
+	 */
+	
+	
+	/**
+	 * @private
+	 * @property {Autolinker.htmlParser.HtmlParser} htmlParser
+	 * 
+	 * The HtmlParser instance used to skip over HTML tags, while finding text nodes to process. This is lazily instantiated
+	 * in the {@link #getHtmlParser} method.
+	 */
+	htmlParser : undefined,
+	
+	/**
+	 * @private
+	 * @property {Autolinker.matchParser.MatchParser} matchParser
+	 * 
+	 * The MatchParser instance used to find URL/email/Twitter matches in the text nodes of an input string passed to
+	 * {@link #link}. This is lazily instantiated in the {@link #getMatchParser} method.
+	 */
+	matchParser : undefined,
+	
+	/**
+	 * @private
+	 * @property {Autolinker.AnchorTagBuilder} tagBuilder
+	 * 
+	 * The AnchorTagBuilder instance used to build the URL/email/Twitter replacement anchor tags. This is lazily instantiated
+	 * in the {@link #getTagBuilder} method.
+	 */
+	tagBuilder : undefined,
+	
+	
 	/**
 	 * Automatically links URLs, email addresses, and Twitter handles found in the given chunk of HTML. 
 	 * Does not link URLs found within HTML tags.
@@ -26253,831 +26176,153 @@ module.exports = function text(state, silent) {
 	 * For instance, if given the text: `You should go to http://www.yahoo.com`, then the result
 	 * will be `You should go to &lt;a href="http://www.yahoo.com"&gt;http://www.yahoo.com&lt;/a&gt;`
 	 * 
-	 * Example:
+	 * This method finds the text around any HTML elements in the input `textOrHtml`, which will be the text that is processed.
+	 * Any original HTML elements will be left as-is, as well as the text that is already wrapped in anchor (&lt;a&gt;) tags.
 	 * 
-	 *     var linkedText = Autolinker.link( "Go to google.com", { newWindow: false } );
-	 *     // Produces: "Go to <a href="http://google.com">google.com</a>"
-	 * 
-	 * @static
-	 * @param {String} textOrHtml The HTML or text to find URLs, email addresses, and Twitter handles within (depending on if
+	 * @param {String} textOrHtml The HTML or text to link URLs, email addresses, and Twitter handles within (depending on if
 	 *   the {@link #urls}, {@link #email}, and {@link #twitter} options are enabled).
-	 * @param {Object} [options] Any of the configuration options for the Autolinker class, specified in an Object (map).
-	 *   See the class description for an example call.
-	 * @return {String} The HTML text, with URLs automatically linked
+	 * @return {String} The HTML, with URLs/emails/Twitter handles automatically linked.
 	 */
-	Autolinker.link = function( textOrHtml, options ) {
-		var autolinker = new Autolinker( options );
-		return autolinker.link( textOrHtml );
-	};
-
-
-	// Namespace for `match` classes
-	Autolinker.match = {};
-	/*global Autolinker */
-	/*jshint eqnull:true, boss:true */
-	/**
-	 * @class Autolinker.Util
-	 * @singleton
-	 * 
-	 * A few utility methods for Autolinker.
-	 */
-	Autolinker.Util = {
-
-		/**
-		 * @property {Function} abstractMethod
-		 * 
-		 * A function object which represents an abstract method.
-		 */
-		abstractMethod : function() { throw "abstract"; },
-
-
-		/**
-		 * Assigns (shallow copies) the properties of `src` onto `dest`.
-		 * 
-		 * @param {Object} dest The destination object.
-		 * @param {Object} src The source object.
-		 * @return {Object} The destination object (`dest`)
-		 */
-		assign : function( dest, src ) {
-			for( var prop in src ) {
-				if( src.hasOwnProperty( prop ) ) {
-					dest[ prop ] = src[ prop ];
+	link : function( textOrHtml ) {
+		var htmlParser = this.getHtmlParser(),
+		    htmlNodes = htmlParser.parse( textOrHtml ),
+		    anchorTagStackCount = 0,  // used to only process text around anchor tags, and any inner text/html they may have
+		    resultHtml = [];
+		
+		for( var i = 0, len = htmlNodes.length; i < len; i++ ) {
+			var node = htmlNodes[ i ],
+			    nodeType = node.getType(),
+			    nodeText = node.getText();
+			
+			if( nodeType === 'element' ) {
+				// Process HTML nodes in the input `textOrHtml`
+				if( node.getTagName() === 'a' ) {
+					if( !node.isClosing() ) {  // it's the start <a> tag
+						anchorTagStackCount++;
+					} else {   // it's the end </a> tag
+						anchorTagStackCount = Math.max( anchorTagStackCount - 1, 0 );  // attempt to handle extraneous </a> tags by making sure the stack count never goes below 0
+					}
+				}
+				resultHtml.push( nodeText );  // now add the text of the tag itself verbatim
+				
+			} else if( nodeType === 'entity' ) {
+				resultHtml.push( nodeText );  // append HTML entity nodes (such as '&nbsp;') verbatim
+				
+			} else {
+				// Process text nodes in the input `textOrHtml`
+				if( anchorTagStackCount === 0 ) {
+					// If we're not within an <a> tag, process the text node to linkify
+					var linkifiedStr = this.linkifyStr( nodeText );
+					resultHtml.push( linkifiedStr );
+					
+				} else {
+					// `text` is within an <a> tag, simply append the text - we do not want to autolink anything 
+					// already within an <a>...</a> tag
+					resultHtml.push( nodeText );
 				}
 			}
-
-			return dest;
-		},
-
-
-		/**
-		 * Extends `superclass` to create a new subclass, adding the `protoProps` to the new subclass's prototype.
-		 * 
-		 * @param {Function} superclass The constructor function for the superclass.
-		 * @param {Object} protoProps The methods/properties to add to the subclass's prototype. This may contain the
-		 *   special property `constructor`, which will be used as the new subclass's constructor function.
-		 * @return {Function} The new subclass function.
-		 */
-		extend : function( superclass, protoProps ) {
-			var superclassProto = superclass.prototype;
-
-			var F = function() {};
-			F.prototype = superclassProto;
-
-			var subclass;
-			if( protoProps.hasOwnProperty( 'constructor' ) ) {
-				subclass = protoProps.constructor;
-			} else {
-				subclass = function() { superclassProto.constructor.apply( this, arguments ); };
-			}
-
-			var subclassProto = subclass.prototype = new F();  // set up prototype chain
-			subclassProto.constructor = subclass;  // fix constructor property
-			subclassProto.superclass = superclassProto;
-
-			delete protoProps.constructor;  // don't re-assign constructor property to the prototype, since a new function may have been created (`subclass`), which is now already there
-			Autolinker.Util.assign( subclassProto, protoProps );
-
-			return subclass;
-		},
-
-
-		/**
-		 * Truncates the `str` at `len - ellipsisChars.length`, and adds the `ellipsisChars` to the
-		 * end of the string (by default, two periods: '..'). If the `str` length does not exceed 
-		 * `len`, the string will be returned unchanged.
-		 * 
-		 * @param {String} str The string to truncate and add an ellipsis to.
-		 * @param {Number} truncateLen The length to truncate the string at.
-		 * @param {String} [ellipsisChars=..] The ellipsis character(s) to add to the end of `str`
-		 *   when truncated. Defaults to '..'
-		 */
-		ellipsis : function( str, truncateLen, ellipsisChars ) {
-			if( str.length > truncateLen ) {
-				ellipsisChars = ( ellipsisChars == null ) ? '..' : ellipsisChars;
-				str = str.substring( 0, truncateLen - ellipsisChars.length ) + ellipsisChars;
-			}
-			return str;
-		},
-
-
-		/**
-		 * Supports `Array.prototype.indexOf()` functionality for old IE (IE8 and below).
-		 * 
-		 * @param {Array} arr The array to find an element of.
-		 * @param {*} element The element to find in the array, and return the index of.
-		 * @return {Number} The index of the `element`, or -1 if it was not found.
-		 */
-		indexOf : function( arr, element ) {
-			if( Array.prototype.indexOf ) {
-				return arr.indexOf( element );
-
-			} else {
-				for( var i = 0, len = arr.length; i < len; i++ ) {
-					if( arr[ i ] === element ) return i;
-				}
-				return -1;
-			}
-		},
-
-
-
-		/**
-		 * Performs the functionality of what modern browsers do when `String.prototype.split()` is called
-		 * with a regular expression that contains capturing parenthesis.
-		 * 
-		 * For example:
-		 * 
-		 *     // Modern browsers: 
-		 *     "a,b,c".split( /(,)/ );  // --> [ 'a', ',', 'b', ',', 'c' ]
-		 *     
-		 *     // Old IE (including IE8):
-		 *     "a,b,c".split( /(,)/ );  // --> [ 'a', 'b', 'c' ]
-		 *     
-		 * This method emulates the functionality of modern browsers for the old IE case.
-		 * 
-		 * @param {String} str The string to split.
-		 * @param {RegExp} splitRegex The regular expression to split the input `str` on. The splitting
-		 *   character(s) will be spliced into the array, as in the "modern browsers" example in the 
-		 *   description of this method. 
-		 *   Note #1: the supplied regular expression **must** have the 'g' flag specified.
-		 *   Note #2: for simplicity's sake, the regular expression does not need 
-		 *   to contain capturing parenthesis - it will be assumed that any match has them.
-		 * @return {String[]} The split array of strings, with the splitting character(s) included.
-		 */
-		splitAndCapture : function( str, splitRegex ) {
-			if( !splitRegex.global ) throw new Error( "`splitRegex` must have the 'g' flag set" );
-
-			var result = [],
-			    lastIdx = 0,
-			    match;
-
-			while( match = splitRegex.exec( str ) ) {
-				result.push( str.substring( lastIdx, match.index ) );
-				result.push( match[ 0 ] );  // push the splitting char(s)
-
-				lastIdx = match.index + match[ 0 ].length;
-			}
-			result.push( str.substring( lastIdx ) );
-
-			return result;
 		}
-
-	};
-	/*global Autolinker */
+		
+		return resultHtml.join( "" );
+	},
+	
+	
 	/**
+	 * Process the text that lies in between HTML tags, performing the anchor tag replacements for matched 
+	 * URLs/emails/Twitter handles, and returns the string with the replacements made. 
+	 * 
+	 * This method does the actual wrapping of URLs/emails/Twitter handles with anchor tags.
+	 * 
 	 * @private
-	 * @class Autolinker.HtmlParser
-	 * @extends Object
-	 * 
-	 * An HTML parser implementation which simply walks an HTML string and calls the provided visitor functions to process 
-	 * HTML and text nodes.
-	 * 
-	 * Autolinker uses this to only link URLs/emails/Twitter handles within text nodes, basically ignoring HTML tags.
+	 * @param {String} str The string of text to auto-link.
+	 * @return {String} The text with anchor tags auto-filled.
 	 */
-	Autolinker.HtmlParser = Autolinker.Util.extend( Object, {
-
-		/**
-		 * @private
-		 * @property {RegExp} htmlRegex
-		 * 
-		 * The regular expression used to pull out HTML tags from a string. Handles namespaced HTML tags and
-		 * attribute names, as specified by http://www.w3.org/TR/html-markup/syntax.html.
-		 * 
-		 * Capturing groups:
-		 * 
-		 * 1. The "!DOCTYPE" tag name, if a tag is a &lt;!DOCTYPE&gt; tag.
-		 * 2. If it is an end tag, this group will have the '/'.
-		 * 3. The tag name for all tags (other than the &lt;!DOCTYPE&gt; tag)
-		 */
-		htmlRegex : (function() {
-			var tagNameRegex = /[0-9a-zA-Z][0-9a-zA-Z:]*/,
-			    attrNameRegex = /[^\s\0"'>\/=\x01-\x1F\x7F]+/,   // the unicode range accounts for excluding control chars, and the delete char
-			    attrValueRegex = /(?:".*?"|'.*?'|[^'"=<>`\s]+)/, // double quoted, single quoted, or unquoted attribute values
-			    nameEqualsValueRegex = attrNameRegex.source + '(?:\\s*=\\s*' + attrValueRegex.source + ')?';  // optional '=[value]'
-
-			return new RegExp( [
-				// for <!DOCTYPE> tag. Ex: <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">) 
-				'(?:',
-					'<(!DOCTYPE)',  // *** Capturing Group 1 - If it's a doctype tag
-
-						// Zero or more attributes following the tag name
-						'(?:',
-							'\\s+',  // one or more whitespace chars before an attribute
-
-							// Either:
-							// A. attr="value", or 
-							// B. "value" alone (To cover example doctype tag: <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">) 
-							'(?:', nameEqualsValueRegex, '|', attrValueRegex.source + ')',
-						')*',
-					'>',
-				')',
-
-				'|',
-
-				// All other HTML tags (i.e. tags that are not <!DOCTYPE>)
-				'(?:',
-					'<(/)?',  // Beginning of a tag. Either '<' for a start tag, or '</' for an end tag. 
-					          // *** Capturing Group 2: The slash or an empty string. Slash ('/') for end tag, empty string for start or self-closing tag.
-
-						// *** Capturing Group 3 - The tag name
-						'(' + tagNameRegex.source + ')',
-
-						// Zero or more attributes following the tag name
-						'(?:',
-							'\\s+',                // one or more whitespace chars before an attribute
-							nameEqualsValueRegex,  // attr="value" (with optional ="value" part)
-						')*',
-
-						'\\s*/?',  // any trailing spaces and optional '/' before the closing '>'
-					'>',
-				')'
-			].join( "" ), 'gi' );
-		} )(),
-
-
-		/**
-		 * Walks an HTML string, calling the `options.processHtmlNode` function for each HTML tag that is encountered, and calling
-		 * the `options.processTextNode` function when each text around HTML tags is encountered.
-		 * 
-		 * @param {String} html The HTML to parse.
-		 * @param {Object} [options] An Object (map) which may contain the following properties:
-		 * 
-		 * @param {Function} [options.processHtmlNode] A visitor function which allows processing of an encountered HTML node.
-		 *   This function is called with the following arguments:
-		 * @param {String} [options.processHtmlNode.tagText] The HTML tag text that was found.
-		 * @param {String} [options.processHtmlNode.tagName] The tag name for the HTML tag that was found. Ex: 'a' for an anchor tag.
-		 * @param {String} [options.processHtmlNode.isClosingTag] `true` if the tag is a closing tag (ex: &lt;/a&gt;), `false` otherwise.
-		 *  
-		 * @param {Function} [options.processTextNode] A visitor function which allows processing of an encountered text node.
-		 *   This function is called with the following arguments:
-		 * @param {String} [options.processTextNode.text] The text node that was matched.
-		 */
-		parse : function( html, options ) {
-			options = options || {};
-
-			var processHtmlNodeVisitor = options.processHtmlNode || function() {},
-			    processTextNodeVisitor = options.processTextNode || function() {},
-			    htmlRegex = this.htmlRegex,
-			    currentResult,
-			    lastIndex = 0;
-
-			// Loop over the HTML string, ignoring HTML tags, and processing the text that lies between them,
-			// wrapping the URLs in anchor tags
-			while( ( currentResult = htmlRegex.exec( html ) ) !== null ) {
-				var tagText = currentResult[ 0 ],
-				    tagName = currentResult[ 1 ] || currentResult[ 3 ],  // The <!DOCTYPE> tag (ex: "!DOCTYPE"), or another tag (ex: "a") 
-				    isClosingTag = !!currentResult[ 2 ],
-				    inBetweenTagsText = html.substring( lastIndex, currentResult.index );
-
-				if( inBetweenTagsText ) {
-					processTextNodeVisitor( inBetweenTagsText );
-				}
-
-				processHtmlNodeVisitor( tagText, tagName.toLowerCase(), isClosingTag );
-
-				lastIndex = currentResult.index + tagText.length;
-			}
-
-			// Process any remaining text after the last HTML element. Will process all of the text if there were no HTML elements.
-			if( lastIndex < html.length ) {
-				var text = html.substring( lastIndex );
-
-				if( text ) {
-					processTextNodeVisitor( text );
-				}
-			}
-		}
-
-	} );
-	/*global Autolinker */
-	/*jshint boss:true */
+	linkifyStr : function( str ) {
+		return this.getMatchParser().replace( str, this.createMatchReturnVal, this );
+	},
+	
+	
 	/**
-	 * @class Autolinker.HtmlTag
-	 * @extends Object
+	 * Creates the return string value for a given match in the input string, for the {@link #processTextNode} method.
 	 * 
-	 * Represents an HTML tag, which can be used to easily build/modify HTML tags programmatically.
+	 * This method handles the {@link #replaceFn}, if one was provided.
 	 * 
-	 * Autolinker uses this abstraction to create HTML tags, and then write them out as strings. You may also use
-	 * this class in your code, especially within a {@link Autolinker#replaceFn replaceFn}.
-	 * 
-	 * ## Examples
-	 * 
-	 * Example instantiation:
-	 * 
-	 *     var tag = new Autolinker.HtmlTag( {
-	 *         tagName : 'a',
-	 *         attrs   : { 'href': 'http://google.com', 'class': 'external-link' },
-	 *         innerHtml : 'Google'
-	 *     } );
-	 *     
-	 *     tag.toString();  // <a href="http://google.com" class="external-link">Google</a>
-	 *     
-	 *     // Individual accessor methods
-	 *     tag.getTagName();                 // 'a'
-	 *     tag.getAttr( 'href' );            // 'http://google.com'
-	 *     tag.hasClass( 'external-link' );  // true
-	 * 
-	 * 
-	 * Using mutator methods (which may be used in combination with instantiation config properties):
-	 * 
-	 *     var tag = new Autolinker.HtmlTag();
-	 *     tag.setTagName( 'a' );
-	 *     tag.setAttr( 'href', 'http://google.com' );
-	 *     tag.addClass( 'external-link' );
-	 *     tag.setInnerHtml( 'Google' );
-	 *     
-	 *     tag.getTagName();                 // 'a'
-	 *     tag.getAttr( 'href' );            // 'http://google.com'
-	 *     tag.hasClass( 'external-link' );  // true
-	 *     
-	 *     tag.toString();  // <a href="http://google.com" class="external-link">Google</a>
-	 *     
-	 * 
-	 * ## Example use within a {@link Autolinker#replaceFn replaceFn}
-	 * 
-	 *     var html = Autolinker.link( "Test google.com", {
-	 *         replaceFn : function( autolinker, match ) {
-	 *             var tag = autolinker.getTagBuilder().build( match );  // returns an {@link Autolinker.HtmlTag} instance, configured with the Match's href and anchor text
-	 *             tag.setAttr( 'rel', 'nofollow' );
-	 *             
-	 *             return tag;
-	 *         }
-	 *     } );
-	 *     
-	 *     // generated html:
-	 *     //   Test <a href="http://google.com" target="_blank" rel="nofollow">google.com</a>
-	 *     
-	 *     
-	 * ## Example use with a new tag for the replacement
-	 * 
-	 *     var html = Autolinker.link( "Test google.com", {
-	 *         replaceFn : function( autolinker, match ) {
-	 *             var tag = new Autolinker.HtmlTag( {
-	 *                 tagName : 'button',
-	 *                 attrs   : { 'title': 'Load URL: ' + match.getAnchorHref() },
-	 *                 innerHtml : 'Load URL: ' + match.getAnchorText()
-	 *             } );
-	 *             
-	 *             return tag;
-	 *         }
-	 *     } );
-	 *     
-	 *     // generated html:
-	 *     //   Test <button title="Load URL: http://google.com">Load URL: google.com</button>
-	 */
-	Autolinker.HtmlTag = Autolinker.Util.extend( Object, {
-
-		/**
-		 * @cfg {String} tagName
-		 * 
-		 * The tag name. Ex: 'a', 'button', etc.
-		 * 
-		 * Not required at instantiation time, but should be set using {@link #setTagName} before {@link #toString}
-		 * is executed.
-		 */
-
-		/**
-		 * @cfg {Object.<String, String>} attrs
-		 * 
-		 * An key/value Object (map) of attributes to create the tag with. The keys are the attribute names, and the
-		 * values are the attribute values.
-		 */
-
-		/**
-		 * @cfg {String} innerHtml
-		 * 
-		 * The inner HTML for the tag. 
-		 * 
-		 * Note the camel case name on `innerHtml`. Acronyms are camelCased in this utility (such as not to run into the acronym 
-		 * naming inconsistency that the DOM developers created with `XMLHttpRequest`). You may alternatively use {@link #innerHTML}
-		 * if you prefer, but this one is recommended.
-		 */
-
-		/**
-		 * @cfg {String} innerHTML
-		 * 
-		 * Alias of {@link #innerHtml}, accepted for consistency with the browser DOM api, but prefer the camelCased version
-		 * for acronym names.
-		 */
-
-
-		/**
-		 * @protected
-		 * @property {RegExp} whitespaceRegex
-		 * 
-		 * Regular expression used to match whitespace in a string of CSS classes.
-		 */
-		whitespaceRegex : /\s+/,
-
-
-		/**
-		 * @constructor
-		 * @param {Object} [cfg] The configuration properties for this class, in an Object (map)
-		 */
-		constructor : function( cfg ) {
-			Autolinker.Util.assign( this, cfg );
-
-			this.innerHtml = this.innerHtml || this.innerHTML;  // accept either the camelCased form or the fully capitalized acronym
-		},
-
-
-		/**
-		 * Sets the tag name that will be used to generate the tag with.
-		 * 
-		 * @param {String} tagName
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		setTagName : function( tagName ) {
-			this.tagName = tagName;
-			return this;
-		},
-
-
-		/**
-		 * Retrieves the tag name.
-		 * 
-		 * @return {String}
-		 */
-		getTagName : function() {
-			return this.tagName || "";
-		},
-
-
-		/**
-		 * Sets an attribute on the HtmlTag.
-		 * 
-		 * @param {String} attrName The attribute name to set.
-		 * @param {String} attrValue The attribute value to set.
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		setAttr : function( attrName, attrValue ) {
-			var tagAttrs = this.getAttrs();
-			tagAttrs[ attrName ] = attrValue;
-
-			return this;
-		},
-
-
-		/**
-		 * Retrieves an attribute from the HtmlTag. If the attribute does not exist, returns `undefined`.
-		 * 
-		 * @param {String} name The attribute name to retrieve.
-		 * @return {String} The attribute's value, or `undefined` if it does not exist on the HtmlTag.
-		 */
-		getAttr : function( attrName ) {
-			return this.getAttrs()[ attrName ];
-		},
-
-
-		/**
-		 * Sets one or more attributes on the HtmlTag.
-		 * 
-		 * @param {Object.<String, String>} attrs A key/value Object (map) of the attributes to set.
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		setAttrs : function( attrs ) {
-			var tagAttrs = this.getAttrs();
-			Autolinker.Util.assign( tagAttrs, attrs );
-
-			return this;
-		},
-
-
-		/**
-		 * Retrieves the attributes Object (map) for the HtmlTag.
-		 * 
-		 * @return {Object.<String, String>} A key/value object of the attributes for the HtmlTag.
-		 */
-		getAttrs : function() {
-			return this.attrs || ( this.attrs = {} );
-		},
-
-
-		/**
-		 * Sets the provided `cssClass`, overwriting any current CSS classes on the HtmlTag.
-		 * 
-		 * @param {String} cssClass One or more space-separated CSS classes to set (overwrite).
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		setClass : function( cssClass ) {
-			return this.setAttr( 'class', cssClass );
-		},
-
-
-		/**
-		 * Convenience method to add one or more CSS classes to the HtmlTag. Will not add duplicate CSS classes.
-		 * 
-		 * @param {String} cssClass One or more space-separated CSS classes to add.
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		addClass : function( cssClass ) {
-			var classAttr = this.getClass(),
-			    whitespaceRegex = this.whitespaceRegex,
-			    indexOf = Autolinker.Util.indexOf,  // to support IE8 and below
-			    classes = ( !classAttr ) ? [] : classAttr.split( whitespaceRegex ),
-			    newClasses = cssClass.split( whitespaceRegex ),
-			    newClass;
-
-			while( newClass = newClasses.shift() ) {
-				if( indexOf( classes, newClass ) === -1 ) {
-					classes.push( newClass );
-				}
-			}
-
-			this.getAttrs()[ 'class' ] = classes.join( " " );
-			return this;
-		},
-
-
-		/**
-		 * Convenience method to remove one or more CSS classes from the HtmlTag.
-		 * 
-		 * @param {String} cssClass One or more space-separated CSS classes to remove.
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		removeClass : function( cssClass ) {
-			var classAttr = this.getClass(),
-			    whitespaceRegex = this.whitespaceRegex,
-			    indexOf = Autolinker.Util.indexOf,  // to support IE8 and below
-			    classes = ( !classAttr ) ? [] : classAttr.split( whitespaceRegex ),
-			    removeClasses = cssClass.split( whitespaceRegex ),
-			    removeClass;
-
-			while( classes.length && ( removeClass = removeClasses.shift() ) ) {
-				var idx = indexOf( classes, removeClass );
-				if( idx !== -1 ) {
-					classes.splice( idx, 1 );
-				}
-			}
-
-			this.getAttrs()[ 'class' ] = classes.join( " " );
-			return this;
-		},
-
-
-		/**
-		 * Convenience method to retrieve the CSS class(es) for the HtmlTag, which will each be separated by spaces when
-		 * there are multiple.
-		 * 
-		 * @return {String}
-		 */
-		getClass : function() {
-			return this.getAttrs()[ 'class' ] || "";
-		},
-
-
-		/**
-		 * Convenience method to check if the tag has a CSS class or not.
-		 * 
-		 * @param {String} cssClass The CSS class to check for.
-		 * @return {Boolean} `true` if the HtmlTag has the CSS class, `false` otherwise.
-		 */
-		hasClass : function( cssClass ) {
-			return ( ' ' + this.getClass() + ' ' ).indexOf( ' ' + cssClass + ' ' ) !== -1;
-		},
-
-
-		/**
-		 * Sets the inner HTML for the tag.
-		 * 
-		 * @param {String} html The inner HTML to set.
-		 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
-		 */
-		setInnerHtml : function( html ) {
-			this.innerHtml = html;
-
-			return this;
-		},
-
-
-		/**
-		 * Retrieves the inner HTML for the tag.
-		 * 
-		 * @return {String}
-		 */
-		getInnerHtml : function() {
-			return this.innerHtml || "";
-		},
-
-
-		/**
-		 * Override of superclass method used to generate the HTML string for the tag.
-		 * 
-		 * @return {String}
-		 */
-		toString : function() {
-			var tagName = this.getTagName(),
-			    attrsStr = this.buildAttrsStr();
-
-			attrsStr = ( attrsStr ) ? ' ' + attrsStr : '';  // prepend a space if there are actually attributes
-
-			return [ '<', tagName, attrsStr, '>', this.getInnerHtml(), '</', tagName, '>' ].join( "" );
-		},
-
-
-		/**
-		 * Support method for {@link #toString}, returns the string space-separated key="value" pairs, used to populate 
-		 * the stringified HtmlTag.
-		 * 
-		 * @protected
-		 * @return {String} Example return: `attr1="value1" attr2="value2"`
-		 */
-		buildAttrsStr : function() {
-			if( !this.attrs ) return "";  // no `attrs` Object (map) has been set, return empty string
-
-			var attrs = this.getAttrs(),
-			    attrsArr = [];
-
-			for( var prop in attrs ) {
-				if( attrs.hasOwnProperty( prop ) ) {
-					attrsArr.push( prop + '="' + attrs[ prop ] + '"' );
-				}
-			}
-			return attrsArr.join( " " );
-		}
-
-	} );
-	/*global Autolinker */
-	/*jshint scripturl:true */
-	/**
 	 * @private
-	 * @class Autolinker.MatchValidator
-	 * @extends Object
-	 * 
-	 * Used by Autolinker to filter out false positives from the {@link Autolinker#matcherRegex}.
-	 * 
-	 * Due to the limitations of regular expressions (including the missing feature of look-behinds in JS regular expressions),
-	 * we cannot always determine the validity of a given match. This class applies a bit of additional logic to filter out any
-	 * false positives that have been matched by the {@link Autolinker#matcherRegex}.
+	 * @param {Autolinker.match.Match} match The Match object that represents the match.
+	 * @return {String} The string that the `match` should be replaced with. This is usually the anchor tag string, but
+	 *   may be the `matchStr` itself if the match is not to be replaced.
 	 */
-	Autolinker.MatchValidator = Autolinker.Util.extend( Object, {
-
-		/**
-		 * @private
-		 * @property {RegExp} invalidProtocolRelMatchRegex
-		 * 
-		 * The regular expression used to check a potential protocol-relative URL match, coming from the 
-		 * {@link Autolinker#matcherRegex}. A protocol-relative URL is, for example, "//yahoo.com"
-		 * 
-		 * This regular expression checks to see if there is a word character before the '//' match in order to determine if 
-		 * we should actually autolink a protocol-relative URL. This is needed because there is no negative look-behind in 
-		 * JavaScript regular expressions. 
-		 * 
-		 * For instance, we want to autolink something like "Go to: //google.com", but we don't want to autolink something 
-		 * like "abc//google.com"
-		 */
-		invalidProtocolRelMatchRegex : /^[\w]\/\//,
-
-		/**
-		 * Regex to test for a full protocol, with the two trailing slashes. Ex: 'http://'
-		 * 
-		 * @private
-		 * @property {RegExp} hasFullProtocolRegex
-		 */
-		hasFullProtocolRegex : /^[A-Za-z][-.+A-Za-z0-9]+:\/\//,
-
-		/**
-		 * Regex to find the URI scheme, such as 'mailto:'.
-		 * 
-		 * This is used to filter out 'javascript:' and 'vbscript:' schemes.
-		 * 
-		 * @private
-		 * @property {RegExp} uriSchemeRegex
-		 */
-		uriSchemeRegex : /^[A-Za-z][-.+A-Za-z0-9]+:/,
-
-		/**
-		 * Regex to determine if at least one word char exists after the protocol (i.e. after the ':')
-		 * 
-		 * @private
-		 * @property {RegExp} hasWordCharAfterProtocolRegex
-		 */
-		hasWordCharAfterProtocolRegex : /:[^\s]*?[A-Za-z]/,
-
-
-		/**
-		 * Determines if a given match found by {@link Autolinker#processTextNode} is valid. Will return `false` for:
-		 * 
-		 * 1) URL matches which do not have at least have one period ('.') in the domain name (effectively skipping over 
-		 *    matches like "abc:def"). However, URL matches with a protocol will be allowed (ex: 'http://localhost')
-		 * 2) URL matches which do not have at least one word character in the domain name (effectively skipping over
-		 *    matches like "git:1.0").
-		 * 3) A protocol-relative url match (a URL beginning with '//') whose previous character is a word character 
-		 *    (effectively skipping over strings like "abc//google.com")
-		 * 
-		 * Otherwise, returns `true`.
-		 * 
-		 * @param {String} urlMatch The matched URL, if there was one. Will be an empty string if the match is not a URL match.
-		 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to match
-		 *   something like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
-		 * @param {String} protocolRelativeMatch The protocol-relative string for a URL match (i.e. '//'), possibly with a preceding
-		 *   character (ex, a space, such as: ' //', or a letter, such as: 'a//'). The match is invalid if there is a word character
-		 *   preceding the '//'.
-		 * @return {Boolean} `true` if the match given is valid and should be processed, or `false` if the match is invalid and/or 
-		 *   should just not be processed.
-		 */
-		isValidMatch : function( urlMatch, protocolUrlMatch, protocolRelativeMatch ) {
-			if(
-				( protocolUrlMatch && !this.isValidUriScheme( protocolUrlMatch ) ) ||
-				this.urlMatchDoesNotHaveProtocolOrDot( urlMatch, protocolUrlMatch ) ||       // At least one period ('.') must exist in the URL match for us to consider it an actual URL, *unless* it was a full protocol match (like 'http://localhost')
-				this.urlMatchDoesNotHaveAtLeastOneWordChar( urlMatch, protocolUrlMatch ) ||  // At least one letter character must exist in the domain name after a protocol match. Ex: skip over something like "git:1.0"
-				this.isInvalidProtocolRelativeMatch( protocolRelativeMatch )                 // A protocol-relative match which has a word character in front of it (so we can skip something like "abc//google.com")
-			) {
-				return false;
-			}
-
-			return true;
-		},
-
-
-		/**
-		 * Determines if the URI scheme is a valid scheme to be autolinked. Returns `false` if the scheme is 
-		 * 'javascript:' or 'vbscript:'
-		 * 
-		 * @private
-		 * @param {String} uriSchemeMatch The match URL string for a full URI scheme match. Ex: 'http://yahoo.com' 
-		 *   or 'mailto:a@a.com'.
-		 * @return {Boolean} `true` if the scheme is a valid one, `false` otherwise.
-		 */
-		isValidUriScheme : function( uriSchemeMatch ) {
-			var uriScheme = uriSchemeMatch.match( this.uriSchemeRegex )[ 0 ];
-
-			return ( uriScheme !== 'javascript:' && uriScheme !== 'vbscript:' );
-		},
-
-
-		/**
-		 * Determines if a URL match does not have either:
-		 * 
-		 * a) a full protocol (i.e. 'http://'), or
-		 * b) at least one dot ('.') in the domain name (for a non-full-protocol match).
-		 * 
-		 * Either situation is considered an invalid URL (ex: 'git:d' does not have either the '://' part, or at least one dot
-		 * in the domain name. If the match was 'git:abc.com', we would consider this valid.)
-		 * 
-		 * @private
-		 * @param {String} urlMatch The matched URL, if there was one. Will be an empty string if the match is not a URL match.
-		 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to match
-		 *   something like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
-		 * @return {Boolean} `true` if the URL match does not have a full protocol, or at least one dot ('.') in a non-full-protocol
-		 *   match.
-		 */
-		urlMatchDoesNotHaveProtocolOrDot : function( urlMatch, protocolUrlMatch ) {
-			return ( !!urlMatch && ( !protocolUrlMatch || !this.hasFullProtocolRegex.test( protocolUrlMatch ) ) && urlMatch.indexOf( '.' ) === -1 );
-		},
-
-
-		/**
-		 * Determines if a URL match does not have at least one word character after the protocol (i.e. in the domain name).
-		 * 
-		 * At least one letter character must exist in the domain name after a protocol match. Ex: skip over something 
-		 * like "git:1.0"
-		 * 
-		 * @private
-		 * @param {String} urlMatch The matched URL, if there was one. Will be an empty string if the match is not a URL match.
-		 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to
-		 *   know whether or not we have a protocol in the URL string, in order to check for a word character after the protocol
-		 *   separator (':').
-		 * @return {Boolean} `true` if the URL match does not have at least one word character in it after the protocol, `false`
-		 *   otherwise.
-		 */
-		urlMatchDoesNotHaveAtLeastOneWordChar : function( urlMatch, protocolUrlMatch ) {
-			if( urlMatch && protocolUrlMatch ) {
-				return !this.hasWordCharAfterProtocolRegex.test( urlMatch );
-			} else {
-				return false;
-			}
-		},
-
-
-		/**
-		 * Determines if a protocol-relative match is an invalid one. This method returns `true` if there is a `protocolRelativeMatch`,
-		 * and that match contains a word character before the '//' (i.e. it must contain whitespace or nothing before the '//' in
-		 * order to be considered valid).
-		 * 
-		 * @private
-		 * @param {String} protocolRelativeMatch The protocol-relative string for a URL match (i.e. '//'), possibly with a preceding
-		 *   character (ex, a space, such as: ' //', or a letter, such as: 'a//'). The match is invalid if there is a word character
-		 *   preceding the '//'.
-		 * @return {Boolean} `true` if it is an invalid protocol-relative match, `false` otherwise.
-		 */
-		isInvalidProtocolRelativeMatch : function( protocolRelativeMatch ) {
-			return ( !!protocolRelativeMatch && this.invalidProtocolRelMatchRegex.test( protocolRelativeMatch ) );
+	createMatchReturnVal : function( match ) {
+		// Handle a custom `replaceFn` being provided
+		var replaceFnResult;
+		if( this.replaceFn ) {
+			replaceFnResult = this.replaceFn.call( this, this, match );  // Autolinker instance is the context, and the first arg
 		}
-
-	} );
-	/*global Autolinker */
-	/*jshint sub:true */
+		
+		if( typeof replaceFnResult === 'string' ) {
+			return replaceFnResult;  // `replaceFn` returned a string, use that
+			
+		} else if( replaceFnResult === false ) {
+			return match.getMatchedText();  // no replacement for the match
+			
+		} else if( replaceFnResult instanceof Autolinker.HtmlTag ) {
+			return replaceFnResult.toString();
+		
+		} else {  // replaceFnResult === true, or no/unknown return value from function
+			// Perform Autolinker's default anchor tag generation
+			var tagBuilder = this.getTagBuilder(),
+			    anchorTag = tagBuilder.build( match );  // returns an Autolinker.HtmlTag instance
+			
+			return anchorTag.toString();
+		}
+	},
+	
+	
 	/**
+	 * Lazily instantiates and returns the {@link #htmlParser} instance for this Autolinker instance.
+	 * 
 	 * @protected
-	 * @class Autolinker.AnchorTagBuilder
-	 * @extends Object
+	 * @return {Autolinker.htmlParser.HtmlParser}
+	 */
+	getHtmlParser : function() {
+		var htmlParser = this.htmlParser;
+		
+		if( !htmlParser ) {
+			htmlParser = this.htmlParser = new Autolinker.htmlParser.HtmlParser();
+		}
+		
+		return htmlParser;
+	},
+	
+	
+	/**
+	 * Lazily instantiates and returns the {@link #matchParser} instance for this Autolinker instance.
 	 * 
-	 * Builds anchor (&lt;a&gt;) tags for the Autolinker utility when a match is found.
+	 * @protected
+	 * @return {Autolinker.matchParser.MatchParser}
+	 */
+	getMatchParser : function() {
+		var matchParser = this.matchParser;
+		
+		if( !matchParser ) {
+			matchParser = this.matchParser = new Autolinker.matchParser.MatchParser( {
+				urls : this.urls,
+				email : this.email,
+				twitter : this.twitter,
+				stripPrefix : this.stripPrefix
+			} );
+		}
+		
+		return matchParser;
+	},
+	
+	
+	/**
+	 * Returns the {@link #tagBuilder} instance for this Autolinker instance, lazily instantiating it
+	 * if it does not yet exist.
 	 * 
-	 * Normally this class is instantiated, configured, and used internally by an {@link Autolinker} instance, but may 
-	 * actually be retrieved in a {@link Autolinker#replaceFn replaceFn} to create {@link Autolinker.HtmlTag HtmlTag} instances
-	 * which may be modified before returning from the {@link Autolinker#replaceFn replaceFn}. For example:
+	 * This method may be used in a {@link #replaceFn} to generate the {@link Autolinker.HtmlTag HtmlTag} instance that 
+	 * Autolinker would normally generate, and then allow for modifications before returning it. For example:
 	 * 
 	 *     var html = Autolinker.link( "Test google.com", {
 	 *         replaceFn : function( autolinker, match ) {
@@ -27090,502 +26335,1930 @@ module.exports = function text(state, silent) {
 	 *     
 	 *     // generated html:
 	 *     //   Test <a href="http://google.com" target="_blank" rel="nofollow">google.com</a>
-	 */
-	Autolinker.AnchorTagBuilder = Autolinker.Util.extend( Object, {
-
-		/**
-		 * @cfg {Boolean} newWindow
-		 * @inheritdoc Autolinker#newWindow
-		 */
-
-		/**
-		 * @cfg {Number} truncate
-		 * @inheritdoc Autolinker#truncate
-		 */
-
-		/**
-		 * @cfg {String} className
-		 * @inheritdoc Autolinker#className
-		 */
-
-
-		/**
-		 * @constructor
-		 * @param {Object} [cfg] The configuration options for the AnchorTagBuilder instance, specified in an Object (map).
-		 */
-		constructor : function( cfg ) {
-			Autolinker.Util.assign( this, cfg );
-		},
-
-
-		/**
-		 * Generates the actual anchor (&lt;a&gt;) tag to use in place of the matched URL/email/Twitter text,
-		 * via its `match` object.
-		 * 
-		 * @param {Autolinker.match.Match} match The Match instance to generate an anchor tag from.
-		 * @return {Autolinker.HtmlTag} The HtmlTag instance for the anchor tag.
-		 */
-		build : function( match ) {
-			var tag = new Autolinker.HtmlTag( {
-				tagName   : 'a',
-				attrs     : this.createAttrs( match.getType(), match.getAnchorHref() ),
-				innerHtml : this.processAnchorText( match.getAnchorText() )
-			} );
-
-			return tag;
-		},
-
-
-		/**
-		 * Creates the Object (map) of the HTML attributes for the anchor (&lt;a&gt;) tag being generated.
-		 * 
-		 * @protected
-		 * @param {"url"/"email"/"twitter"} matchType The type of match that an anchor tag is being generated for.
-		 * @param {String} href The href for the anchor tag.
-		 * @return {Object} A key/value Object (map) of the anchor tag's attributes. 
-		 */
-		createAttrs : function( matchType, anchorHref ) {
-			var attrs = {
-				'href' : anchorHref  // we'll always have the `href` attribute
-			};
-
-			var cssClass = this.createCssClass( matchType );
-			if( cssClass ) {
-				attrs[ 'class' ] = cssClass;
-			}
-			if( this.newWindow ) {
-				attrs[ 'target' ] = "_blank";
-			}
-
-			return attrs;
-		},
-
-
-		/**
-		 * Creates the CSS class that will be used for a given anchor tag, based on the `matchType` and the {@link #className}
-		 * config.
-		 * 
-		 * @private
-		 * @param {"url"/"email"/"twitter"} matchType The type of match that an anchor tag is being generated for.
-		 * @return {String} The CSS class string for the link. Example return: "myLink myLink-url". If no {@link #className}
-		 *   was configured, returns an empty string.
-		 */
-		createCssClass : function( matchType ) {
-			var className = this.className;
-
-			if( !className ) 
-				return "";
-			else
-				return className + " " + className + "-" + matchType;  // ex: "myLink myLink-url", "myLink myLink-email", or "myLink myLink-twitter"
-		},
-
-
-		/**
-		 * Processes the `anchorText` by truncating the text according to the {@link #truncate} config.
-		 * 
-		 * @private
-		 * @param {String} anchorText The anchor tag's text (i.e. what will be displayed).
-		 * @return {String} The processed `anchorText`.
-		 */
-		processAnchorText : function( anchorText ) {
-			anchorText = this.doTruncate( anchorText );
-
-			return anchorText;
-		},
-
-
-		/**
-		 * Performs the truncation of the `anchorText`, if the `anchorText` is longer than the {@link #truncate} option.
-		 * Truncates the text to 2 characters fewer than the {@link #truncate} option, and adds ".." to the end.
-		 * 
-		 * @private
-		 * @param {String} text The anchor tag's text (i.e. what will be displayed).
-		 * @return {String} The truncated anchor text.
-		 */
-		doTruncate : function( anchorText ) {
-			return Autolinker.Util.ellipsis( anchorText, this.truncate || Number.POSITIVE_INFINITY );
-		}
-
-	} );
-	/*global Autolinker */
-	/**
-	 * @abstract
-	 * @class Autolinker.match.Match
 	 * 
-	 * Represents a match found in an input string which should be Autolinked. A Match object is what is provided in a 
-	 * {@link Autolinker#replaceFn replaceFn}, and may be used to query for details about the match.
+	 * @return {Autolinker.AnchorTagBuilder}
+	 */
+	getTagBuilder : function() {
+		var tagBuilder = this.tagBuilder;
+		
+		if( !tagBuilder ) {
+			tagBuilder = this.tagBuilder = new Autolinker.AnchorTagBuilder( {
+				newWindow   : this.newWindow,
+				truncate    : this.truncate,
+				className   : this.className
+			} );
+		}
+		
+		return tagBuilder;
+	}
+
+};
+
+
+/**
+ * Automatically links URLs, email addresses, and Twitter handles found in the given chunk of HTML. 
+ * Does not link URLs found within HTML tags.
+ * 
+ * For instance, if given the text: `You should go to http://www.yahoo.com`, then the result
+ * will be `You should go to &lt;a href="http://www.yahoo.com"&gt;http://www.yahoo.com&lt;/a&gt;`
+ * 
+ * Example:
+ * 
+ *     var linkedText = Autolinker.link( "Go to google.com", { newWindow: false } );
+ *     // Produces: "Go to <a href="http://google.com">google.com</a>"
+ * 
+ * @static
+ * @param {String} textOrHtml The HTML or text to find URLs, email addresses, and Twitter handles within (depending on if
+ *   the {@link #urls}, {@link #email}, and {@link #twitter} options are enabled).
+ * @param {Object} [options] Any of the configuration options for the Autolinker class, specified in an Object (map).
+ *   See the class description for an example call.
+ * @return {String} The HTML text, with URLs automatically linked
+ */
+Autolinker.link = function( textOrHtml, options ) {
+	var autolinker = new Autolinker( options );
+	return autolinker.link( textOrHtml );
+};
+
+
+// Autolinker Namespaces
+Autolinker.match = {};
+Autolinker.htmlParser = {};
+Autolinker.matchParser = {};
+/*global Autolinker */
+/*jshint eqnull:true, boss:true */
+/**
+ * @class Autolinker.Util
+ * @singleton
+ * 
+ * A few utility methods for Autolinker.
+ */
+Autolinker.Util = {
+	
+	/**
+	 * @property {Function} abstractMethod
+	 * 
+	 * A function object which represents an abstract method.
+	 */
+	abstractMethod : function() { throw "abstract"; },
+	
+	
+	/**
+	 * Assigns (shallow copies) the properties of `src` onto `dest`.
+	 * 
+	 * @param {Object} dest The destination object.
+	 * @param {Object} src The source object.
+	 * @return {Object} The destination object (`dest`)
+	 */
+	assign : function( dest, src ) {
+		for( var prop in src ) {
+			if( src.hasOwnProperty( prop ) ) {
+				dest[ prop ] = src[ prop ];
+			}
+		}
+		
+		return dest;
+	},
+	
+	
+	/**
+	 * Extends `superclass` to create a new subclass, adding the `protoProps` to the new subclass's prototype.
+	 * 
+	 * @param {Function} superclass The constructor function for the superclass.
+	 * @param {Object} protoProps The methods/properties to add to the subclass's prototype. This may contain the
+	 *   special property `constructor`, which will be used as the new subclass's constructor function.
+	 * @return {Function} The new subclass function.
+	 */
+	extend : function( superclass, protoProps ) {
+		var superclassProto = superclass.prototype;
+		
+		var F = function() {};
+		F.prototype = superclassProto;
+		
+		var subclass;
+		if( protoProps.hasOwnProperty( 'constructor' ) ) {
+			subclass = protoProps.constructor;
+		} else {
+			subclass = function() { superclassProto.constructor.apply( this, arguments ); };
+		}
+		
+		var subclassProto = subclass.prototype = new F();  // set up prototype chain
+		subclassProto.constructor = subclass;  // fix constructor property
+		subclassProto.superclass = superclassProto;
+		
+		delete protoProps.constructor;  // don't re-assign constructor property to the prototype, since a new function may have been created (`subclass`), which is now already there
+		Autolinker.Util.assign( subclassProto, protoProps );
+		
+		return subclass;
+	},
+	
+	
+	/**
+	 * Truncates the `str` at `len - ellipsisChars.length`, and adds the `ellipsisChars` to the
+	 * end of the string (by default, two periods: '..'). If the `str` length does not exceed 
+	 * `len`, the string will be returned unchanged.
+	 * 
+	 * @param {String} str The string to truncate and add an ellipsis to.
+	 * @param {Number} truncateLen The length to truncate the string at.
+	 * @param {String} [ellipsisChars=..] The ellipsis character(s) to add to the end of `str`
+	 *   when truncated. Defaults to '..'
+	 */
+	ellipsis : function( str, truncateLen, ellipsisChars ) {
+		if( str.length > truncateLen ) {
+			ellipsisChars = ( ellipsisChars == null ) ? '..' : ellipsisChars;
+			str = str.substring( 0, truncateLen - ellipsisChars.length ) + ellipsisChars;
+		}
+		return str;
+	},
+	
+	
+	/**
+	 * Supports `Array.prototype.indexOf()` functionality for old IE (IE8 and below).
+	 * 
+	 * @param {Array} arr The array to find an element of.
+	 * @param {*} element The element to find in the array, and return the index of.
+	 * @return {Number} The index of the `element`, or -1 if it was not found.
+	 */
+	indexOf : function( arr, element ) {
+		if( Array.prototype.indexOf ) {
+			return arr.indexOf( element );
+			
+		} else {
+			for( var i = 0, len = arr.length; i < len; i++ ) {
+				if( arr[ i ] === element ) return i;
+			}
+			return -1;
+		}
+	},
+	
+	
+	
+	/**
+	 * Performs the functionality of what modern browsers do when `String.prototype.split()` is called
+	 * with a regular expression that contains capturing parenthesis.
 	 * 
 	 * For example:
 	 * 
-	 *     var input = "...";  // string with URLs, Email Addresses, and Twitter Handles
+	 *     // Modern browsers: 
+	 *     "a,b,c".split( /(,)/ );  // --> [ 'a', ',', 'b', ',', 'c' ]
 	 *     
-	 *     var linkedText = Autolinker.link( input, {
-	 *         replaceFn : function( autolinker, match ) {
-	 *             console.log( "href = ", match.getAnchorHref() );
-	 *             console.log( "text = ", match.getAnchorText() );
-	 *         
-	 *             switch( match.getType() ) {
-	 *                 case 'url' : 
-	 *                     console.log( "url: ", match.getUrl() );
-	 *                     
-	 *                 case 'email' :
-	 *                     console.log( "email: ", match.getEmail() );
-	 *                     
-	 *                 case 'twitter' :
-	 *                     console.log( "twitter: ", match.getTwitterHandle() );
-	 *             }
-	 *         }
-	 *     } );
+	 *     // Old IE (including IE8):
+	 *     "a,b,c".split( /(,)/ );  // --> [ 'a', 'b', 'c' ]
 	 *     
-	 * See the {@link Autolinker} class for more details on using the {@link Autolinker#replaceFn replaceFn}.
-	 */
-	Autolinker.match.Match = Autolinker.Util.extend( Object, {
-
-		/**
-		 * @cfg {String} matchedText (required)
-		 * 
-		 * The original text that was matched.
-		 */
-
-
-		/**
-		 * @constructor
-		 * @param {Object} cfg The configuration properties for the Match instance, specified in an Object (map).
-		 */
-		constructor : function( cfg ) {
-			Autolinker.Util.assign( this, cfg );
-		},
-
-
-		/**
-		 * Returns a string name for the type of match that this class represents.
-		 * 
-		 * @abstract
-		 * @return {String}
-		 */
-		getType : Autolinker.Util.abstractMethod,
-
-
-		/**
-		 * Returns the original text that was matched.
-		 * 
-		 * @return {String}
-		 */
-		getMatchedText : function() {
-			return this.matchedText;
-		},
-
-
-		/**
-		 * Returns the anchor href that should be generated for the match.
-		 * 
-		 * @abstract
-		 * @return {String}
-		 */
-		getAnchorHref : Autolinker.Util.abstractMethod,
-
-
-		/**
-		 * Returns the anchor text that should be generated for the match.
-		 * 
-		 * @abstract
-		 * @return {String}
-		 */
-		getAnchorText : Autolinker.Util.abstractMethod
-
-	} );
-	/*global Autolinker */
-	/**
-	 * @class Autolinker.match.Email
-	 * @extends Autolinker.match.Match
+	 * This method emulates the functionality of modern browsers for the old IE case.
 	 * 
-	 * Represents a Email match found in an input string which should be Autolinked.
-	 * 
-	 * See this class's superclass ({@link Autolinker.match.Match}) for more details.
+	 * @param {String} str The string to split.
+	 * @param {RegExp} splitRegex The regular expression to split the input `str` on. The splitting
+	 *   character(s) will be spliced into the array, as in the "modern browsers" example in the 
+	 *   description of this method. 
+	 *   Note #1: the supplied regular expression **must** have the 'g' flag specified.
+	 *   Note #2: for simplicity's sake, the regular expression does not need 
+	 *   to contain capturing parenthesis - it will be assumed that any match has them.
+	 * @return {String[]} The split array of strings, with the splitting character(s) included.
 	 */
-	Autolinker.match.Email = Autolinker.Util.extend( Autolinker.match.Match, {
-
-		/**
-		 * @cfg {String} email (required)
-		 * 
-		 * The email address that was matched.
-		 */
-
-
-		/**
-		 * Returns a string name for the type of match that this class represents.
-		 * 
-		 * @return {String}
-		 */
-		getType : function() {
-			return 'email';
-		},
-
-
-		/**
-		 * Returns the email address that was matched.
-		 * 
-		 * @return {String}
-		 */
-		getEmail : function() {
-			return this.email;
-		},
-
-
-		/**
-		 * Returns the anchor href that should be generated for the match.
-		 * 
-		 * @return {String}
-		 */
-		getAnchorHref : function() {
-			return 'mailto:' + this.email;
-		},
-
-
-		/**
-		 * Returns the anchor text that should be generated for the match.
-		 * 
-		 * @return {String}
-		 */
-		getAnchorText : function() {
-			return this.email;
+	splitAndCapture : function( str, splitRegex ) {
+		if( !splitRegex.global ) throw new Error( "`splitRegex` must have the 'g' flag set" );
+		
+		var result = [],
+		    lastIdx = 0,
+		    match;
+		
+		while( match = splitRegex.exec( str ) ) {
+			result.push( str.substring( lastIdx, match.index ) );
+			result.push( match[ 0 ] );  // push the splitting char(s)
+			
+			lastIdx = match.index + match[ 0 ].length;
 		}
-
-	} );
-	/*global Autolinker */
+		result.push( str.substring( lastIdx ) );
+		
+		return result;
+	}
+	
+};
+/*global Autolinker */
+/*jshint boss:true */
+/**
+ * @class Autolinker.HtmlTag
+ * @extends Object
+ * 
+ * Represents an HTML tag, which can be used to easily build/modify HTML tags programmatically.
+ * 
+ * Autolinker uses this abstraction to create HTML tags, and then write them out as strings. You may also use
+ * this class in your code, especially within a {@link Autolinker#replaceFn replaceFn}.
+ * 
+ * ## Examples
+ * 
+ * Example instantiation:
+ * 
+ *     var tag = new Autolinker.HtmlTag( {
+ *         tagName : 'a',
+ *         attrs   : { 'href': 'http://google.com', 'class': 'external-link' },
+ *         innerHtml : 'Google'
+ *     } );
+ *     
+ *     tag.toString();  // <a href="http://google.com" class="external-link">Google</a>
+ *     
+ *     // Individual accessor methods
+ *     tag.getTagName();                 // 'a'
+ *     tag.getAttr( 'href' );            // 'http://google.com'
+ *     tag.hasClass( 'external-link' );  // true
+ * 
+ * 
+ * Using mutator methods (which may be used in combination with instantiation config properties):
+ * 
+ *     var tag = new Autolinker.HtmlTag();
+ *     tag.setTagName( 'a' );
+ *     tag.setAttr( 'href', 'http://google.com' );
+ *     tag.addClass( 'external-link' );
+ *     tag.setInnerHtml( 'Google' );
+ *     
+ *     tag.getTagName();                 // 'a'
+ *     tag.getAttr( 'href' );            // 'http://google.com'
+ *     tag.hasClass( 'external-link' );  // true
+ *     
+ *     tag.toString();  // <a href="http://google.com" class="external-link">Google</a>
+ *     
+ * 
+ * ## Example use within a {@link Autolinker#replaceFn replaceFn}
+ * 
+ *     var html = Autolinker.link( "Test google.com", {
+ *         replaceFn : function( autolinker, match ) {
+ *             var tag = autolinker.getTagBuilder().build( match );  // returns an {@link Autolinker.HtmlTag} instance, configured with the Match's href and anchor text
+ *             tag.setAttr( 'rel', 'nofollow' );
+ *             
+ *             return tag;
+ *         }
+ *     } );
+ *     
+ *     // generated html:
+ *     //   Test <a href="http://google.com" target="_blank" rel="nofollow">google.com</a>
+ *     
+ *     
+ * ## Example use with a new tag for the replacement
+ * 
+ *     var html = Autolinker.link( "Test google.com", {
+ *         replaceFn : function( autolinker, match ) {
+ *             var tag = new Autolinker.HtmlTag( {
+ *                 tagName : 'button',
+ *                 attrs   : { 'title': 'Load URL: ' + match.getAnchorHref() },
+ *                 innerHtml : 'Load URL: ' + match.getAnchorText()
+ *             } );
+ *             
+ *             return tag;
+ *         }
+ *     } );
+ *     
+ *     // generated html:
+ *     //   Test <button title="Load URL: http://google.com">Load URL: google.com</button>
+ */
+Autolinker.HtmlTag = Autolinker.Util.extend( Object, {
+	
 	/**
-	 * @class Autolinker.match.Twitter
-	 * @extends Autolinker.match.Match
+	 * @cfg {String} tagName
 	 * 
-	 * Represents a Twitter match found in an input string which should be Autolinked.
+	 * The tag name. Ex: 'a', 'button', etc.
 	 * 
-	 * See this class's superclass ({@link Autolinker.match.Match}) for more details.
+	 * Not required at instantiation time, but should be set using {@link #setTagName} before {@link #toString}
+	 * is executed.
 	 */
-	Autolinker.match.Twitter = Autolinker.Util.extend( Autolinker.match.Match, {
-
-		/**
-		 * @cfg {String} twitterHandle (required)
-		 * 
-		 * The Twitter handle that was matched.
-		 */
-
-
-		/**
-		 * Returns the type of match that this class represents.
-		 * 
-		 * @return {String}
-		 */
-		getType : function() {
-			return 'twitter';
-		},
-
-
-		/**
-		 * Returns a string name for the type of match that this class represents.
-		 * 
-		 * @return {String}
-		 */
-		getTwitterHandle : function() {
-			return this.twitterHandle;
-		},
-
-
-		/**
-		 * Returns the anchor href that should be generated for the match.
-		 * 
-		 * @return {String}
-		 */
-		getAnchorHref : function() {
-			return 'https://twitter.com/' + this.twitterHandle;
-		},
-
-
-		/**
-		 * Returns the anchor text that should be generated for the match.
-		 * 
-		 * @return {String}
-		 */
-		getAnchorText : function() {
-			return '@' + this.twitterHandle;
-		}
-
-	} );
-	/*global Autolinker */
+	
 	/**
-	 * @class Autolinker.match.Url
-	 * @extends Autolinker.match.Match
+	 * @cfg {Object.<String, String>} attrs
 	 * 
-	 * Represents a Url match found in an input string which should be Autolinked.
-	 * 
-	 * See this class's superclass ({@link Autolinker.match.Match}) for more details.
+	 * An key/value Object (map) of attributes to create the tag with. The keys are the attribute names, and the
+	 * values are the attribute values.
 	 */
-	Autolinker.match.Url = Autolinker.Util.extend( Autolinker.match.Match, {
-
-		/**
-		 * @cfg {String} url (required)
-		 * 
-		 * The url that was matched.
-		 */
-
-		/**
-		 * @cfg {Boolean} protocolUrlMatch (required)
-		 * 
-		 * `true` if the URL is a match which already has a protocol (i.e. 'http://'), `false` if the match was from a 'www' or
-		 * known TLD match.
-		 */
-
-		/**
-		 * @cfg {Boolean} protocolRelativeMatch (required)
-		 * 
-		 * `true` if the URL is a protocol-relative match. A protocol-relative match is a URL that starts with '//',
-		 * and will be either http:// or https:// based on the protocol that the site is loaded under.
-		 */
-
-		/**
-		 * @cfg {Boolean} stripPrefix (required)
-		 * @inheritdoc Autolinker#stripPrefix
-		 */
-
-
-		/**
-		 * @private
-		 * @property {RegExp} urlPrefixRegex
-		 * 
-		 * A regular expression used to remove the 'http://' or 'https://' and/or the 'www.' from URLs.
-		 */
-		urlPrefixRegex: /^(https?:\/\/)?(www\.)?/i,
-
-		/**
-		 * @private
-		 * @property {RegExp} protocolRelativeRegex
-		 * 
-		 * The regular expression used to remove the protocol-relative '//' from the {@link #url} string, for purposes
-		 * of {@link #getAnchorText}. A protocol-relative URL is, for example, "//yahoo.com"
-		 */
-		protocolRelativeRegex : /^\/\//,
-
-		/**
-		 * @private
-		 * @property {Boolean} protocolPrepended
-		 * 
-		 * Will be set to `true` if the 'http://' protocol has been prepended to the {@link #url} (because the
-		 * {@link #url} did not have a protocol)
-		 */
-		protocolPrepended : false,
-
-
-		/**
-		 * Returns a string name for the type of match that this class represents.
-		 * 
-		 * @return {String}
-		 */
-		getType : function() {
-			return 'url';
-		},
-
-
-		/**
-		 * Returns the url that was matched, assuming the protocol to be 'http://' if the original
-		 * match was missing a protocol.
-		 * 
-		 * @return {String}
-		 */
-		getUrl : function() {
-			var url = this.url;
-
-			// if the url string doesn't begin with a protocol, assume 'http://'
-			if( !this.protocolRelativeMatch && !this.protocolUrlMatch && !this.protocolPrepended ) {
-				url = this.url = 'http://' + url;
-
-				this.protocolPrepended = true;
+	
+	/**
+	 * @cfg {String} innerHtml
+	 * 
+	 * The inner HTML for the tag. 
+	 * 
+	 * Note the camel case name on `innerHtml`. Acronyms are camelCased in this utility (such as not to run into the acronym 
+	 * naming inconsistency that the DOM developers created with `XMLHttpRequest`). You may alternatively use {@link #innerHTML}
+	 * if you prefer, but this one is recommended.
+	 */
+	
+	/**
+	 * @cfg {String} innerHTML
+	 * 
+	 * Alias of {@link #innerHtml}, accepted for consistency with the browser DOM api, but prefer the camelCased version
+	 * for acronym names.
+	 */
+	
+	
+	/**
+	 * @protected
+	 * @property {RegExp} whitespaceRegex
+	 * 
+	 * Regular expression used to match whitespace in a string of CSS classes.
+	 */
+	whitespaceRegex : /\s+/,
+	
+	
+	/**
+	 * @constructor
+	 * @param {Object} [cfg] The configuration properties for this class, in an Object (map)
+	 */
+	constructor : function( cfg ) {
+		Autolinker.Util.assign( this, cfg );
+		
+		this.innerHtml = this.innerHtml || this.innerHTML;  // accept either the camelCased form or the fully capitalized acronym
+	},
+	
+	
+	/**
+	 * Sets the tag name that will be used to generate the tag with.
+	 * 
+	 * @param {String} tagName
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	setTagName : function( tagName ) {
+		this.tagName = tagName;
+		return this;
+	},
+	
+	
+	/**
+	 * Retrieves the tag name.
+	 * 
+	 * @return {String}
+	 */
+	getTagName : function() {
+		return this.tagName || "";
+	},
+	
+	
+	/**
+	 * Sets an attribute on the HtmlTag.
+	 * 
+	 * @param {String} attrName The attribute name to set.
+	 * @param {String} attrValue The attribute value to set.
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	setAttr : function( attrName, attrValue ) {
+		var tagAttrs = this.getAttrs();
+		tagAttrs[ attrName ] = attrValue;
+		
+		return this;
+	},
+	
+	
+	/**
+	 * Retrieves an attribute from the HtmlTag. If the attribute does not exist, returns `undefined`.
+	 * 
+	 * @param {String} name The attribute name to retrieve.
+	 * @return {String} The attribute's value, or `undefined` if it does not exist on the HtmlTag.
+	 */
+	getAttr : function( attrName ) {
+		return this.getAttrs()[ attrName ];
+	},
+	
+	
+	/**
+	 * Sets one or more attributes on the HtmlTag.
+	 * 
+	 * @param {Object.<String, String>} attrs A key/value Object (map) of the attributes to set.
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	setAttrs : function( attrs ) {
+		var tagAttrs = this.getAttrs();
+		Autolinker.Util.assign( tagAttrs, attrs );
+		
+		return this;
+	},
+	
+	
+	/**
+	 * Retrieves the attributes Object (map) for the HtmlTag.
+	 * 
+	 * @return {Object.<String, String>} A key/value object of the attributes for the HtmlTag.
+	 */
+	getAttrs : function() {
+		return this.attrs || ( this.attrs = {} );
+	},
+	
+	
+	/**
+	 * Sets the provided `cssClass`, overwriting any current CSS classes on the HtmlTag.
+	 * 
+	 * @param {String} cssClass One or more space-separated CSS classes to set (overwrite).
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	setClass : function( cssClass ) {
+		return this.setAttr( 'class', cssClass );
+	},
+	
+	
+	/**
+	 * Convenience method to add one or more CSS classes to the HtmlTag. Will not add duplicate CSS classes.
+	 * 
+	 * @param {String} cssClass One or more space-separated CSS classes to add.
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	addClass : function( cssClass ) {
+		var classAttr = this.getClass(),
+		    whitespaceRegex = this.whitespaceRegex,
+		    indexOf = Autolinker.Util.indexOf,  // to support IE8 and below
+		    classes = ( !classAttr ) ? [] : classAttr.split( whitespaceRegex ),
+		    newClasses = cssClass.split( whitespaceRegex ),
+		    newClass;
+		
+		while( newClass = newClasses.shift() ) {
+			if( indexOf( classes, newClass ) === -1 ) {
+				classes.push( newClass );
 			}
-
-			return url;
-		},
-
-
-		/**
-		 * Returns the anchor href that should be generated for the match.
-		 * 
-		 * @return {String}
-		 */
-		getAnchorHref : function() {
-			var url = this.getUrl();
-
-			return url.replace( /&amp;/g, '&' );  // any &amp;'s in the URL should be converted back to '&' if they were displayed as &amp; in the source html 
-		},
-
-
-		/**
-		 * Returns the anchor text that should be generated for the match.
-		 * 
-		 * @return {String}
-		 */
-		getAnchorText : function() {
-			var anchorText = this.getUrl();
-
-			if( this.protocolRelativeMatch ) {
-				// Strip off any protocol-relative '//' from the anchor text
-				anchorText = this.stripProtocolRelativePrefix( anchorText );
-			}
-			if( this.stripPrefix ) {
-				anchorText = this.stripUrlPrefix( anchorText );
-			}
-			anchorText = this.removeTrailingSlash( anchorText );  // remove trailing slash, if there is one
-
-			return anchorText;
-		},
-
-
-		// ---------------------------------------
-
-		// Utility Functionality
-
-		/**
-		 * Strips the URL prefix (such as "http://" or "https://") from the given text.
-		 * 
-		 * @private
-		 * @param {String} text The text of the anchor that is being generated, for which to strip off the
-		 *   url prefix (such as stripping off "http://")
-		 * @return {String} The `anchorText`, with the prefix stripped.
-		 */
-		stripUrlPrefix : function( text ) {
-			return text.replace( this.urlPrefixRegex, '' );
-		},
-
-
-		/**
-		 * Strips any protocol-relative '//' from the anchor text.
-		 * 
-		 * @private
-		 * @param {String} text The text of the anchor that is being generated, for which to strip off the
-		 *   protocol-relative prefix (such as stripping off "//")
-		 * @return {String} The `anchorText`, with the protocol-relative prefix stripped.
-		 */
-		stripProtocolRelativePrefix : function( text ) {
-			return text.replace( this.protocolRelativeRegex, '' );
-		},
-
-
-		/**
-		 * Removes any trailing slash from the given `anchorText`, in preparation for the text to be displayed.
-		 * 
-		 * @private
-		 * @param {String} anchorText The text of the anchor that is being generated, for which to remove any trailing
-		 *   slash ('/') that may exist.
-		 * @return {String} The `anchorText`, with the trailing slash removed.
-		 */
-		removeTrailingSlash : function( anchorText ) {
-			if( anchorText.charAt( anchorText.length - 1 ) === '/' ) {
-				anchorText = anchorText.slice( 0, -1 );
-			}
-			return anchorText;
 		}
+		
+		this.getAttrs()[ 'class' ] = classes.join( " " );
+		return this;
+	},
+	
+	
+	/**
+	 * Convenience method to remove one or more CSS classes from the HtmlTag.
+	 * 
+	 * @param {String} cssClass One or more space-separated CSS classes to remove.
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	removeClass : function( cssClass ) {
+		var classAttr = this.getClass(),
+		    whitespaceRegex = this.whitespaceRegex,
+		    indexOf = Autolinker.Util.indexOf,  // to support IE8 and below
+		    classes = ( !classAttr ) ? [] : classAttr.split( whitespaceRegex ),
+		    removeClasses = cssClass.split( whitespaceRegex ),
+		    removeClass;
+		
+		while( classes.length && ( removeClass = removeClasses.shift() ) ) {
+			var idx = indexOf( classes, removeClass );
+			if( idx !== -1 ) {
+				classes.splice( idx, 1 );
+			}
+		}
+		
+		this.getAttrs()[ 'class' ] = classes.join( " " );
+		return this;
+	},
+	
+	
+	/**
+	 * Convenience method to retrieve the CSS class(es) for the HtmlTag, which will each be separated by spaces when
+	 * there are multiple.
+	 * 
+	 * @return {String}
+	 */
+	getClass : function() {
+		return this.getAttrs()[ 'class' ] || "";
+	},
+	
+	
+	/**
+	 * Convenience method to check if the tag has a CSS class or not.
+	 * 
+	 * @param {String} cssClass The CSS class to check for.
+	 * @return {Boolean} `true` if the HtmlTag has the CSS class, `false` otherwise.
+	 */
+	hasClass : function( cssClass ) {
+		return ( ' ' + this.getClass() + ' ' ).indexOf( ' ' + cssClass + ' ' ) !== -1;
+	},
+	
+	
+	/**
+	 * Sets the inner HTML for the tag.
+	 * 
+	 * @param {String} html The inner HTML to set.
+	 * @return {Autolinker.HtmlTag} This HtmlTag instance, so that method calls may be chained.
+	 */
+	setInnerHtml : function( html ) {
+		this.innerHtml = html;
+		
+		return this;
+	},
+	
+	
+	/**
+	 * Retrieves the inner HTML for the tag.
+	 * 
+	 * @return {String}
+	 */
+	getInnerHtml : function() {
+		return this.innerHtml || "";
+	},
+	
+	
+	/**
+	 * Override of superclass method used to generate the HTML string for the tag.
+	 * 
+	 * @return {String}
+	 */
+	toString : function() {
+		var tagName = this.getTagName(),
+		    attrsStr = this.buildAttrsStr();
+		
+		attrsStr = ( attrsStr ) ? ' ' + attrsStr : '';  // prepend a space if there are actually attributes
+		
+		return [ '<', tagName, attrsStr, '>', this.getInnerHtml(), '</', tagName, '>' ].join( "" );
+	},
+	
+	
+	/**
+	 * Support method for {@link #toString}, returns the string space-separated key="value" pairs, used to populate 
+	 * the stringified HtmlTag.
+	 * 
+	 * @protected
+	 * @return {String} Example return: `attr1="value1" attr2="value2"`
+	 */
+	buildAttrsStr : function() {
+		if( !this.attrs ) return "";  // no `attrs` Object (map) has been set, return empty string
+		
+		var attrs = this.getAttrs(),
+		    attrsArr = [];
+		
+		for( var prop in attrs ) {
+			if( attrs.hasOwnProperty( prop ) ) {
+				attrsArr.push( prop + '="' + attrs[ prop ] + '"' );
+			}
+		}
+		return attrsArr.join( " " );
+	}
+	
+} );
+/*global Autolinker */
+/*jshint sub:true */
+/**
+ * @protected
+ * @class Autolinker.AnchorTagBuilder
+ * @extends Object
+ * 
+ * Builds anchor (&lt;a&gt;) tags for the Autolinker utility when a match is found.
+ * 
+ * Normally this class is instantiated, configured, and used internally by an {@link Autolinker} instance, but may 
+ * actually be retrieved in a {@link Autolinker#replaceFn replaceFn} to create {@link Autolinker.HtmlTag HtmlTag} instances
+ * which may be modified before returning from the {@link Autolinker#replaceFn replaceFn}. For example:
+ * 
+ *     var html = Autolinker.link( "Test google.com", {
+ *         replaceFn : function( autolinker, match ) {
+ *             var tag = autolinker.getTagBuilder().build( match );  // returns an {@link Autolinker.HtmlTag} instance
+ *             tag.setAttr( 'rel', 'nofollow' );
+ *             
+ *             return tag;
+ *         }
+ *     } );
+ *     
+ *     // generated html:
+ *     //   Test <a href="http://google.com" target="_blank" rel="nofollow">google.com</a>
+ */
+Autolinker.AnchorTagBuilder = Autolinker.Util.extend( Object, {
+	
+	/**
+	 * @cfg {Boolean} newWindow
+	 * @inheritdoc Autolinker#newWindow
+	 */
+	
+	/**
+	 * @cfg {Number} truncate
+	 * @inheritdoc Autolinker#truncate
+	 */
+	
+	/**
+	 * @cfg {String} className
+	 * @inheritdoc Autolinker#className
+	 */
+	
+	
+	/**
+	 * @constructor
+	 * @param {Object} [cfg] The configuration options for the AnchorTagBuilder instance, specified in an Object (map).
+	 */
+	constructor : function( cfg ) {
+		Autolinker.Util.assign( this, cfg );
+	},
+	
+	
+	/**
+	 * Generates the actual anchor (&lt;a&gt;) tag to use in place of the matched URL/email/Twitter text,
+	 * via its `match` object.
+	 * 
+	 * @param {Autolinker.match.Match} match The Match instance to generate an anchor tag from.
+	 * @return {Autolinker.HtmlTag} The HtmlTag instance for the anchor tag.
+	 */
+	build : function( match ) {
+		var tag = new Autolinker.HtmlTag( {
+			tagName   : 'a',
+			attrs     : this.createAttrs( match.getType(), match.getAnchorHref() ),
+			innerHtml : this.processAnchorText( match.getAnchorText() )
+		} );
+		
+		return tag;
+	},
+	
+	
+	/**
+	 * Creates the Object (map) of the HTML attributes for the anchor (&lt;a&gt;) tag being generated.
+	 * 
+	 * @protected
+	 * @param {"url"/"email"/"twitter"} matchType The type of match that an anchor tag is being generated for.
+	 * @param {String} href The href for the anchor tag.
+	 * @return {Object} A key/value Object (map) of the anchor tag's attributes. 
+	 */
+	createAttrs : function( matchType, anchorHref ) {
+		var attrs = {
+			'href' : anchorHref  // we'll always have the `href` attribute
+		};
+		
+		var cssClass = this.createCssClass( matchType );
+		if( cssClass ) {
+			attrs[ 'class' ] = cssClass;
+		}
+		if( this.newWindow ) {
+			attrs[ 'target' ] = "_blank";
+		}
+		
+		return attrs;
+	},
+	
+	
+	/**
+	 * Creates the CSS class that will be used for a given anchor tag, based on the `matchType` and the {@link #className}
+	 * config.
+	 * 
+	 * @private
+	 * @param {"url"/"email"/"twitter"} matchType The type of match that an anchor tag is being generated for.
+	 * @return {String} The CSS class string for the link. Example return: "myLink myLink-url". If no {@link #className}
+	 *   was configured, returns an empty string.
+	 */
+	createCssClass : function( matchType ) {
+		var className = this.className;
+		
+		if( !className ) 
+			return "";
+		else
+			return className + " " + className + "-" + matchType;  // ex: "myLink myLink-url", "myLink myLink-email", or "myLink myLink-twitter"
+	},
+	
+	
+	/**
+	 * Processes the `anchorText` by truncating the text according to the {@link #truncate} config.
+	 * 
+	 * @private
+	 * @param {String} anchorText The anchor tag's text (i.e. what will be displayed).
+	 * @return {String} The processed `anchorText`.
+	 */
+	processAnchorText : function( anchorText ) {
+		anchorText = this.doTruncate( anchorText );
+		
+		return anchorText;
+	},
+	
+	
+	/**
+	 * Performs the truncation of the `anchorText`, if the `anchorText` is longer than the {@link #truncate} option.
+	 * Truncates the text to 2 characters fewer than the {@link #truncate} option, and adds ".." to the end.
+	 * 
+	 * @private
+	 * @param {String} text The anchor tag's text (i.e. what will be displayed).
+	 * @return {String} The truncated anchor text.
+	 */
+	doTruncate : function( anchorText ) {
+		return Autolinker.Util.ellipsis( anchorText, this.truncate || Number.POSITIVE_INFINITY );
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @private
+ * @class Autolinker.htmlParser.HtmlParser
+ * @extends Object
+ * 
+ * An HTML parser implementation which simply walks an HTML string and returns an array of 
+ * {@link Autolinker.htmlParser.HtmlNode HtmlNodes} that represent the basic HTML structure of the input string.
+ * 
+ * Autolinker uses this to only link URLs/emails/Twitter handles within text nodes, effectively ignoring / "walking
+ * around" HTML tags.
+ */
+Autolinker.htmlParser.HtmlParser = Autolinker.Util.extend( Object, {
+	
+	/**
+	 * @private
+	 * @property {RegExp} htmlRegex
+	 * 
+	 * The regular expression used to pull out HTML tags from a string. Handles namespaced HTML tags and
+	 * attribute names, as specified by http://www.w3.org/TR/html-markup/syntax.html.
+	 * 
+	 * Capturing groups:
+	 * 
+	 * 1. The "!DOCTYPE" tag name, if a tag is a &lt;!DOCTYPE&gt; tag.
+	 * 2. If it is an end tag, this group will have the '/'.
+	 * 3. The tag name for all tags (other than the &lt;!DOCTYPE&gt; tag)
+	 */
+	htmlRegex : (function() {
+		var tagNameRegex = /[0-9a-zA-Z][0-9a-zA-Z:]*/,
+		    attrNameRegex = /[^\s\0"'>\/=\x01-\x1F\x7F]+/,   // the unicode range accounts for excluding control chars, and the delete char
+		    attrValueRegex = /(?:"[^"]*?"|'[^']*?'|[^'"=<>`\s]+)/, // double quoted, single quoted, or unquoted attribute values
+		    nameEqualsValueRegex = attrNameRegex.source + '(?:\\s*=\\s*' + attrValueRegex.source + ')?';  // optional '=[value]'
+		
+		return new RegExp( [
+			// for <!DOCTYPE> tag. Ex: <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">) 
+			'(?:',
+				'<(!DOCTYPE)',  // *** Capturing Group 1 - If it's a doctype tag
+					
+					// Zero or more attributes following the tag name
+					'(?:',
+						'\\s+',  // one or more whitespace chars before an attribute
+						
+						// Either:
+						// A. attr="value", or 
+						// B. "value" alone (To cover example doctype tag: <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">) 
+						'(?:', nameEqualsValueRegex, '|', attrValueRegex.source + ')',
+					')*',
+				'>',
+			')',
+			
+			'|',
+			
+			// All other HTML tags (i.e. tags that are not <!DOCTYPE>)
+			'(?:',
+				'<(/)?',  // Beginning of a tag. Either '<' for a start tag, or '</' for an end tag. 
+				          // *** Capturing Group 2: The slash or an empty string. Slash ('/') for end tag, empty string for start or self-closing tag.
+			
+					// *** Capturing Group 3 - The tag name
+					'(' + tagNameRegex.source + ')',
+					
+					// Zero or more attributes following the tag name
+					'(?:',
+						'\\s+',                // one or more whitespace chars before an attribute
+						nameEqualsValueRegex,  // attr="value" (with optional ="value" part)
+					')*',
+					
+					'\\s*/?',  // any trailing spaces and optional '/' before the closing '>'
+				'>',
+			')'
+		].join( "" ), 'gi' );
+	} )(),
+	
+	/**
+	 * @private
+	 * @property {RegExp} htmlCharacterEntitiesRegex
+	 *
+	 * The regular expression that matches common HTML character entities.
+	 * 
+	 * Ignoring &amp; as it could be part of a query string -- handling it separately.
+	 */
+	htmlCharacterEntitiesRegex: /(&nbsp;|&#160;|&lt;|&#60;|&gt;|&#62;|&quot;|&#34;|&#39;)/gi,
+	
+	
+	/**
+	 * Parses an HTML string and returns a simple array of {@link Autolinker.htmlParser.HtmlNode HtmlNodes} to represent
+	 * the HTML structure of the input string. 
+	 * 
+	 * @param {String} html The HTML to parse.
+	 * @return {Autolinker.htmlParser.HtmlNode[]}
+	 */
+	parse : function( html ) {
+		var htmlRegex = this.htmlRegex,
+		    currentResult,
+		    lastIndex = 0,
+		    textAndEntityNodes,
+		    nodes = [];  // will be the result of the method
+		
+		while( ( currentResult = htmlRegex.exec( html ) ) !== null ) {
+			var tagText = currentResult[ 0 ],
+			    tagName = currentResult[ 1 ] || currentResult[ 3 ],  // The <!DOCTYPE> tag (ex: "!DOCTYPE"), or another tag (ex: "a" or "img") 
+			    isClosingTag = !!currentResult[ 2 ],
+			    inBetweenTagsText = html.substring( lastIndex, currentResult.index );
+			
+			// Push TextNodes and EntityNodes for any text found between tags
+			if( inBetweenTagsText ) {
+				textAndEntityNodes = this.parseTextAndEntityNodes( inBetweenTagsText );
+				nodes.push.apply( nodes, textAndEntityNodes );
+			}
+			
+			// Push the ElementNode
+			nodes.push( this.createElementNode( tagText, tagName, isClosingTag ) );
+			
+			lastIndex = currentResult.index + tagText.length;
+		}
+		
+		// Process any remaining text after the last HTML element. Will process all of the text if there were no HTML elements.
+		if( lastIndex < html.length ) {
+			var text = html.substring( lastIndex );
+			
+			// Push TextNodes and EntityNodes for any text found between tags
+			if( text ) {
+				textAndEntityNodes = this.parseTextAndEntityNodes( text );
+				nodes.push.apply( nodes, textAndEntityNodes );
+			}
+		}
+		
+		return nodes;
+	},
+	
+	
+	/**
+	 * Parses text and HTML entity nodes from a given string. The input string should not have any HTML tags (elements)
+	 * within it.
+	 * 
+	 * @private
+	 * @param {String} text The text to parse.
+	 * @return {Autolinker.htmlParser.HtmlNode[]} An array of HtmlNodes to represent the 
+	 *   {@link Autolinker.htmlParser.TextNode TextNodes} and {@link Autolinker.htmlParser.EntityNode EntityNodes} found.
+	 */
+	parseTextAndEntityNodes : function( text ) {
+		var nodes = [],
+		    textAndEntityTokens = Autolinker.Util.splitAndCapture( text, this.htmlCharacterEntitiesRegex );  // split at HTML entities, but include the HTML entities in the results array
+		
+		// Every even numbered token is a TextNode, and every odd numbered token is an EntityNode
+		// For example: an input `text` of "Test &quot;this&quot; today" would turn into the 
+		//   `textAndEntityTokens`: [ 'Test ', '&quot;', 'this', '&quot;', ' today' ]
+		for( var i = 0, len = textAndEntityTokens.length; i < len; i += 2 ) {
+			var textToken = textAndEntityTokens[ i ],
+			    entityToken = textAndEntityTokens[ i + 1 ];
+			
+			if( textToken ) nodes.push( this.createTextNode( textToken ) );
+			if( entityToken ) nodes.push( this.createEntityNode( entityToken ) );
+		}
+		return nodes;
+	},
+	
+	
+	/**
+	 * Factory method to create an {@link Autolinker.htmlParser.ElementNode ElementNode}.
+	 * 
+	 * @private
+	 * @param {String} tagText The full text of the tag (element) that was matched, including its attributes.
+	 * @param {String} tagName The name of the tag. Ex: An &lt;img&gt; tag would be passed to this method as "img".
+	 * @param {Boolean} isClosingTag `true` if it's a closing tag, false otherwise.
+	 * @return {Autolinker.htmlParser.ElementNode}
+	 */
+	createElementNode : function( tagText, tagName, isClosingTag ) {
+		return new Autolinker.htmlParser.ElementNode( {
+			text    : tagText,
+			tagName : tagName.toLowerCase(),
+			closing : isClosingTag
+		} );
+	},
+	
+	
+	/**
+	 * Factory method to create a {@link Autolinker.htmlParser.EntityNode EntityNode}.
+	 * 
+	 * @private
+	 * @param {String} text The text that was matched for the HTML entity (such as '&amp;nbsp;').
+	 * @return {Autolinker.htmlParser.EntityNode}
+	 */
+	createEntityNode : function( text ) {
+		return new Autolinker.htmlParser.EntityNode( { text: text } );
+	},
+	
+	
+	/**
+	 * Factory method to create a {@link Autolinker.htmlParser.TextNode TextNode}.
+	 * 
+	 * @private
+	 * @param {String} text The text that was matched.
+	 * @return {Autolinker.htmlParser.TextNode}
+	 */
+	createTextNode : function( text ) {
+		return new Autolinker.htmlParser.TextNode( { text: text } );
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @abstract
+ * @class Autolinker.htmlParser.HtmlNode
+ * 
+ * Represents an HTML node found in an input string. An HTML node is one of the following:
+ * 
+ * 1. An {@link Autolinker.htmlParser.ElementNode ElementNode}, which represents HTML tags.
+ * 2. A {@link Autolinker.htmlParser.TextNode TextNode}, which represents text outside or within HTML tags.
+ * 3. A {@link Autolinker.htmlParser.EntityNode EntityNode}, which represents one of the known HTML
+ *    entities that Autolinker looks for. This includes common ones such as &amp;quot; and &amp;nbsp;
+ */
+Autolinker.htmlParser.HtmlNode = Autolinker.Util.extend( Object, {
+	
+	/**
+	 * @cfg {String} text (required)
+	 * 
+	 * The original text that was matched for the HtmlNode. 
+	 * 
+	 * - In the case of an {@link Autolinker.htmlParser.ElementNode ElementNode}, this will be the tag's
+	 *   text.
+	 * - In the case of a {@link Autolinker.htmlParser.TextNode TextNode}, this will be the text itself.
+	 * - In the case of a {@link Autolinker.htmlParser.EntityNode EntityNode}, this will be the text of
+	 *   the HTML entity.
+	 */
+	text : "",
+	
+	
+	/**
+	 * @constructor
+	 * @param {Object} cfg The configuration properties for the Match instance, specified in an Object (map).
+	 */
+	constructor : function( cfg ) {
+		Autolinker.Util.assign( this, cfg );
+	},
 
-	} );
+	
+	/**
+	 * Returns a string name for the type of node that this class represents.
+	 * 
+	 * @abstract
+	 * @return {String}
+	 */
+	getType : Autolinker.Util.abstractMethod,
+	
+	
+	/**
+	 * Retrieves the {@link #text} for the HtmlNode.
+	 * 
+	 * @return {String}
+	 */
+	getText : function() {
+		return this.text;
+	}
 
-	return Autolinker;
+} );
+/*global Autolinker */
+/**
+ * @class Autolinker.htmlParser.ElementNode
+ * @extends Autolinker.htmlParser.HtmlNode
+ * 
+ * Represents an HTML element node that has been parsed by the {@link Autolinker.htmlParser.HtmlParser}.
+ * 
+ * See this class's superclass ({@link Autolinker.htmlParser.HtmlNode}) for more details.
+ */
+Autolinker.htmlParser.ElementNode = Autolinker.Util.extend( Autolinker.htmlParser.HtmlNode, {
+	
+	/**
+	 * @cfg {String} tagName (required)
+	 * 
+	 * The name of the tag that was matched.
+	 */
+	tagName : '',
+	
+	/**
+	 * @cfg {Boolean} closing (required)
+	 * 
+	 * `true` if the element (tag) is a closing tag, `false` if its an opening tag.
+	 */
+	closing : false,
 
+	
+	/**
+	 * Returns a string name for the type of node that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getType : function() {
+		return 'element';
+	},
+	
+
+	/**
+	 * Returns the HTML element's (tag's) name. Ex: for an &lt;img&gt; tag, returns "img".
+	 * 
+	 * @return {String}
+	 */
+	getTagName : function() {
+		return this.tagName;
+	},
+	
+	
+	/**
+	 * Determines if the HTML element (tag) is a closing tag. Ex: &lt;div&gt; returns
+	 * `false`, while &lt;/div&gt; returns `true`.
+	 * 
+	 * @return {Boolean}
+	 */
+	isClosing : function() {
+		return this.closing;
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @class Autolinker.htmlParser.EntityNode
+ * @extends Autolinker.htmlParser.HtmlNode
+ * 
+ * Represents a known HTML entity node that has been parsed by the {@link Autolinker.htmlParser.HtmlParser}.
+ * Ex: '&amp;nbsp;', or '&amp#160;' (which will be retrievable from the {@link #getText} method.
+ * 
+ * Note that this class will only be returned from the HtmlParser for the set of checked HTML entity nodes 
+ * defined by the {@link Autolinker.htmlParser.HtmlParser#htmlCharacterEntitiesRegex}.
+ * 
+ * See this class's superclass ({@link Autolinker.htmlParser.HtmlNode}) for more details.
+ */
+Autolinker.htmlParser.EntityNode = Autolinker.Util.extend( Autolinker.htmlParser.HtmlNode, {
+	
+	/**
+	 * Returns a string name for the type of node that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getType : function() {
+		return 'entity';
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @class Autolinker.htmlParser.TextNode
+ * @extends Autolinker.htmlParser.HtmlNode
+ * 
+ * Represents a text node that has been parsed by the {@link Autolinker.htmlParser.HtmlParser}.
+ * 
+ * See this class's superclass ({@link Autolinker.htmlParser.HtmlNode}) for more details.
+ */
+Autolinker.htmlParser.TextNode = Autolinker.Util.extend( Autolinker.htmlParser.HtmlNode, {
+	
+	/**
+	 * Returns a string name for the type of node that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getType : function() {
+		return 'text';
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @private
+ * @class Autolinker.matchParser.MatchParser
+ * @extends Object
+ * 
+ * Used by Autolinker to parse {@link #urls URLs}, {@link #emails email addresses}, and {@link #twitter Twitter handles}, 
+ * given an input string of text.
+ * 
+ * The MatchParser is fed a non-HTML string in order to search out URLs, email addresses and Twitter handles. Autolinker
+ * first uses the {@link HtmlParser} to "walk around" HTML tags, and then the text around the HTML tags is passed into
+ * the MatchParser in order to find the actual matches.
+ */
+Autolinker.matchParser.MatchParser = Autolinker.Util.extend( Object, {
+	
+	/**
+	 * @cfg {Boolean} urls
+	 * 
+	 * `true` if miscellaneous URLs should be automatically linked, `false` if they should not be.
+	 */
+	urls : true,
+	
+	/**
+	 * @cfg {Boolean} email
+	 * 
+	 * `true` if email addresses should be automatically linked, `false` if they should not be.
+	 */
+	email : true,
+	
+	/**
+	 * @cfg {Boolean} twitter
+	 * 
+	 * `true` if Twitter handles ("@example") should be automatically linked, `false` if they should not be.
+	 */
+	twitter : true,
+	
+	/**
+	 * @cfg {Boolean} stripPrefix
+	 * 
+	 * `true` if 'http://' or 'https://' and/or the 'www.' should be stripped from the beginning of URL links' text
+	 * in {@link Autolinker.match.Url URL matches}, `false` otherwise.
+	 * 
+	 * TODO: Handle this before a URL Match object is instantiated.
+	 */
+	stripPrefix : true,
+	
+	
+	/**
+	 * @private
+	 * @property {RegExp} matcherRegex
+	 * 
+	 * The regular expression that matches URLs, email addresses, and Twitter handles.
+	 * 
+	 * This regular expression has the following capturing groups:
+	 * 
+	 * 1. Group that is used to determine if there is a Twitter handle match (i.e. \@someTwitterUser). Simply check for its 
+	 *    existence to determine if there is a Twitter handle match. The next couple of capturing groups give information 
+	 *    about the Twitter handle match.
+	 * 2. The whitespace character before the \@sign in a Twitter handle. This is needed because there are no lookbehinds in
+	 *    JS regular expressions, and can be used to reconstruct the original string in a replace().
+	 * 3. The Twitter handle itself in a Twitter match. If the match is '@someTwitterUser', the handle is 'someTwitterUser'.
+	 * 4. Group that matches an email address. Used to determine if the match is an email address, as well as holding the full 
+	 *    address. Ex: 'me@my.com'
+	 * 5. Group that matches a URL in the input text. Ex: 'http://google.com', 'www.google.com', or just 'google.com'.
+	 *    This also includes a path, url parameters, or hash anchors. Ex: google.com/path/to/file?q1=1&q2=2#myAnchor
+	 * 6. Group that matches a protocol URL (i.e. 'http://google.com'). This is used to match protocol URLs with just a single
+	 *    word, like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
+	 * 7. A protocol-relative ('//') match for the case of a 'www.' prefixed URL. Will be an empty string if it is not a 
+	 *    protocol-relative match. We need to know the character before the '//' in order to determine if it is a valid match
+	 *    or the // was in a string we don't want to auto-link.
+	 * 8. A protocol-relative ('//') match for the case of a known TLD prefixed URL. Will be an empty string if it is not a 
+	 *    protocol-relative match. See #6 for more info. 
+	 */
+	matcherRegex : (function() {
+		var twitterRegex = /(^|[^\w])@(\w{1,15})/,              // For matching a twitter handle. Ex: @gregory_jacobs
+		    
+		    emailRegex = /(?:[\-;:&=\+\$,\w\.]+@)/,             // something@ for email addresses (a.k.a. local-part)
+		    
+		    protocolRegex = /(?:[A-Za-z][-.+A-Za-z0-9]+:(?![A-Za-z][-.+A-Za-z0-9]+:\/\/)(?!\d+\/?)(?:\/\/)?)/,  // match protocol, allow in format "http://" or "mailto:". However, do not match the first part of something like 'link:http://www.google.com' (i.e. don't match "link:"). Also, make sure we don't interpret 'google.com:8000' as if 'google.com' was a protocol here (i.e. ignore a trailing port number in this regex)
+		    wwwRegex = /(?:www\.)/,                             // starting with 'www.'
+		    domainNameRegex = /[A-Za-z0-9\.\-]*[A-Za-z0-9\-]/,  // anything looking at all like a domain, non-unicode domains, not ending in a period
+		    tldRegex = /\.(?:international|construction|contractors|enterprises|photography|productions|foundation|immobilien|industries|management|properties|technology|christmas|community|directory|education|equipment|institute|marketing|solutions|vacations|bargains|boutique|builders|catering|cleaning|clothing|computer|democrat|diamonds|graphics|holdings|lighting|partners|plumbing|supplies|training|ventures|academy|careers|company|cruises|domains|exposed|flights|florist|gallery|guitars|holiday|kitchen|neustar|okinawa|recipes|rentals|reviews|shiksha|singles|support|systems|agency|berlin|camera|center|coffee|condos|dating|estate|events|expert|futbol|kaufen|luxury|maison|monash|museum|nagoya|photos|repair|report|social|supply|tattoo|tienda|travel|viajes|villas|vision|voting|voyage|actor|build|cards|cheap|codes|dance|email|glass|house|mango|ninja|parts|photo|shoes|solar|today|tokyo|tools|watch|works|aero|arpa|asia|best|bike|blue|buzz|camp|club|cool|coop|farm|fish|gift|guru|info|jobs|kiwi|kred|land|limo|link|menu|mobi|moda|name|pics|pink|post|qpon|rich|ruhr|sexy|tips|vote|voto|wang|wien|wiki|zone|bar|bid|biz|cab|cat|ceo|com|edu|gov|int|kim|mil|net|onl|org|pro|pub|red|tel|uno|wed|xxx|xyz|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw)\b/,   // match our known top level domains (TLDs)
+		    
+		    // Allow optional path, query string, and hash anchor, not ending in the following characters: "?!:,.;"
+		    // http://blog.codinghorror.com/the-problem-with-urls/
+		    urlSuffixRegex = /[\-A-Za-z0-9+&@#\/%=~_()|'$*\[\]?!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|'$*\[\]]/;
+		
+		return new RegExp( [
+			'(',  // *** Capturing group $1, which can be used to check for a twitter handle match. Use group $3 for the actual twitter handle though. $2 may be used to reconstruct the original string in a replace() 
+				// *** Capturing group $2, which matches the whitespace character before the '@' sign (needed because of no lookbehinds), and 
+				// *** Capturing group $3, which matches the actual twitter handle
+				twitterRegex.source,
+			')',
+			
+			'|',
+			
+			'(',  // *** Capturing group $4, which is used to determine an email match
+				emailRegex.source,
+				domainNameRegex.source,
+				tldRegex.source,
+			')',
+			
+			'|',
+			
+			'(',  // *** Capturing group $5, which is used to match a URL
+				'(?:', // parens to cover match for protocol (optional), and domain
+					'(',  // *** Capturing group $6, for a protocol-prefixed url (ex: http://google.com)
+						protocolRegex.source,
+						domainNameRegex.source,
+					')',
+					
+					'|',
+					
+					'(?:',  // non-capturing paren for a 'www.' prefixed url (ex: www.google.com)
+						'(.?//)?',  // *** Capturing group $7 for an optional protocol-relative URL. Must be at the beginning of the string or start with a non-word character
+						wwwRegex.source,
+						domainNameRegex.source,
+					')',
+					
+					'|',
+					
+					'(?:',  // non-capturing paren for known a TLD url (ex: google.com)
+						'(.?//)?',  // *** Capturing group $8 for an optional protocol-relative URL. Must be at the beginning of the string or start with a non-word character
+						domainNameRegex.source,
+						tldRegex.source,
+					')',
+				')',
+				
+				'(?:' + urlSuffixRegex.source + ')?',  // match for path, query string, and/or hash anchor - optional
+			')'
+		].join( "" ), 'gi' );
+	} )(),
+	
+	/**
+	 * @private
+	 * @property {RegExp} charBeforeProtocolRelMatchRegex
+	 * 
+	 * The regular expression used to retrieve the character before a protocol-relative URL match.
+	 * 
+	 * This is used in conjunction with the {@link #matcherRegex}, which needs to grab the character before a protocol-relative
+	 * '//' due to the lack of a negative look-behind in JavaScript regular expressions. The character before the match is stripped
+	 * from the URL.
+	 */
+	charBeforeProtocolRelMatchRegex : /^(.)?\/\//,
+	
+	/**
+	 * @private
+	 * @property {Autolinker.MatchValidator} matchValidator
+	 * 
+	 * The MatchValidator object, used to filter out any false positives from the {@link #matcherRegex}. See
+	 * {@link Autolinker.MatchValidator} for details.
+	 */
+	
+	
+	/**
+	 * @constructor
+	 * @param {Object} [cfg] The configuration options for the AnchorTagBuilder instance, specified in an Object (map).
+	 */
+	constructor : function( cfg ) {
+		Autolinker.Util.assign( this, cfg );
+	
+		this.matchValidator = new Autolinker.MatchValidator();
+	},
+	
+	
+	/**
+	 * Parses the input `text` to search for URLs/emails/Twitter handles, and calls the `replaceFn`
+	 * to allow replacements of the matches. Returns the `text` with matches replaced.
+	 * 
+	 * @param {String} text The text to search and repace matches in.
+	 * @param {Function} replaceFn The iterator function to handle the replacements. The function takes a
+	 *   single argument, a {@link Autolinker.match.Match} object, and should return the text that should
+	 *   make the replacement.
+	 * @param {Object} [contextObj=window] The context object ("scope") to run the `replaceFn` in.
+	 * @return {String}
+	 */
+	replace : function( text, replaceFn, contextObj ) {
+		var me = this;  // for closure
+		
+		return text.replace( this.matcherRegex, function( matchStr, $1, $2, $3, $4, $5, $6, $7, $8 ) {
+			var matchDescObj = me.processCandidateMatch( matchStr, $1, $2, $3, $4, $5, $6, $7, $8 );  // "match description" object
+			
+			// Return out with no changes for match types that are disabled (url, email, twitter), or for matches that are 
+			// invalid (false positives from the matcherRegex, which can't use look-behinds since they are unavailable in JS).
+			if( !matchDescObj ) {
+				return matchStr;
+				
+			} else {
+				// Generate replacement text for the match from the `replaceFn`
+				var replaceStr = replaceFn.call( contextObj, matchDescObj.match );
+				return matchDescObj.prefixStr + replaceStr + matchDescObj.suffixStr;
+			}
+		} );
+	},
+	
+	
+	/**
+	 * Processes a candidate match from the {@link #matcherRegex}. 
+	 * 
+	 * Not all matches found by the regex are actual URL/email/Twitter matches, as determined by the {@link #matchValidator}. In
+	 * this case, the method returns `null`. Otherwise, a valid Object with `prefixStr`, `match`, and `suffixStr` is returned.
+	 * 
+	 * @private
+	 * @param {String} matchStr The full match that was found by the {@link #matcherRegex}.
+	 * @param {String} twitterMatch The matched text of a Twitter handle, if the match is a Twitter match.
+	 * @param {String} twitterHandlePrefixWhitespaceChar The whitespace char before the @ sign in a Twitter handle match. This 
+	 *   is needed because of no lookbehinds in JS regexes, and is need to re-include the character for the anchor tag replacement.
+	 * @param {String} twitterHandle The actual Twitter user (i.e the word after the @ sign in a Twitter match).
+	 * @param {String} emailAddressMatch The matched email address for an email address match.
+	 * @param {String} urlMatch The matched URL string for a URL match.
+	 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to match
+	 *   something like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
+	 * @param {String} wwwProtocolRelativeMatch The '//' for a protocol-relative match from a 'www' url, with the character that 
+	 *   comes before the '//'.
+	 * @param {String} tldProtocolRelativeMatch The '//' for a protocol-relative match from a TLD (top level domain) match, with 
+	 *   the character that comes before the '//'.
+	 *   
+	 * @return {Object} A "match description object". This will be `null` if the match was invalid, or if a match type is disabled.
+	 *   Otherwise, this will be an Object (map) with the following properties:
+	 * @return {String} return.prefixStr The char(s) that should be prepended to the replacement string. These are char(s) that
+	 *   were needed to be included from the regex match that were ignored by processing code, and should be re-inserted into 
+	 *   the replacement stream.
+	 * @return {String} return.suffixStr The char(s) that should be appended to the replacement string. These are char(s) that
+	 *   were needed to be included from the regex match that were ignored by processing code, and should be re-inserted into 
+	 *   the replacement stream.
+	 * @return {Autolinker.match.Match} return.match The Match object that represents the match that was found.
+	 */
+	processCandidateMatch : function( 
+		matchStr, twitterMatch, twitterHandlePrefixWhitespaceChar, twitterHandle, 
+		emailAddressMatch, urlMatch, protocolUrlMatch, wwwProtocolRelativeMatch, tldProtocolRelativeMatch
+	) {
+		// Note: The `matchStr` variable wil be fixed up to remove characters that are no longer needed (which will 
+		// be added to `prefixStr` and `suffixStr`).
+		
+		var protocolRelativeMatch = wwwProtocolRelativeMatch || tldProtocolRelativeMatch,
+		    match,  // Will be an Autolinker.match.Match object
+		    
+		    prefixStr = "",       // A string to use to prefix the anchor tag that is created. This is needed for the Twitter handle match
+		    suffixStr = "";       // A string to suffix the anchor tag that is created. This is used if there is a trailing parenthesis that should not be auto-linked.
+		    
+		
+		// Return out with `null` for match types that are disabled (url, email, twitter), or for matches that are 
+		// invalid (false positives from the matcherRegex, which can't use look-behinds since they are unavailable in JS).
+		if(
+			( twitterMatch && !this.twitter ) || ( emailAddressMatch && !this.email ) || ( urlMatch && !this.urls ) ||
+			!this.matchValidator.isValidMatch( urlMatch, protocolUrlMatch, protocolRelativeMatch ) 
+		) {
+			return null;
+		}
+		
+		// Handle a closing parenthesis at the end of the match, and exclude it if there is not a matching open parenthesis
+		// in the match itself. 
+		if( this.matchHasUnbalancedClosingParen( matchStr ) ) {
+			matchStr = matchStr.substr( 0, matchStr.length - 1 );  // remove the trailing ")"
+			suffixStr = ")";  // this will be added after the generated <a> tag
+		}
+		
+		
+		if( emailAddressMatch ) {
+			match = new Autolinker.match.Email( { matchedText: matchStr, email: emailAddressMatch } );
+			
+		} else if( twitterMatch ) {
+			// fix up the `matchStr` if there was a preceding whitespace char, which was needed to determine the match 
+			// itself (since there are no look-behinds in JS regexes)
+			if( twitterHandlePrefixWhitespaceChar ) {
+				prefixStr = twitterHandlePrefixWhitespaceChar;
+				matchStr = matchStr.slice( 1 );  // remove the prefixed whitespace char from the match
+			}
+			match = new Autolinker.match.Twitter( { matchedText: matchStr, twitterHandle: twitterHandle } );
+			
+		} else {  // url match
+			// If it's a protocol-relative '//' match, remove the character before the '//' (which the matcherRegex needed
+			// to match due to the lack of a negative look-behind in JavaScript regular expressions)
+			if( protocolRelativeMatch ) {
+				var charBeforeMatch = protocolRelativeMatch.match( this.charBeforeProtocolRelMatchRegex )[ 1 ] || "";
+				
+				if( charBeforeMatch ) {  // fix up the `matchStr` if there was a preceding char before a protocol-relative match, which was needed to determine the match itself (since there are no look-behinds in JS regexes)
+					prefixStr = charBeforeMatch;
+					matchStr = matchStr.slice( 1 );  // remove the prefixed char from the match
+				}
+			}
+			
+			match = new Autolinker.match.Url( {
+				matchedText : matchStr,
+				url : matchStr,
+				protocolUrlMatch : !!protocolUrlMatch,
+				protocolRelativeMatch : !!protocolRelativeMatch,
+				stripPrefix : this.stripPrefix
+			} );
+		}
+		
+		return {
+			prefixStr : prefixStr,
+			suffixStr : suffixStr,
+			match     : match
+		};
+	},
+	
+	
+	/**
+	 * Determines if a match found has an unmatched closing parenthesis. If so, this parenthesis will be removed
+	 * from the match itself, and appended after the generated anchor tag in {@link #processTextNode}.
+	 * 
+	 * A match may have an extra closing parenthesis at the end of the match because the regular expression must include parenthesis
+	 * for URLs such as "wikipedia.com/something_(disambiguation)", which should be auto-linked. 
+	 * 
+	 * However, an extra parenthesis *will* be included when the URL itself is wrapped in parenthesis, such as in the case of
+	 * "(wikipedia.com/something_(disambiguation))". In this case, the last closing parenthesis should *not* be part of the URL 
+	 * itself, and this method will return `true`.
+	 * 
+	 * @private
+	 * @param {String} matchStr The full match string from the {@link #matcherRegex}.
+	 * @return {Boolean} `true` if there is an unbalanced closing parenthesis at the end of the `matchStr`, `false` otherwise.
+	 */
+	matchHasUnbalancedClosingParen : function( matchStr ) {
+		var lastChar = matchStr.charAt( matchStr.length - 1 );
+		
+		if( lastChar === ')' ) {
+			var openParensMatch = matchStr.match( /\(/g ),
+			    closeParensMatch = matchStr.match( /\)/g ),
+			    numOpenParens = ( openParensMatch && openParensMatch.length ) || 0,
+			    numCloseParens = ( closeParensMatch && closeParensMatch.length ) || 0;
+			
+			if( numOpenParens < numCloseParens ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+} );
+/*global Autolinker */
+/*jshint scripturl:true */
+/**
+ * @private
+ * @class Autolinker.MatchValidator
+ * @extends Object
+ * 
+ * Used by Autolinker to filter out false positives from the {@link Autolinker#matcherRegex}.
+ * 
+ * Due to the limitations of regular expressions (including the missing feature of look-behinds in JS regular expressions),
+ * we cannot always determine the validity of a given match. This class applies a bit of additional logic to filter out any
+ * false positives that have been matched by the {@link Autolinker#matcherRegex}.
+ */
+Autolinker.MatchValidator = Autolinker.Util.extend( Object, {
+	
+	/**
+	 * @private
+	 * @property {RegExp} invalidProtocolRelMatchRegex
+	 * 
+	 * The regular expression used to check a potential protocol-relative URL match, coming from the 
+	 * {@link Autolinker#matcherRegex}. A protocol-relative URL is, for example, "//yahoo.com"
+	 * 
+	 * This regular expression checks to see if there is a word character before the '//' match in order to determine if 
+	 * we should actually autolink a protocol-relative URL. This is needed because there is no negative look-behind in 
+	 * JavaScript regular expressions. 
+	 * 
+	 * For instance, we want to autolink something like "Go to: //google.com", but we don't want to autolink something 
+	 * like "abc//google.com"
+	 */
+	invalidProtocolRelMatchRegex : /^[\w]\/\//,
+	
+	/**
+	 * Regex to test for a full protocol, with the two trailing slashes. Ex: 'http://'
+	 * 
+	 * @private
+	 * @property {RegExp} hasFullProtocolRegex
+	 */
+	hasFullProtocolRegex : /^[A-Za-z][-.+A-Za-z0-9]+:\/\//,
+	
+	/**
+	 * Regex to find the URI scheme, such as 'mailto:'.
+	 * 
+	 * This is used to filter out 'javascript:' and 'vbscript:' schemes.
+	 * 
+	 * @private
+	 * @property {RegExp} uriSchemeRegex
+	 */
+	uriSchemeRegex : /^[A-Za-z][-.+A-Za-z0-9]+:/,
+	
+	/**
+	 * Regex to determine if at least one word char exists after the protocol (i.e. after the ':')
+	 * 
+	 * @private
+	 * @property {RegExp} hasWordCharAfterProtocolRegex
+	 */
+	hasWordCharAfterProtocolRegex : /:[^\s]*?[A-Za-z]/,
+	
+	
+	/**
+	 * Determines if a given match found by {@link Autolinker#processTextNode} is valid. Will return `false` for:
+	 * 
+	 * 1) URL matches which do not have at least have one period ('.') in the domain name (effectively skipping over 
+	 *    matches like "abc:def"). However, URL matches with a protocol will be allowed (ex: 'http://localhost')
+	 * 2) URL matches which do not have at least one word character in the domain name (effectively skipping over
+	 *    matches like "git:1.0").
+	 * 3) A protocol-relative url match (a URL beginning with '//') whose previous character is a word character 
+	 *    (effectively skipping over strings like "abc//google.com")
+	 * 
+	 * Otherwise, returns `true`.
+	 * 
+	 * @param {String} urlMatch The matched URL, if there was one. Will be an empty string if the match is not a URL match.
+	 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to match
+	 *   something like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
+	 * @param {String} protocolRelativeMatch The protocol-relative string for a URL match (i.e. '//'), possibly with a preceding
+	 *   character (ex, a space, such as: ' //', or a letter, such as: 'a//'). The match is invalid if there is a word character
+	 *   preceding the '//'.
+	 * @return {Boolean} `true` if the match given is valid and should be processed, or `false` if the match is invalid and/or 
+	 *   should just not be processed.
+	 */
+	isValidMatch : function( urlMatch, protocolUrlMatch, protocolRelativeMatch ) {
+		if(
+			( protocolUrlMatch && !this.isValidUriScheme( protocolUrlMatch ) ) ||
+			this.urlMatchDoesNotHaveProtocolOrDot( urlMatch, protocolUrlMatch ) ||       // At least one period ('.') must exist in the URL match for us to consider it an actual URL, *unless* it was a full protocol match (like 'http://localhost')
+			this.urlMatchDoesNotHaveAtLeastOneWordChar( urlMatch, protocolUrlMatch ) ||  // At least one letter character must exist in the domain name after a protocol match. Ex: skip over something like "git:1.0"
+			this.isInvalidProtocolRelativeMatch( protocolRelativeMatch )                 // A protocol-relative match which has a word character in front of it (so we can skip something like "abc//google.com")
+		) {
+			return false;
+		}
+		
+		return true;
+	},
+	
+	
+	/**
+	 * Determines if the URI scheme is a valid scheme to be autolinked. Returns `false` if the scheme is 
+	 * 'javascript:' or 'vbscript:'
+	 * 
+	 * @private
+	 * @param {String} uriSchemeMatch The match URL string for a full URI scheme match. Ex: 'http://yahoo.com' 
+	 *   or 'mailto:a@a.com'.
+	 * @return {Boolean} `true` if the scheme is a valid one, `false` otherwise.
+	 */
+	isValidUriScheme : function( uriSchemeMatch ) {
+		var uriScheme = uriSchemeMatch.match( this.uriSchemeRegex )[ 0 ].toLowerCase();
+		
+		return ( uriScheme !== 'javascript:' && uriScheme !== 'vbscript:' );
+	},
+	
+	
+	/**
+	 * Determines if a URL match does not have either:
+	 * 
+	 * a) a full protocol (i.e. 'http://'), or
+	 * b) at least one dot ('.') in the domain name (for a non-full-protocol match).
+	 * 
+	 * Either situation is considered an invalid URL (ex: 'git:d' does not have either the '://' part, or at least one dot
+	 * in the domain name. If the match was 'git:abc.com', we would consider this valid.)
+	 * 
+	 * @private
+	 * @param {String} urlMatch The matched URL, if there was one. Will be an empty string if the match is not a URL match.
+	 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to match
+	 *   something like 'http://localhost', where we won't double check that the domain name has at least one '.' in it.
+	 * @return {Boolean} `true` if the URL match does not have a full protocol, or at least one dot ('.') in a non-full-protocol
+	 *   match.
+	 */
+	urlMatchDoesNotHaveProtocolOrDot : function( urlMatch, protocolUrlMatch ) {
+		return ( !!urlMatch && ( !protocolUrlMatch || !this.hasFullProtocolRegex.test( protocolUrlMatch ) ) && urlMatch.indexOf( '.' ) === -1 );
+	},
+	
+	
+	/**
+	 * Determines if a URL match does not have at least one word character after the protocol (i.e. in the domain name).
+	 * 
+	 * At least one letter character must exist in the domain name after a protocol match. Ex: skip over something 
+	 * like "git:1.0"
+	 * 
+	 * @private
+	 * @param {String} urlMatch The matched URL, if there was one. Will be an empty string if the match is not a URL match.
+	 * @param {String} protocolUrlMatch The match URL string for a protocol match. Ex: 'http://yahoo.com'. This is used to
+	 *   know whether or not we have a protocol in the URL string, in order to check for a word character after the protocol
+	 *   separator (':').
+	 * @return {Boolean} `true` if the URL match does not have at least one word character in it after the protocol, `false`
+	 *   otherwise.
+	 */
+	urlMatchDoesNotHaveAtLeastOneWordChar : function( urlMatch, protocolUrlMatch ) {
+		if( urlMatch && protocolUrlMatch ) {
+			return !this.hasWordCharAfterProtocolRegex.test( urlMatch );
+		} else {
+			return false;
+		}
+	},
+	
+	
+	/**
+	 * Determines if a protocol-relative match is an invalid one. This method returns `true` if there is a `protocolRelativeMatch`,
+	 * and that match contains a word character before the '//' (i.e. it must contain whitespace or nothing before the '//' in
+	 * order to be considered valid).
+	 * 
+	 * @private
+	 * @param {String} protocolRelativeMatch The protocol-relative string for a URL match (i.e. '//'), possibly with a preceding
+	 *   character (ex, a space, such as: ' //', or a letter, such as: 'a//'). The match is invalid if there is a word character
+	 *   preceding the '//'.
+	 * @return {Boolean} `true` if it is an invalid protocol-relative match, `false` otherwise.
+	 */
+	isInvalidProtocolRelativeMatch : function( protocolRelativeMatch ) {
+		return ( !!protocolRelativeMatch && this.invalidProtocolRelMatchRegex.test( protocolRelativeMatch ) );
+	}
+
+} );
+/*global Autolinker */
+/**
+ * @abstract
+ * @class Autolinker.match.Match
+ * 
+ * Represents a match found in an input string which should be Autolinked. A Match object is what is provided in a 
+ * {@link Autolinker#replaceFn replaceFn}, and may be used to query for details about the match.
+ * 
+ * For example:
+ * 
+ *     var input = "...";  // string with URLs, Email Addresses, and Twitter Handles
+ *     
+ *     var linkedText = Autolinker.link( input, {
+ *         replaceFn : function( autolinker, match ) {
+ *             console.log( "href = ", match.getAnchorHref() );
+ *             console.log( "text = ", match.getAnchorText() );
+ *         
+ *             switch( match.getType() ) {
+ *                 case 'url' : 
+ *                     console.log( "url: ", match.getUrl() );
+ *                     
+ *                 case 'email' :
+ *                     console.log( "email: ", match.getEmail() );
+ *                     
+ *                 case 'twitter' :
+ *                     console.log( "twitter: ", match.getTwitterHandle() );
+ *             }
+ *         }
+ *     } );
+ *     
+ * See the {@link Autolinker} class for more details on using the {@link Autolinker#replaceFn replaceFn}.
+ */
+Autolinker.match.Match = Autolinker.Util.extend( Object, {
+	
+	/**
+	 * @cfg {String} matchedText (required)
+	 * 
+	 * The original text that was matched.
+	 */
+	
+	
+	/**
+	 * @constructor
+	 * @param {Object} cfg The configuration properties for the Match instance, specified in an Object (map).
+	 */
+	constructor : function( cfg ) {
+		Autolinker.Util.assign( this, cfg );
+	},
+
+	
+	/**
+	 * Returns a string name for the type of match that this class represents.
+	 * 
+	 * @abstract
+	 * @return {String}
+	 */
+	getType : Autolinker.Util.abstractMethod,
+	
+	
+	/**
+	 * Returns the original text that was matched.
+	 * 
+	 * @return {String}
+	 */
+	getMatchedText : function() {
+		return this.matchedText;
+	},
+	
+
+	/**
+	 * Returns the anchor href that should be generated for the match.
+	 * 
+	 * @abstract
+	 * @return {String}
+	 */
+	getAnchorHref : Autolinker.Util.abstractMethod,
+	
+	
+	/**
+	 * Returns the anchor text that should be generated for the match.
+	 * 
+	 * @abstract
+	 * @return {String}
+	 */
+	getAnchorText : Autolinker.Util.abstractMethod
+
+} );
+/*global Autolinker */
+/**
+ * @class Autolinker.match.Email
+ * @extends Autolinker.match.Match
+ * 
+ * Represents a Email match found in an input string which should be Autolinked.
+ * 
+ * See this class's superclass ({@link Autolinker.match.Match}) for more details.
+ */
+Autolinker.match.Email = Autolinker.Util.extend( Autolinker.match.Match, {
+	
+	/**
+	 * @cfg {String} email (required)
+	 * 
+	 * The email address that was matched.
+	 */
+	
+
+	/**
+	 * Returns a string name for the type of match that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getType : function() {
+		return 'email';
+	},
+	
+	
+	/**
+	 * Returns the email address that was matched.
+	 * 
+	 * @return {String}
+	 */
+	getEmail : function() {
+		return this.email;
+	},
+	
+
+	/**
+	 * Returns the anchor href that should be generated for the match.
+	 * 
+	 * @return {String}
+	 */
+	getAnchorHref : function() {
+		return 'mailto:' + this.email;
+	},
+	
+	
+	/**
+	 * Returns the anchor text that should be generated for the match.
+	 * 
+	 * @return {String}
+	 */
+	getAnchorText : function() {
+		return this.email;
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @class Autolinker.match.Twitter
+ * @extends Autolinker.match.Match
+ * 
+ * Represents a Twitter match found in an input string which should be Autolinked.
+ * 
+ * See this class's superclass ({@link Autolinker.match.Match}) for more details.
+ */
+Autolinker.match.Twitter = Autolinker.Util.extend( Autolinker.match.Match, {
+	
+	/**
+	 * @cfg {String} twitterHandle (required)
+	 * 
+	 * The Twitter handle that was matched.
+	 */
+	
+
+	/**
+	 * Returns the type of match that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getType : function() {
+		return 'twitter';
+	},
+	
+	
+	/**
+	 * Returns a string name for the type of match that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getTwitterHandle : function() {
+		return this.twitterHandle;
+	},
+	
+
+	/**
+	 * Returns the anchor href that should be generated for the match.
+	 * 
+	 * @return {String}
+	 */
+	getAnchorHref : function() {
+		return 'https://twitter.com/' + this.twitterHandle;
+	},
+	
+	
+	/**
+	 * Returns the anchor text that should be generated for the match.
+	 * 
+	 * @return {String}
+	 */
+	getAnchorText : function() {
+		return '@' + this.twitterHandle;
+	}
+	
+} );
+/*global Autolinker */
+/**
+ * @class Autolinker.match.Url
+ * @extends Autolinker.match.Match
+ * 
+ * Represents a Url match found in an input string which should be Autolinked.
+ * 
+ * See this class's superclass ({@link Autolinker.match.Match}) for more details.
+ */
+Autolinker.match.Url = Autolinker.Util.extend( Autolinker.match.Match, {
+	
+	/**
+	 * @cfg {String} url (required)
+	 * 
+	 * The url that was matched.
+	 */
+	
+	/**
+	 * @cfg {Boolean} protocolUrlMatch (required)
+	 * 
+	 * `true` if the URL is a match which already has a protocol (i.e. 'http://'), `false` if the match was from a 'www' or
+	 * known TLD match.
+	 */
+	
+	/**
+	 * @cfg {Boolean} protocolRelativeMatch (required)
+	 * 
+	 * `true` if the URL is a protocol-relative match. A protocol-relative match is a URL that starts with '//',
+	 * and will be either http:// or https:// based on the protocol that the site is loaded under.
+	 */
+	
+	/**
+	 * @cfg {Boolean} stripPrefix (required)
+	 * @inheritdoc Autolinker#stripPrefix
+	 */
+	
+
+	/**
+	 * @private
+	 * @property {RegExp} urlPrefixRegex
+	 * 
+	 * A regular expression used to remove the 'http://' or 'https://' and/or the 'www.' from URLs.
+	 */
+	urlPrefixRegex: /^(https?:\/\/)?(www\.)?/i,
+	
+	/**
+	 * @private
+	 * @property {RegExp} protocolRelativeRegex
+	 * 
+	 * The regular expression used to remove the protocol-relative '//' from the {@link #url} string, for purposes
+	 * of {@link #getAnchorText}. A protocol-relative URL is, for example, "//yahoo.com"
+	 */
+	protocolRelativeRegex : /^\/\//,
+	
+	/**
+	 * @private
+	 * @property {Boolean} protocolPrepended
+	 * 
+	 * Will be set to `true` if the 'http://' protocol has been prepended to the {@link #url} (because the
+	 * {@link #url} did not have a protocol)
+	 */
+	protocolPrepended : false,
+	
+
+	/**
+	 * Returns a string name for the type of match that this class represents.
+	 * 
+	 * @return {String}
+	 */
+	getType : function() {
+		return 'url';
+	},
+	
+	
+	/**
+	 * Returns the url that was matched, assuming the protocol to be 'http://' if the original
+	 * match was missing a protocol.
+	 * 
+	 * @return {String}
+	 */
+	getUrl : function() {
+		var url = this.url;
+		
+		// if the url string doesn't begin with a protocol, assume 'http://'
+		if( !this.protocolRelativeMatch && !this.protocolUrlMatch && !this.protocolPrepended ) {
+			url = this.url = 'http://' + url;
+			
+			this.protocolPrepended = true;
+		}
+		
+		return url;
+	},
+	
+
+	/**
+	 * Returns the anchor href that should be generated for the match.
+	 * 
+	 * @return {String}
+	 */
+	getAnchorHref : function() {
+		var url = this.getUrl();
+		
+		return url.replace( /&amp;/g, '&' );  // any &amp;'s in the URL should be converted back to '&' if they were displayed as &amp; in the source html 
+	},
+	
+	
+	/**
+	 * Returns the anchor text that should be generated for the match.
+	 * 
+	 * @return {String}
+	 */
+	getAnchorText : function() {
+		var anchorText = this.getUrl();
+		
+		if( this.protocolRelativeMatch ) {
+			// Strip off any protocol-relative '//' from the anchor text
+			anchorText = this.stripProtocolRelativePrefix( anchorText );
+		}
+		if( this.stripPrefix ) {
+			anchorText = this.stripUrlPrefix( anchorText );
+		}
+		anchorText = this.removeTrailingSlash( anchorText );  // remove trailing slash, if there is one
+		
+		return anchorText;
+	},
+	
+	
+	// ---------------------------------------
+	
+	// Utility Functionality
+	
+	/**
+	 * Strips the URL prefix (such as "http://" or "https://") from the given text.
+	 * 
+	 * @private
+	 * @param {String} text The text of the anchor that is being generated, for which to strip off the
+	 *   url prefix (such as stripping off "http://")
+	 * @return {String} The `anchorText`, with the prefix stripped.
+	 */
+	stripUrlPrefix : function( text ) {
+		return text.replace( this.urlPrefixRegex, '' );
+	},
+	
+	
+	/**
+	 * Strips any protocol-relative '//' from the anchor text.
+	 * 
+	 * @private
+	 * @param {String} text The text of the anchor that is being generated, for which to strip off the
+	 *   protocol-relative prefix (such as stripping off "//")
+	 * @return {String} The `anchorText`, with the protocol-relative prefix stripped.
+	 */
+	stripProtocolRelativePrefix : function( text ) {
+		return text.replace( this.protocolRelativeRegex, '' );
+	},
+	
+	
+	/**
+	 * Removes any trailing slash from the given `anchorText`, in preparation for the text to be displayed.
+	 * 
+	 * @private
+	 * @param {String} anchorText The text of the anchor that is being generated, for which to remove any trailing
+	 *   slash ('/') that may exist.
+	 * @return {String} The `anchorText`, with the trailing slash removed.
+	 */
+	removeTrailingSlash : function( anchorText ) {
+		if( anchorText.charAt( anchorText.length - 1 ) === '/' ) {
+			anchorText = anchorText.slice( 0, -1 );
+		}
+		return anchorText;
+	}
+	
+} );
+return Autolinker;
 
 }));
 
@@ -32714,1027 +33387,1337 @@ require("../config").defineOptions(Editor.prototype, "editor", {
                     window.require(["ace/ext/language_tools"], function() {});
                 })();
             
-/*! jQuery v2.1.4 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */
-!function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l=a.document,m="2.1.4",n=function(a,b){return new n.fn.init(a,b)},o=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,p=/^-ms-/,q=/-([\da-z])/gi,r=function(a,b){return b.toUpperCase()};n.fn=n.prototype={jquery:m,constructor:n,selector:"",length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0>a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=n.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return n.each(this,a,b)},map:function(a){return this.pushStack(n.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0>a?b:0);return this.pushStack(c>=0&&b>c?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},n.extend=n.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||n.isFunction(g)||(g={}),h===i&&(g=this,h--);i>h;h++)if(null!=(a=arguments[h]))for(b in a)c=g[b],d=a[b],g!==d&&(j&&d&&(n.isPlainObject(d)||(e=n.isArray(d)))?(e?(e=!1,f=c&&n.isArray(c)?c:[]):f=c&&n.isPlainObject(c)?c:{},g[b]=n.extend(j,f,d)):void 0!==d&&(g[b]=d));return g},n.extend({expando:"jQuery"+(m+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===n.type(a)},isArray:Array.isArray,isWindow:function(a){return null!=a&&a===a.window},isNumeric:function(a){return!n.isArray(a)&&a-parseFloat(a)+1>=0},isPlainObject:function(a){return"object"!==n.type(a)||a.nodeType||n.isWindow(a)?!1:a.constructor&&!j.call(a.constructor.prototype,"isPrototypeOf")?!1:!0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},type:function(a){return null==a?a+"":"object"==typeof a||"function"==typeof a?h[i.call(a)]||"object":typeof a},globalEval:function(a){var b,c=eval;a=n.trim(a),a&&(1===a.indexOf("use strict")?(b=l.createElement("script"),b.text=a,l.head.appendChild(b).parentNode.removeChild(b)):c(a))},camelCase:function(a){return a.replace(p,"ms-").replace(q,r)},nodeName:function(a,b){return a.nodeName&&a.nodeName.toLowerCase()===b.toLowerCase()},each:function(a,b,c){var d,e=0,f=a.length,g=s(a);if(c){if(g){for(;f>e;e++)if(d=b.apply(a[e],c),d===!1)break}else for(e in a)if(d=b.apply(a[e],c),d===!1)break}else if(g){for(;f>e;e++)if(d=b.call(a[e],e,a[e]),d===!1)break}else for(e in a)if(d=b.call(a[e],e,a[e]),d===!1)break;return a},trim:function(a){return null==a?"":(a+"").replace(o,"")},makeArray:function(a,b){var c=b||[];return null!=a&&(s(Object(a))?n.merge(c,"string"==typeof a?[a]:a):f.call(c,a)),c},inArray:function(a,b,c){return null==b?-1:g.call(b,a,c)},merge:function(a,b){for(var c=+b.length,d=0,e=a.length;c>d;d++)a[e++]=b[d];return a.length=e,a},grep:function(a,b,c){for(var d,e=[],f=0,g=a.length,h=!c;g>f;f++)d=!b(a[f],f),d!==h&&e.push(a[f]);return e},map:function(a,b,c){var d,f=0,g=a.length,h=s(a),i=[];if(h)for(;g>f;f++)d=b(a[f],f,c),null!=d&&i.push(d);else for(f in a)d=b(a[f],f,c),null!=d&&i.push(d);return e.apply([],i)},guid:1,proxy:function(a,b){var c,e,f;return"string"==typeof b&&(c=a[b],b=a,a=c),n.isFunction(a)?(e=d.call(arguments,2),f=function(){return a.apply(b||this,e.concat(d.call(arguments)))},f.guid=a.guid=a.guid||n.guid++,f):void 0},now:Date.now,support:k}),n.each("Boolean Number String Function Array Date RegExp Object Error".split(" "),function(a,b){h["[object "+b+"]"]=b.toLowerCase()});function s(a){var b="length"in a&&a.length,c=n.type(a);return"function"===c||n.isWindow(a)?!1:1===a.nodeType&&b?!0:"array"===c||0===b||"number"==typeof b&&b>0&&b-1 in a}var t=function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u="sizzle"+1*new Date,v=a.document,w=0,x=0,y=ha(),z=ha(),A=ha(),B=function(a,b){return a===b&&(l=!0),0},C=1<<31,D={}.hasOwnProperty,E=[],F=E.pop,G=E.push,H=E.push,I=E.slice,J=function(a,b){for(var c=0,d=a.length;d>c;c++)if(a[c]===b)return c;return-1},K="checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",L="[\\x20\\t\\r\\n\\f]",M="(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",N=M.replace("w","w#"),O="\\["+L+"*("+M+")(?:"+L+"*([*^$|!~]?=)"+L+"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|("+N+"))|)"+L+"*\\]",P=":("+M+")(?:\\((('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|((?:\\\\.|[^\\\\()[\\]]|"+O+")*)|.*)\\)|)",Q=new RegExp(L+"+","g"),R=new RegExp("^"+L+"+|((?:^|[^\\\\])(?:\\\\.)*)"+L+"+$","g"),S=new RegExp("^"+L+"*,"+L+"*"),T=new RegExp("^"+L+"*([>+~]|"+L+")"+L+"*"),U=new RegExp("="+L+"*([^\\]'\"]*?)"+L+"*\\]","g"),V=new RegExp(P),W=new RegExp("^"+N+"$"),X={ID:new RegExp("^#("+M+")"),CLASS:new RegExp("^\\.("+M+")"),TAG:new RegExp("^("+M.replace("w","w*")+")"),ATTR:new RegExp("^"+O),PSEUDO:new RegExp("^"+P),CHILD:new RegExp("^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\("+L+"*(even|odd|(([+-]|)(\\d*)n|)"+L+"*(?:([+-]|)"+L+"*(\\d+)|))"+L+"*\\)|)","i"),bool:new RegExp("^(?:"+K+")$","i"),needsContext:new RegExp("^"+L+"*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\("+L+"*((?:-\\d)?\\d*)"+L+"*\\)|)(?=[^-]|$)","i")},Y=/^(?:input|select|textarea|button)$/i,Z=/^h\d$/i,$=/^[^{]+\{\s*\[native \w/,_=/^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,aa=/[+~]/,ba=/'|\\/g,ca=new RegExp("\\\\([\\da-f]{1,6}"+L+"?|("+L+")|.)","ig"),da=function(a,b,c){var d="0x"+b-65536;return d!==d||c?b:0>d?String.fromCharCode(d+65536):String.fromCharCode(d>>10|55296,1023&d|56320)},ea=function(){m()};try{H.apply(E=I.call(v.childNodes),v.childNodes),E[v.childNodes.length].nodeType}catch(fa){H={apply:E.length?function(a,b){G.apply(a,I.call(b))}:function(a,b){var c=a.length,d=0;while(a[c++]=b[d++]);a.length=c-1}}}function ga(a,b,d,e){var f,h,j,k,l,o,r,s,w,x;if((b?b.ownerDocument||b:v)!==n&&m(b),b=b||n,d=d||[],k=b.nodeType,"string"!=typeof a||!a||1!==k&&9!==k&&11!==k)return d;if(!e&&p){if(11!==k&&(f=_.exec(a)))if(j=f[1]){if(9===k){if(h=b.getElementById(j),!h||!h.parentNode)return d;if(h.id===j)return d.push(h),d}else if(b.ownerDocument&&(h=b.ownerDocument.getElementById(j))&&t(b,h)&&h.id===j)return d.push(h),d}else{if(f[2])return H.apply(d,b.getElementsByTagName(a)),d;if((j=f[3])&&c.getElementsByClassName)return H.apply(d,b.getElementsByClassName(j)),d}if(c.qsa&&(!q||!q.test(a))){if(s=r=u,w=b,x=1!==k&&a,1===k&&"object"!==b.nodeName.toLowerCase()){o=g(a),(r=b.getAttribute("id"))?s=r.replace(ba,"\\$&"):b.setAttribute("id",s),s="[id='"+s+"'] ",l=o.length;while(l--)o[l]=s+ra(o[l]);w=aa.test(a)&&pa(b.parentNode)||b,x=o.join(",")}if(x)try{return H.apply(d,w.querySelectorAll(x)),d}catch(y){}finally{r||b.removeAttribute("id")}}}return i(a.replace(R,"$1"),b,d,e)}function ha(){var a=[];function b(c,e){return a.push(c+" ")>d.cacheLength&&delete b[a.shift()],b[c+" "]=e}return b}function ia(a){return a[u]=!0,a}function ja(a){var b=n.createElement("div");try{return!!a(b)}catch(c){return!1}finally{b.parentNode&&b.parentNode.removeChild(b),b=null}}function ka(a,b){var c=a.split("|"),e=a.length;while(e--)d.attrHandle[c[e]]=b}function la(a,b){var c=b&&a,d=c&&1===a.nodeType&&1===b.nodeType&&(~b.sourceIndex||C)-(~a.sourceIndex||C);if(d)return d;if(c)while(c=c.nextSibling)if(c===b)return-1;return a?1:-1}function ma(a){return function(b){var c=b.nodeName.toLowerCase();return"input"===c&&b.type===a}}function na(a){return function(b){var c=b.nodeName.toLowerCase();return("input"===c||"button"===c)&&b.type===a}}function oa(a){return ia(function(b){return b=+b,ia(function(c,d){var e,f=a([],c.length,b),g=f.length;while(g--)c[e=f[g]]&&(c[e]=!(d[e]=c[e]))})})}function pa(a){return a&&"undefined"!=typeof a.getElementsByTagName&&a}c=ga.support={},f=ga.isXML=function(a){var b=a&&(a.ownerDocument||a).documentElement;return b?"HTML"!==b.nodeName:!1},m=ga.setDocument=function(a){var b,e,g=a?a.ownerDocument||a:v;return g!==n&&9===g.nodeType&&g.documentElement?(n=g,o=g.documentElement,e=g.defaultView,e&&e!==e.top&&(e.addEventListener?e.addEventListener("unload",ea,!1):e.attachEvent&&e.attachEvent("onunload",ea)),p=!f(g),c.attributes=ja(function(a){return a.className="i",!a.getAttribute("className")}),c.getElementsByTagName=ja(function(a){return a.appendChild(g.createComment("")),!a.getElementsByTagName("*").length}),c.getElementsByClassName=$.test(g.getElementsByClassName),c.getById=ja(function(a){return o.appendChild(a).id=u,!g.getElementsByName||!g.getElementsByName(u).length}),c.getById?(d.find.ID=function(a,b){if("undefined"!=typeof b.getElementById&&p){var c=b.getElementById(a);return c&&c.parentNode?[c]:[]}},d.filter.ID=function(a){var b=a.replace(ca,da);return function(a){return a.getAttribute("id")===b}}):(delete d.find.ID,d.filter.ID=function(a){var b=a.replace(ca,da);return function(a){var c="undefined"!=typeof a.getAttributeNode&&a.getAttributeNode("id");return c&&c.value===b}}),d.find.TAG=c.getElementsByTagName?function(a,b){return"undefined"!=typeof b.getElementsByTagName?b.getElementsByTagName(a):c.qsa?b.querySelectorAll(a):void 0}:function(a,b){var c,d=[],e=0,f=b.getElementsByTagName(a);if("*"===a){while(c=f[e++])1===c.nodeType&&d.push(c);return d}return f},d.find.CLASS=c.getElementsByClassName&&function(a,b){return p?b.getElementsByClassName(a):void 0},r=[],q=[],(c.qsa=$.test(g.querySelectorAll))&&(ja(function(a){o.appendChild(a).innerHTML="<a id='"+u+"'></a><select id='"+u+"-\f]' msallowcapture=''><option selected=''></option></select>",a.querySelectorAll("[msallowcapture^='']").length&&q.push("[*^$]="+L+"*(?:''|\"\")"),a.querySelectorAll("[selected]").length||q.push("\\["+L+"*(?:value|"+K+")"),a.querySelectorAll("[id~="+u+"-]").length||q.push("~="),a.querySelectorAll(":checked").length||q.push(":checked"),a.querySelectorAll("a#"+u+"+*").length||q.push(".#.+[+~]")}),ja(function(a){var b=g.createElement("input");b.setAttribute("type","hidden"),a.appendChild(b).setAttribute("name","D"),a.querySelectorAll("[name=d]").length&&q.push("name"+L+"*[*^$|!~]?="),a.querySelectorAll(":enabled").length||q.push(":enabled",":disabled"),a.querySelectorAll("*,:x"),q.push(",.*:")})),(c.matchesSelector=$.test(s=o.matches||o.webkitMatchesSelector||o.mozMatchesSelector||o.oMatchesSelector||o.msMatchesSelector))&&ja(function(a){c.disconnectedMatch=s.call(a,"div"),s.call(a,"[s!='']:x"),r.push("!=",P)}),q=q.length&&new RegExp(q.join("|")),r=r.length&&new RegExp(r.join("|")),b=$.test(o.compareDocumentPosition),t=b||$.test(o.contains)?function(a,b){var c=9===a.nodeType?a.documentElement:a,d=b&&b.parentNode;return a===d||!(!d||1!==d.nodeType||!(c.contains?c.contains(d):a.compareDocumentPosition&&16&a.compareDocumentPosition(d)))}:function(a,b){if(b)while(b=b.parentNode)if(b===a)return!0;return!1},B=b?function(a,b){if(a===b)return l=!0,0;var d=!a.compareDocumentPosition-!b.compareDocumentPosition;return d?d:(d=(a.ownerDocument||a)===(b.ownerDocument||b)?a.compareDocumentPosition(b):1,1&d||!c.sortDetached&&b.compareDocumentPosition(a)===d?a===g||a.ownerDocument===v&&t(v,a)?-1:b===g||b.ownerDocument===v&&t(v,b)?1:k?J(k,a)-J(k,b):0:4&d?-1:1)}:function(a,b){if(a===b)return l=!0,0;var c,d=0,e=a.parentNode,f=b.parentNode,h=[a],i=[b];if(!e||!f)return a===g?-1:b===g?1:e?-1:f?1:k?J(k,a)-J(k,b):0;if(e===f)return la(a,b);c=a;while(c=c.parentNode)h.unshift(c);c=b;while(c=c.parentNode)i.unshift(c);while(h[d]===i[d])d++;return d?la(h[d],i[d]):h[d]===v?-1:i[d]===v?1:0},g):n},ga.matches=function(a,b){return ga(a,null,null,b)},ga.matchesSelector=function(a,b){if((a.ownerDocument||a)!==n&&m(a),b=b.replace(U,"='$1']"),!(!c.matchesSelector||!p||r&&r.test(b)||q&&q.test(b)))try{var d=s.call(a,b);if(d||c.disconnectedMatch||a.document&&11!==a.document.nodeType)return d}catch(e){}return ga(b,n,null,[a]).length>0},ga.contains=function(a,b){return(a.ownerDocument||a)!==n&&m(a),t(a,b)},ga.attr=function(a,b){(a.ownerDocument||a)!==n&&m(a);var e=d.attrHandle[b.toLowerCase()],f=e&&D.call(d.attrHandle,b.toLowerCase())?e(a,b,!p):void 0;return void 0!==f?f:c.attributes||!p?a.getAttribute(b):(f=a.getAttributeNode(b))&&f.specified?f.value:null},ga.error=function(a){throw new Error("Syntax error, unrecognized expression: "+a)},ga.uniqueSort=function(a){var b,d=[],e=0,f=0;if(l=!c.detectDuplicates,k=!c.sortStable&&a.slice(0),a.sort(B),l){while(b=a[f++])b===a[f]&&(e=d.push(f));while(e--)a.splice(d[e],1)}return k=null,a},e=ga.getText=function(a){var b,c="",d=0,f=a.nodeType;if(f){if(1===f||9===f||11===f){if("string"==typeof a.textContent)return a.textContent;for(a=a.firstChild;a;a=a.nextSibling)c+=e(a)}else if(3===f||4===f)return a.nodeValue}else while(b=a[d++])c+=e(b);return c},d=ga.selectors={cacheLength:50,createPseudo:ia,match:X,attrHandle:{},find:{},relative:{">":{dir:"parentNode",first:!0}," ":{dir:"parentNode"},"+":{dir:"previousSibling",first:!0},"~":{dir:"previousSibling"}},preFilter:{ATTR:function(a){return a[1]=a[1].replace(ca,da),a[3]=(a[3]||a[4]||a[5]||"").replace(ca,da),"~="===a[2]&&(a[3]=" "+a[3]+" "),a.slice(0,4)},CHILD:function(a){return a[1]=a[1].toLowerCase(),"nth"===a[1].slice(0,3)?(a[3]||ga.error(a[0]),a[4]=+(a[4]?a[5]+(a[6]||1):2*("even"===a[3]||"odd"===a[3])),a[5]=+(a[7]+a[8]||"odd"===a[3])):a[3]&&ga.error(a[0]),a},PSEUDO:function(a){var b,c=!a[6]&&a[2];return X.CHILD.test(a[0])?null:(a[3]?a[2]=a[4]||a[5]||"":c&&V.test(c)&&(b=g(c,!0))&&(b=c.indexOf(")",c.length-b)-c.length)&&(a[0]=a[0].slice(0,b),a[2]=c.slice(0,b)),a.slice(0,3))}},filter:{TAG:function(a){var b=a.replace(ca,da).toLowerCase();return"*"===a?function(){return!0}:function(a){return a.nodeName&&a.nodeName.toLowerCase()===b}},CLASS:function(a){var b=y[a+" "];return b||(b=new RegExp("(^|"+L+")"+a+"("+L+"|$)"))&&y(a,function(a){return b.test("string"==typeof a.className&&a.className||"undefined"!=typeof a.getAttribute&&a.getAttribute("class")||"")})},ATTR:function(a,b,c){return function(d){var e=ga.attr(d,a);return null==e?"!="===b:b?(e+="","="===b?e===c:"!="===b?e!==c:"^="===b?c&&0===e.indexOf(c):"*="===b?c&&e.indexOf(c)>-1:"$="===b?c&&e.slice(-c.length)===c:"~="===b?(" "+e.replace(Q," ")+" ").indexOf(c)>-1:"|="===b?e===c||e.slice(0,c.length+1)===c+"-":!1):!0}},CHILD:function(a,b,c,d,e){var f="nth"!==a.slice(0,3),g="last"!==a.slice(-4),h="of-type"===b;return 1===d&&0===e?function(a){return!!a.parentNode}:function(b,c,i){var j,k,l,m,n,o,p=f!==g?"nextSibling":"previousSibling",q=b.parentNode,r=h&&b.nodeName.toLowerCase(),s=!i&&!h;if(q){if(f){while(p){l=b;while(l=l[p])if(h?l.nodeName.toLowerCase()===r:1===l.nodeType)return!1;o=p="only"===a&&!o&&"nextSibling"}return!0}if(o=[g?q.firstChild:q.lastChild],g&&s){k=q[u]||(q[u]={}),j=k[a]||[],n=j[0]===w&&j[1],m=j[0]===w&&j[2],l=n&&q.childNodes[n];while(l=++n&&l&&l[p]||(m=n=0)||o.pop())if(1===l.nodeType&&++m&&l===b){k[a]=[w,n,m];break}}else if(s&&(j=(b[u]||(b[u]={}))[a])&&j[0]===w)m=j[1];else while(l=++n&&l&&l[p]||(m=n=0)||o.pop())if((h?l.nodeName.toLowerCase()===r:1===l.nodeType)&&++m&&(s&&((l[u]||(l[u]={}))[a]=[w,m]),l===b))break;return m-=e,m===d||m%d===0&&m/d>=0}}},PSEUDO:function(a,b){var c,e=d.pseudos[a]||d.setFilters[a.toLowerCase()]||ga.error("unsupported pseudo: "+a);return e[u]?e(b):e.length>1?(c=[a,a,"",b],d.setFilters.hasOwnProperty(a.toLowerCase())?ia(function(a,c){var d,f=e(a,b),g=f.length;while(g--)d=J(a,f[g]),a[d]=!(c[d]=f[g])}):function(a){return e(a,0,c)}):e}},pseudos:{not:ia(function(a){var b=[],c=[],d=h(a.replace(R,"$1"));return d[u]?ia(function(a,b,c,e){var f,g=d(a,null,e,[]),h=a.length;while(h--)(f=g[h])&&(a[h]=!(b[h]=f))}):function(a,e,f){return b[0]=a,d(b,null,f,c),b[0]=null,!c.pop()}}),has:ia(function(a){return function(b){return ga(a,b).length>0}}),contains:ia(function(a){return a=a.replace(ca,da),function(b){return(b.textContent||b.innerText||e(b)).indexOf(a)>-1}}),lang:ia(function(a){return W.test(a||"")||ga.error("unsupported lang: "+a),a=a.replace(ca,da).toLowerCase(),function(b){var c;do if(c=p?b.lang:b.getAttribute("xml:lang")||b.getAttribute("lang"))return c=c.toLowerCase(),c===a||0===c.indexOf(a+"-");while((b=b.parentNode)&&1===b.nodeType);return!1}}),target:function(b){var c=a.location&&a.location.hash;return c&&c.slice(1)===b.id},root:function(a){return a===o},focus:function(a){return a===n.activeElement&&(!n.hasFocus||n.hasFocus())&&!!(a.type||a.href||~a.tabIndex)},enabled:function(a){return a.disabled===!1},disabled:function(a){return a.disabled===!0},checked:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&!!a.checked||"option"===b&&!!a.selected},selected:function(a){return a.parentNode&&a.parentNode.selectedIndex,a.selected===!0},empty:function(a){for(a=a.firstChild;a;a=a.nextSibling)if(a.nodeType<6)return!1;return!0},parent:function(a){return!d.pseudos.empty(a)},header:function(a){return Z.test(a.nodeName)},input:function(a){return Y.test(a.nodeName)},button:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&"button"===a.type||"button"===b},text:function(a){var b;return"input"===a.nodeName.toLowerCase()&&"text"===a.type&&(null==(b=a.getAttribute("type"))||"text"===b.toLowerCase())},first:oa(function(){return[0]}),last:oa(function(a,b){return[b-1]}),eq:oa(function(a,b,c){return[0>c?c+b:c]}),even:oa(function(a,b){for(var c=0;b>c;c+=2)a.push(c);return a}),odd:oa(function(a,b){for(var c=1;b>c;c+=2)a.push(c);return a}),lt:oa(function(a,b,c){for(var d=0>c?c+b:c;--d>=0;)a.push(d);return a}),gt:oa(function(a,b,c){for(var d=0>c?c+b:c;++d<b;)a.push(d);return a})}},d.pseudos.nth=d.pseudos.eq;for(b in{radio:!0,checkbox:!0,file:!0,password:!0,image:!0})d.pseudos[b]=ma(b);for(b in{submit:!0,reset:!0})d.pseudos[b]=na(b);function qa(){}qa.prototype=d.filters=d.pseudos,d.setFilters=new qa,g=ga.tokenize=function(a,b){var c,e,f,g,h,i,j,k=z[a+" "];if(k)return b?0:k.slice(0);h=a,i=[],j=d.preFilter;while(h){(!c||(e=S.exec(h)))&&(e&&(h=h.slice(e[0].length)||h),i.push(f=[])),c=!1,(e=T.exec(h))&&(c=e.shift(),f.push({value:c,type:e[0].replace(R," ")}),h=h.slice(c.length));for(g in d.filter)!(e=X[g].exec(h))||j[g]&&!(e=j[g](e))||(c=e.shift(),f.push({value:c,type:g,matches:e}),h=h.slice(c.length));if(!c)break}return b?h.length:h?ga.error(a):z(a,i).slice(0)};function ra(a){for(var b=0,c=a.length,d="";c>b;b++)d+=a[b].value;return d}function sa(a,b,c){var d=b.dir,e=c&&"parentNode"===d,f=x++;return b.first?function(b,c,f){while(b=b[d])if(1===b.nodeType||e)return a(b,c,f)}:function(b,c,g){var h,i,j=[w,f];if(g){while(b=b[d])if((1===b.nodeType||e)&&a(b,c,g))return!0}else while(b=b[d])if(1===b.nodeType||e){if(i=b[u]||(b[u]={}),(h=i[d])&&h[0]===w&&h[1]===f)return j[2]=h[2];if(i[d]=j,j[2]=a(b,c,g))return!0}}}function ta(a){return a.length>1?function(b,c,d){var e=a.length;while(e--)if(!a[e](b,c,d))return!1;return!0}:a[0]}function ua(a,b,c){for(var d=0,e=b.length;e>d;d++)ga(a,b[d],c);return c}function va(a,b,c,d,e){for(var f,g=[],h=0,i=a.length,j=null!=b;i>h;h++)(f=a[h])&&(!c||c(f,d,e))&&(g.push(f),j&&b.push(h));return g}function wa(a,b,c,d,e,f){return d&&!d[u]&&(d=wa(d)),e&&!e[u]&&(e=wa(e,f)),ia(function(f,g,h,i){var j,k,l,m=[],n=[],o=g.length,p=f||ua(b||"*",h.nodeType?[h]:h,[]),q=!a||!f&&b?p:va(p,m,a,h,i),r=c?e||(f?a:o||d)?[]:g:q;if(c&&c(q,r,h,i),d){j=va(r,n),d(j,[],h,i),k=j.length;while(k--)(l=j[k])&&(r[n[k]]=!(q[n[k]]=l))}if(f){if(e||a){if(e){j=[],k=r.length;while(k--)(l=r[k])&&j.push(q[k]=l);e(null,r=[],j,i)}k=r.length;while(k--)(l=r[k])&&(j=e?J(f,l):m[k])>-1&&(f[j]=!(g[j]=l))}}else r=va(r===g?r.splice(o,r.length):r),e?e(null,g,r,i):H.apply(g,r)})}function xa(a){for(var b,c,e,f=a.length,g=d.relative[a[0].type],h=g||d.relative[" "],i=g?1:0,k=sa(function(a){return a===b},h,!0),l=sa(function(a){return J(b,a)>-1},h,!0),m=[function(a,c,d){var e=!g&&(d||c!==j)||((b=c).nodeType?k(a,c,d):l(a,c,d));return b=null,e}];f>i;i++)if(c=d.relative[a[i].type])m=[sa(ta(m),c)];else{if(c=d.filter[a[i].type].apply(null,a[i].matches),c[u]){for(e=++i;f>e;e++)if(d.relative[a[e].type])break;return wa(i>1&&ta(m),i>1&&ra(a.slice(0,i-1).concat({value:" "===a[i-2].type?"*":""})).replace(R,"$1"),c,e>i&&xa(a.slice(i,e)),f>e&&xa(a=a.slice(e)),f>e&&ra(a))}m.push(c)}return ta(m)}function ya(a,b){var c=b.length>0,e=a.length>0,f=function(f,g,h,i,k){var l,m,o,p=0,q="0",r=f&&[],s=[],t=j,u=f||e&&d.find.TAG("*",k),v=w+=null==t?1:Math.random()||.1,x=u.length;for(k&&(j=g!==n&&g);q!==x&&null!=(l=u[q]);q++){if(e&&l){m=0;while(o=a[m++])if(o(l,g,h)){i.push(l);break}k&&(w=v)}c&&((l=!o&&l)&&p--,f&&r.push(l))}if(p+=q,c&&q!==p){m=0;while(o=b[m++])o(r,s,g,h);if(f){if(p>0)while(q--)r[q]||s[q]||(s[q]=F.call(i));s=va(s)}H.apply(i,s),k&&!f&&s.length>0&&p+b.length>1&&ga.uniqueSort(i)}return k&&(w=v,j=t),r};return c?ia(f):f}return h=ga.compile=function(a,b){var c,d=[],e=[],f=A[a+" "];if(!f){b||(b=g(a)),c=b.length;while(c--)f=xa(b[c]),f[u]?d.push(f):e.push(f);f=A(a,ya(e,d)),f.selector=a}return f},i=ga.select=function(a,b,e,f){var i,j,k,l,m,n="function"==typeof a&&a,o=!f&&g(a=n.selector||a);if(e=e||[],1===o.length){if(j=o[0]=o[0].slice(0),j.length>2&&"ID"===(k=j[0]).type&&c.getById&&9===b.nodeType&&p&&d.relative[j[1].type]){if(b=(d.find.ID(k.matches[0].replace(ca,da),b)||[])[0],!b)return e;n&&(b=b.parentNode),a=a.slice(j.shift().value.length)}i=X.needsContext.test(a)?0:j.length;while(i--){if(k=j[i],d.relative[l=k.type])break;if((m=d.find[l])&&(f=m(k.matches[0].replace(ca,da),aa.test(j[0].type)&&pa(b.parentNode)||b))){if(j.splice(i,1),a=f.length&&ra(j),!a)return H.apply(e,f),e;break}}}return(n||h(a,o))(f,b,!p,e,aa.test(a)&&pa(b.parentNode)||b),e},c.sortStable=u.split("").sort(B).join("")===u,c.detectDuplicates=!!l,m(),c.sortDetached=ja(function(a){return 1&a.compareDocumentPosition(n.createElement("div"))}),ja(function(a){return a.innerHTML="<a href='#'></a>","#"===a.firstChild.getAttribute("href")})||ka("type|href|height|width",function(a,b,c){return c?void 0:a.getAttribute(b,"type"===b.toLowerCase()?1:2)}),c.attributes&&ja(function(a){return a.innerHTML="<input/>",a.firstChild.setAttribute("value",""),""===a.firstChild.getAttribute("value")})||ka("value",function(a,b,c){return c||"input"!==a.nodeName.toLowerCase()?void 0:a.defaultValue}),ja(function(a){return null==a.getAttribute("disabled")})||ka(K,function(a,b,c){var d;return c?void 0:a[b]===!0?b.toLowerCase():(d=a.getAttributeNode(b))&&d.specified?d.value:null}),ga}(a);n.find=t,n.expr=t.selectors,n.expr[":"]=n.expr.pseudos,n.unique=t.uniqueSort,n.text=t.getText,n.isXMLDoc=t.isXML,n.contains=t.contains;var u=n.expr.match.needsContext,v=/^<(\w+)\s*\/?>(?:<\/\1>|)$/,w=/^.[^:#\[\.,]*$/;function x(a,b,c){if(n.isFunction(b))return n.grep(a,function(a,d){return!!b.call(a,d,a)!==c});if(b.nodeType)return n.grep(a,function(a){return a===b!==c});if("string"==typeof b){if(w.test(b))return n.filter(b,a,c);b=n.filter(b,a)}return n.grep(a,function(a){return g.call(b,a)>=0!==c})}n.filter=function(a,b,c){var d=b[0];return c&&(a=":not("+a+")"),1===b.length&&1===d.nodeType?n.find.matchesSelector(d,a)?[d]:[]:n.find.matches(a,n.grep(b,function(a){return 1===a.nodeType}))},n.fn.extend({find:function(a){var b,c=this.length,d=[],e=this;if("string"!=typeof a)return this.pushStack(n(a).filter(function(){for(b=0;c>b;b++)if(n.contains(e[b],this))return!0}));for(b=0;c>b;b++)n.find(a,e[b],d);return d=this.pushStack(c>1?n.unique(d):d),d.selector=this.selector?this.selector+" "+a:a,d},filter:function(a){return this.pushStack(x(this,a||[],!1))},not:function(a){return this.pushStack(x(this,a||[],!0))},is:function(a){return!!x(this,"string"==typeof a&&u.test(a)?n(a):a||[],!1).length}});var y,z=/^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,A=n.fn.init=function(a,b){var c,d;if(!a)return this;if("string"==typeof a){if(c="<"===a[0]&&">"===a[a.length-1]&&a.length>=3?[null,a,null]:z.exec(a),!c||!c[1]&&b)return!b||b.jquery?(b||y).find(a):this.constructor(b).find(a);if(c[1]){if(b=b instanceof n?b[0]:b,n.merge(this,n.parseHTML(c[1],b&&b.nodeType?b.ownerDocument||b:l,!0)),v.test(c[1])&&n.isPlainObject(b))for(c in b)n.isFunction(this[c])?this[c](b[c]):this.attr(c,b[c]);return this}return d=l.getElementById(c[2]),d&&d.parentNode&&(this.length=1,this[0]=d),this.context=l,this.selector=a,this}return a.nodeType?(this.context=this[0]=a,this.length=1,this):n.isFunction(a)?"undefined"!=typeof y.ready?y.ready(a):a(n):(void 0!==a.selector&&(this.selector=a.selector,this.context=a.context),n.makeArray(a,this))};A.prototype=n.fn,y=n(l);var B=/^(?:parents|prev(?:Until|All))/,C={children:!0,contents:!0,next:!0,prev:!0};n.extend({dir:function(a,b,c){var d=[],e=void 0!==c;while((a=a[b])&&9!==a.nodeType)if(1===a.nodeType){if(e&&n(a).is(c))break;d.push(a)}return d},sibling:function(a,b){for(var c=[];a;a=a.nextSibling)1===a.nodeType&&a!==b&&c.push(a);return c}}),n.fn.extend({has:function(a){var b=n(a,this),c=b.length;return this.filter(function(){for(var a=0;c>a;a++)if(n.contains(this,b[a]))return!0})},closest:function(a,b){for(var c,d=0,e=this.length,f=[],g=u.test(a)||"string"!=typeof a?n(a,b||this.context):0;e>d;d++)for(c=this[d];c&&c!==b;c=c.parentNode)if(c.nodeType<11&&(g?g.index(c)>-1:1===c.nodeType&&n.find.matchesSelector(c,a))){f.push(c);break}return this.pushStack(f.length>1?n.unique(f):f)},index:function(a){return a?"string"==typeof a?g.call(n(a),this[0]):g.call(this,a.jquery?a[0]:a):this[0]&&this[0].parentNode?this.first().prevAll().length:-1},add:function(a,b){return this.pushStack(n.unique(n.merge(this.get(),n(a,b))))},addBack:function(a){return this.add(null==a?this.prevObject:this.prevObject.filter(a))}});function D(a,b){while((a=a[b])&&1!==a.nodeType);return a}n.each({parent:function(a){var b=a.parentNode;return b&&11!==b.nodeType?b:null},parents:function(a){return n.dir(a,"parentNode")},parentsUntil:function(a,b,c){return n.dir(a,"parentNode",c)},next:function(a){return D(a,"nextSibling")},prev:function(a){return D(a,"previousSibling")},nextAll:function(a){return n.dir(a,"nextSibling")},prevAll:function(a){return n.dir(a,"previousSibling")},nextUntil:function(a,b,c){return n.dir(a,"nextSibling",c)},prevUntil:function(a,b,c){return n.dir(a,"previousSibling",c)},siblings:function(a){return n.sibling((a.parentNode||{}).firstChild,a)},children:function(a){return n.sibling(a.firstChild)},contents:function(a){return a.contentDocument||n.merge([],a.childNodes)}},function(a,b){n.fn[a]=function(c,d){var e=n.map(this,b,c);return"Until"!==a.slice(-5)&&(d=c),d&&"string"==typeof d&&(e=n.filter(d,e)),this.length>1&&(C[a]||n.unique(e),B.test(a)&&e.reverse()),this.pushStack(e)}});var E=/\S+/g,F={};function G(a){var b=F[a]={};return n.each(a.match(E)||[],function(a,c){b[c]=!0}),b}n.Callbacks=function(a){a="string"==typeof a?F[a]||G(a):n.extend({},a);var b,c,d,e,f,g,h=[],i=!a.once&&[],j=function(l){for(b=a.memory&&l,c=!0,g=e||0,e=0,f=h.length,d=!0;h&&f>g;g++)if(h[g].apply(l[0],l[1])===!1&&a.stopOnFalse){b=!1;break}d=!1,h&&(i?i.length&&j(i.shift()):b?h=[]:k.disable())},k={add:function(){if(h){var c=h.length;!function g(b){n.each(b,function(b,c){var d=n.type(c);"function"===d?a.unique&&k.has(c)||h.push(c):c&&c.length&&"string"!==d&&g(c)})}(arguments),d?f=h.length:b&&(e=c,j(b))}return this},remove:function(){return h&&n.each(arguments,function(a,b){var c;while((c=n.inArray(b,h,c))>-1)h.splice(c,1),d&&(f>=c&&f--,g>=c&&g--)}),this},has:function(a){return a?n.inArray(a,h)>-1:!(!h||!h.length)},empty:function(){return h=[],f=0,this},disable:function(){return h=i=b=void 0,this},disabled:function(){return!h},lock:function(){return i=void 0,b||k.disable(),this},locked:function(){return!i},fireWith:function(a,b){return!h||c&&!i||(b=b||[],b=[a,b.slice?b.slice():b],d?i.push(b):j(b)),this},fire:function(){return k.fireWith(this,arguments),this},fired:function(){return!!c}};return k},n.extend({Deferred:function(a){var b=[["resolve","done",n.Callbacks("once memory"),"resolved"],["reject","fail",n.Callbacks("once memory"),"rejected"],["notify","progress",n.Callbacks("memory")]],c="pending",d={state:function(){return c},always:function(){return e.done(arguments).fail(arguments),this},then:function(){var a=arguments;return n.Deferred(function(c){n.each(b,function(b,f){var g=n.isFunction(a[b])&&a[b];e[f[1]](function(){var a=g&&g.apply(this,arguments);a&&n.isFunction(a.promise)?a.promise().done(c.resolve).fail(c.reject).progress(c.notify):c[f[0]+"With"](this===d?c.promise():this,g?[a]:arguments)})}),a=null}).promise()},promise:function(a){return null!=a?n.extend(a,d):d}},e={};return d.pipe=d.then,n.each(b,function(a,f){var g=f[2],h=f[3];d[f[1]]=g.add,h&&g.add(function(){c=h},b[1^a][2].disable,b[2][2].lock),e[f[0]]=function(){return e[f[0]+"With"](this===e?d:this,arguments),this},e[f[0]+"With"]=g.fireWith}),d.promise(e),a&&a.call(e,e),e},when:function(a){var b=0,c=d.call(arguments),e=c.length,f=1!==e||a&&n.isFunction(a.promise)?e:0,g=1===f?a:n.Deferred(),h=function(a,b,c){return function(e){b[a]=this,c[a]=arguments.length>1?d.call(arguments):e,c===i?g.notifyWith(b,c):--f||g.resolveWith(b,c)}},i,j,k;if(e>1)for(i=new Array(e),j=new Array(e),k=new Array(e);e>b;b++)c[b]&&n.isFunction(c[b].promise)?c[b].promise().done(h(b,k,c)).fail(g.reject).progress(h(b,j,i)):--f;return f||g.resolveWith(k,c),g.promise()}});var H;n.fn.ready=function(a){return n.ready.promise().done(a),this},n.extend({isReady:!1,readyWait:1,holdReady:function(a){a?n.readyWait++:n.ready(!0)},ready:function(a){(a===!0?--n.readyWait:n.isReady)||(n.isReady=!0,a!==!0&&--n.readyWait>0||(H.resolveWith(l,[n]),n.fn.triggerHandler&&(n(l).triggerHandler("ready"),n(l).off("ready"))))}});function I(){l.removeEventListener("DOMContentLoaded",I,!1),a.removeEventListener("load",I,!1),n.ready()}n.ready.promise=function(b){return H||(H=n.Deferred(),"complete"===l.readyState?setTimeout(n.ready):(l.addEventListener("DOMContentLoaded",I,!1),a.addEventListener("load",I,!1))),H.promise(b)},n.ready.promise();var J=n.access=function(a,b,c,d,e,f,g){var h=0,i=a.length,j=null==c;if("object"===n.type(c)){e=!0;for(h in c)n.access(a,b,h,c[h],!0,f,g)}else if(void 0!==d&&(e=!0,n.isFunction(d)||(g=!0),j&&(g?(b.call(a,d),b=null):(j=b,b=function(a,b,c){return j.call(n(a),c)})),b))for(;i>h;h++)b(a[h],c,g?d:d.call(a[h],h,b(a[h],c)));return e?a:j?b.call(a):i?b(a[0],c):f};n.acceptData=function(a){return 1===a.nodeType||9===a.nodeType||!+a.nodeType};function K(){Object.defineProperty(this.cache={},0,{get:function(){return{}}}),this.expando=n.expando+K.uid++}K.uid=1,K.accepts=n.acceptData,K.prototype={key:function(a){if(!K.accepts(a))return 0;var b={},c=a[this.expando];if(!c){c=K.uid++;try{b[this.expando]={value:c},Object.defineProperties(a,b)}catch(d){b[this.expando]=c,n.extend(a,b)}}return this.cache[c]||(this.cache[c]={}),c},set:function(a,b,c){var d,e=this.key(a),f=this.cache[e];if("string"==typeof b)f[b]=c;else if(n.isEmptyObject(f))n.extend(this.cache[e],b);else for(d in b)f[d]=b[d];return f},get:function(a,b){var c=this.cache[this.key(a)];return void 0===b?c:c[b]},access:function(a,b,c){var d;return void 0===b||b&&"string"==typeof b&&void 0===c?(d=this.get(a,b),void 0!==d?d:this.get(a,n.camelCase(b))):(this.set(a,b,c),void 0!==c?c:b)},remove:function(a,b){var c,d,e,f=this.key(a),g=this.cache[f];if(void 0===b)this.cache[f]={};else{n.isArray(b)?d=b.concat(b.map(n.camelCase)):(e=n.camelCase(b),b in g?d=[b,e]:(d=e,d=d in g?[d]:d.match(E)||[])),c=d.length;while(c--)delete g[d[c]]}},hasData:function(a){return!n.isEmptyObject(this.cache[a[this.expando]]||{})},discard:function(a){a[this.expando]&&delete this.cache[a[this.expando]]}};var L=new K,M=new K,N=/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,O=/([A-Z])/g;function P(a,b,c){var d;if(void 0===c&&1===a.nodeType)if(d="data-"+b.replace(O,"-$1").toLowerCase(),c=a.getAttribute(d),"string"==typeof c){try{c="true"===c?!0:"false"===c?!1:"null"===c?null:+c+""===c?+c:N.test(c)?n.parseJSON(c):c}catch(e){}M.set(a,b,c)}else c=void 0;return c}n.extend({hasData:function(a){return M.hasData(a)||L.hasData(a)},data:function(a,b,c){
-return M.access(a,b,c)},removeData:function(a,b){M.remove(a,b)},_data:function(a,b,c){return L.access(a,b,c)},_removeData:function(a,b){L.remove(a,b)}}),n.fn.extend({data:function(a,b){var c,d,e,f=this[0],g=f&&f.attributes;if(void 0===a){if(this.length&&(e=M.get(f),1===f.nodeType&&!L.get(f,"hasDataAttrs"))){c=g.length;while(c--)g[c]&&(d=g[c].name,0===d.indexOf("data-")&&(d=n.camelCase(d.slice(5)),P(f,d,e[d])));L.set(f,"hasDataAttrs",!0)}return e}return"object"==typeof a?this.each(function(){M.set(this,a)}):J(this,function(b){var c,d=n.camelCase(a);if(f&&void 0===b){if(c=M.get(f,a),void 0!==c)return c;if(c=M.get(f,d),void 0!==c)return c;if(c=P(f,d,void 0),void 0!==c)return c}else this.each(function(){var c=M.get(this,d);M.set(this,d,b),-1!==a.indexOf("-")&&void 0!==c&&M.set(this,a,b)})},null,b,arguments.length>1,null,!0)},removeData:function(a){return this.each(function(){M.remove(this,a)})}}),n.extend({queue:function(a,b,c){var d;return a?(b=(b||"fx")+"queue",d=L.get(a,b),c&&(!d||n.isArray(c)?d=L.access(a,b,n.makeArray(c)):d.push(c)),d||[]):void 0},dequeue:function(a,b){b=b||"fx";var c=n.queue(a,b),d=c.length,e=c.shift(),f=n._queueHooks(a,b),g=function(){n.dequeue(a,b)};"inprogress"===e&&(e=c.shift(),d--),e&&("fx"===b&&c.unshift("inprogress"),delete f.stop,e.call(a,g,f)),!d&&f&&f.empty.fire()},_queueHooks:function(a,b){var c=b+"queueHooks";return L.get(a,c)||L.access(a,c,{empty:n.Callbacks("once memory").add(function(){L.remove(a,[b+"queue",c])})})}}),n.fn.extend({queue:function(a,b){var c=2;return"string"!=typeof a&&(b=a,a="fx",c--),arguments.length<c?n.queue(this[0],a):void 0===b?this:this.each(function(){var c=n.queue(this,a,b);n._queueHooks(this,a),"fx"===a&&"inprogress"!==c[0]&&n.dequeue(this,a)})},dequeue:function(a){return this.each(function(){n.dequeue(this,a)})},clearQueue:function(a){return this.queue(a||"fx",[])},promise:function(a,b){var c,d=1,e=n.Deferred(),f=this,g=this.length,h=function(){--d||e.resolveWith(f,[f])};"string"!=typeof a&&(b=a,a=void 0),a=a||"fx";while(g--)c=L.get(f[g],a+"queueHooks"),c&&c.empty&&(d++,c.empty.add(h));return h(),e.promise(b)}});var Q=/[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,R=["Top","Right","Bottom","Left"],S=function(a,b){return a=b||a,"none"===n.css(a,"display")||!n.contains(a.ownerDocument,a)},T=/^(?:checkbox|radio)$/i;!function(){var a=l.createDocumentFragment(),b=a.appendChild(l.createElement("div")),c=l.createElement("input");c.setAttribute("type","radio"),c.setAttribute("checked","checked"),c.setAttribute("name","t"),b.appendChild(c),k.checkClone=b.cloneNode(!0).cloneNode(!0).lastChild.checked,b.innerHTML="<textarea>x</textarea>",k.noCloneChecked=!!b.cloneNode(!0).lastChild.defaultValue}();var U="undefined";k.focusinBubbles="onfocusin"in a;var V=/^key/,W=/^(?:mouse|pointer|contextmenu)|click/,X=/^(?:focusinfocus|focusoutblur)$/,Y=/^([^.]*)(?:\.(.+)|)$/;function Z(){return!0}function $(){return!1}function _(){try{return l.activeElement}catch(a){}}n.event={global:{},add:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,o,p,q,r=L.get(a);if(r){c.handler&&(f=c,c=f.handler,e=f.selector),c.guid||(c.guid=n.guid++),(i=r.events)||(i=r.events={}),(g=r.handle)||(g=r.handle=function(b){return typeof n!==U&&n.event.triggered!==b.type?n.event.dispatch.apply(a,arguments):void 0}),b=(b||"").match(E)||[""],j=b.length;while(j--)h=Y.exec(b[j])||[],o=q=h[1],p=(h[2]||"").split(".").sort(),o&&(l=n.event.special[o]||{},o=(e?l.delegateType:l.bindType)||o,l=n.event.special[o]||{},k=n.extend({type:o,origType:q,data:d,handler:c,guid:c.guid,selector:e,needsContext:e&&n.expr.match.needsContext.test(e),namespace:p.join(".")},f),(m=i[o])||(m=i[o]=[],m.delegateCount=0,l.setup&&l.setup.call(a,d,p,g)!==!1||a.addEventListener&&a.addEventListener(o,g,!1)),l.add&&(l.add.call(a,k),k.handler.guid||(k.handler.guid=c.guid)),e?m.splice(m.delegateCount++,0,k):m.push(k),n.event.global[o]=!0)}},remove:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,o,p,q,r=L.hasData(a)&&L.get(a);if(r&&(i=r.events)){b=(b||"").match(E)||[""],j=b.length;while(j--)if(h=Y.exec(b[j])||[],o=q=h[1],p=(h[2]||"").split(".").sort(),o){l=n.event.special[o]||{},o=(d?l.delegateType:l.bindType)||o,m=i[o]||[],h=h[2]&&new RegExp("(^|\\.)"+p.join("\\.(?:.*\\.|)")+"(\\.|$)"),g=f=m.length;while(f--)k=m[f],!e&&q!==k.origType||c&&c.guid!==k.guid||h&&!h.test(k.namespace)||d&&d!==k.selector&&("**"!==d||!k.selector)||(m.splice(f,1),k.selector&&m.delegateCount--,l.remove&&l.remove.call(a,k));g&&!m.length&&(l.teardown&&l.teardown.call(a,p,r.handle)!==!1||n.removeEvent(a,o,r.handle),delete i[o])}else for(o in i)n.event.remove(a,o+b[j],c,d,!0);n.isEmptyObject(i)&&(delete r.handle,L.remove(a,"events"))}},trigger:function(b,c,d,e){var f,g,h,i,k,m,o,p=[d||l],q=j.call(b,"type")?b.type:b,r=j.call(b,"namespace")?b.namespace.split("."):[];if(g=h=d=d||l,3!==d.nodeType&&8!==d.nodeType&&!X.test(q+n.event.triggered)&&(q.indexOf(".")>=0&&(r=q.split("."),q=r.shift(),r.sort()),k=q.indexOf(":")<0&&"on"+q,b=b[n.expando]?b:new n.Event(q,"object"==typeof b&&b),b.isTrigger=e?2:3,b.namespace=r.join("."),b.namespace_re=b.namespace?new RegExp("(^|\\.)"+r.join("\\.(?:.*\\.|)")+"(\\.|$)"):null,b.result=void 0,b.target||(b.target=d),c=null==c?[b]:n.makeArray(c,[b]),o=n.event.special[q]||{},e||!o.trigger||o.trigger.apply(d,c)!==!1)){if(!e&&!o.noBubble&&!n.isWindow(d)){for(i=o.delegateType||q,X.test(i+q)||(g=g.parentNode);g;g=g.parentNode)p.push(g),h=g;h===(d.ownerDocument||l)&&p.push(h.defaultView||h.parentWindow||a)}f=0;while((g=p[f++])&&!b.isPropagationStopped())b.type=f>1?i:o.bindType||q,m=(L.get(g,"events")||{})[b.type]&&L.get(g,"handle"),m&&m.apply(g,c),m=k&&g[k],m&&m.apply&&n.acceptData(g)&&(b.result=m.apply(g,c),b.result===!1&&b.preventDefault());return b.type=q,e||b.isDefaultPrevented()||o._default&&o._default.apply(p.pop(),c)!==!1||!n.acceptData(d)||k&&n.isFunction(d[q])&&!n.isWindow(d)&&(h=d[k],h&&(d[k]=null),n.event.triggered=q,d[q](),n.event.triggered=void 0,h&&(d[k]=h)),b.result}},dispatch:function(a){a=n.event.fix(a);var b,c,e,f,g,h=[],i=d.call(arguments),j=(L.get(this,"events")||{})[a.type]||[],k=n.event.special[a.type]||{};if(i[0]=a,a.delegateTarget=this,!k.preDispatch||k.preDispatch.call(this,a)!==!1){h=n.event.handlers.call(this,a,j),b=0;while((f=h[b++])&&!a.isPropagationStopped()){a.currentTarget=f.elem,c=0;while((g=f.handlers[c++])&&!a.isImmediatePropagationStopped())(!a.namespace_re||a.namespace_re.test(g.namespace))&&(a.handleObj=g,a.data=g.data,e=((n.event.special[g.origType]||{}).handle||g.handler).apply(f.elem,i),void 0!==e&&(a.result=e)===!1&&(a.preventDefault(),a.stopPropagation()))}return k.postDispatch&&k.postDispatch.call(this,a),a.result}},handlers:function(a,b){var c,d,e,f,g=[],h=b.delegateCount,i=a.target;if(h&&i.nodeType&&(!a.button||"click"!==a.type))for(;i!==this;i=i.parentNode||this)if(i.disabled!==!0||"click"!==a.type){for(d=[],c=0;h>c;c++)f=b[c],e=f.selector+" ",void 0===d[e]&&(d[e]=f.needsContext?n(e,this).index(i)>=0:n.find(e,this,null,[i]).length),d[e]&&d.push(f);d.length&&g.push({elem:i,handlers:d})}return h<b.length&&g.push({elem:this,handlers:b.slice(h)}),g},props:"altKey bubbles cancelable ctrlKey currentTarget eventPhase metaKey relatedTarget shiftKey target timeStamp view which".split(" "),fixHooks:{},keyHooks:{props:"char charCode key keyCode".split(" "),filter:function(a,b){return null==a.which&&(a.which=null!=b.charCode?b.charCode:b.keyCode),a}},mouseHooks:{props:"button buttons clientX clientY offsetX offsetY pageX pageY screenX screenY toElement".split(" "),filter:function(a,b){var c,d,e,f=b.button;return null==a.pageX&&null!=b.clientX&&(c=a.target.ownerDocument||l,d=c.documentElement,e=c.body,a.pageX=b.clientX+(d&&d.scrollLeft||e&&e.scrollLeft||0)-(d&&d.clientLeft||e&&e.clientLeft||0),a.pageY=b.clientY+(d&&d.scrollTop||e&&e.scrollTop||0)-(d&&d.clientTop||e&&e.clientTop||0)),a.which||void 0===f||(a.which=1&f?1:2&f?3:4&f?2:0),a}},fix:function(a){if(a[n.expando])return a;var b,c,d,e=a.type,f=a,g=this.fixHooks[e];g||(this.fixHooks[e]=g=W.test(e)?this.mouseHooks:V.test(e)?this.keyHooks:{}),d=g.props?this.props.concat(g.props):this.props,a=new n.Event(f),b=d.length;while(b--)c=d[b],a[c]=f[c];return a.target||(a.target=l),3===a.target.nodeType&&(a.target=a.target.parentNode),g.filter?g.filter(a,f):a},special:{load:{noBubble:!0},focus:{trigger:function(){return this!==_()&&this.focus?(this.focus(),!1):void 0},delegateType:"focusin"},blur:{trigger:function(){return this===_()&&this.blur?(this.blur(),!1):void 0},delegateType:"focusout"},click:{trigger:function(){return"checkbox"===this.type&&this.click&&n.nodeName(this,"input")?(this.click(),!1):void 0},_default:function(a){return n.nodeName(a.target,"a")}},beforeunload:{postDispatch:function(a){void 0!==a.result&&a.originalEvent&&(a.originalEvent.returnValue=a.result)}}},simulate:function(a,b,c,d){var e=n.extend(new n.Event,c,{type:a,isSimulated:!0,originalEvent:{}});d?n.event.trigger(e,null,b):n.event.dispatch.call(b,e),e.isDefaultPrevented()&&c.preventDefault()}},n.removeEvent=function(a,b,c){a.removeEventListener&&a.removeEventListener(b,c,!1)},n.Event=function(a,b){return this instanceof n.Event?(a&&a.type?(this.originalEvent=a,this.type=a.type,this.isDefaultPrevented=a.defaultPrevented||void 0===a.defaultPrevented&&a.returnValue===!1?Z:$):this.type=a,b&&n.extend(this,b),this.timeStamp=a&&a.timeStamp||n.now(),void(this[n.expando]=!0)):new n.Event(a,b)},n.Event.prototype={isDefaultPrevented:$,isPropagationStopped:$,isImmediatePropagationStopped:$,preventDefault:function(){var a=this.originalEvent;this.isDefaultPrevented=Z,a&&a.preventDefault&&a.preventDefault()},stopPropagation:function(){var a=this.originalEvent;this.isPropagationStopped=Z,a&&a.stopPropagation&&a.stopPropagation()},stopImmediatePropagation:function(){var a=this.originalEvent;this.isImmediatePropagationStopped=Z,a&&a.stopImmediatePropagation&&a.stopImmediatePropagation(),this.stopPropagation()}},n.each({mouseenter:"mouseover",mouseleave:"mouseout",pointerenter:"pointerover",pointerleave:"pointerout"},function(a,b){n.event.special[a]={delegateType:b,bindType:b,handle:function(a){var c,d=this,e=a.relatedTarget,f=a.handleObj;return(!e||e!==d&&!n.contains(d,e))&&(a.type=f.origType,c=f.handler.apply(this,arguments),a.type=b),c}}}),k.focusinBubbles||n.each({focus:"focusin",blur:"focusout"},function(a,b){var c=function(a){n.event.simulate(b,a.target,n.event.fix(a),!0)};n.event.special[b]={setup:function(){var d=this.ownerDocument||this,e=L.access(d,b);e||d.addEventListener(a,c,!0),L.access(d,b,(e||0)+1)},teardown:function(){var d=this.ownerDocument||this,e=L.access(d,b)-1;e?L.access(d,b,e):(d.removeEventListener(a,c,!0),L.remove(d,b))}}}),n.fn.extend({on:function(a,b,c,d,e){var f,g;if("object"==typeof a){"string"!=typeof b&&(c=c||b,b=void 0);for(g in a)this.on(g,b,c,a[g],e);return this}if(null==c&&null==d?(d=b,c=b=void 0):null==d&&("string"==typeof b?(d=c,c=void 0):(d=c,c=b,b=void 0)),d===!1)d=$;else if(!d)return this;return 1===e&&(f=d,d=function(a){return n().off(a),f.apply(this,arguments)},d.guid=f.guid||(f.guid=n.guid++)),this.each(function(){n.event.add(this,a,d,c,b)})},one:function(a,b,c,d){return this.on(a,b,c,d,1)},off:function(a,b,c){var d,e;if(a&&a.preventDefault&&a.handleObj)return d=a.handleObj,n(a.delegateTarget).off(d.namespace?d.origType+"."+d.namespace:d.origType,d.selector,d.handler),this;if("object"==typeof a){for(e in a)this.off(e,b,a[e]);return this}return(b===!1||"function"==typeof b)&&(c=b,b=void 0),c===!1&&(c=$),this.each(function(){n.event.remove(this,a,c,b)})},trigger:function(a,b){return this.each(function(){n.event.trigger(a,b,this)})},triggerHandler:function(a,b){var c=this[0];return c?n.event.trigger(a,b,c,!0):void 0}});var aa=/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi,ba=/<([\w:]+)/,ca=/<|&#?\w+;/,da=/<(?:script|style|link)/i,ea=/checked\s*(?:[^=]|=\s*.checked.)/i,fa=/^$|\/(?:java|ecma)script/i,ga=/^true\/(.*)/,ha=/^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g,ia={option:[1,"<select multiple='multiple'>","</select>"],thead:[1,"<table>","</table>"],col:[2,"<table><colgroup>","</colgroup></table>"],tr:[2,"<table><tbody>","</tbody></table>"],td:[3,"<table><tbody><tr>","</tr></tbody></table>"],_default:[0,"",""]};ia.optgroup=ia.option,ia.tbody=ia.tfoot=ia.colgroup=ia.caption=ia.thead,ia.th=ia.td;function ja(a,b){return n.nodeName(a,"table")&&n.nodeName(11!==b.nodeType?b:b.firstChild,"tr")?a.getElementsByTagName("tbody")[0]||a.appendChild(a.ownerDocument.createElement("tbody")):a}function ka(a){return a.type=(null!==a.getAttribute("type"))+"/"+a.type,a}function la(a){var b=ga.exec(a.type);return b?a.type=b[1]:a.removeAttribute("type"),a}function ma(a,b){for(var c=0,d=a.length;d>c;c++)L.set(a[c],"globalEval",!b||L.get(b[c],"globalEval"))}function na(a,b){var c,d,e,f,g,h,i,j;if(1===b.nodeType){if(L.hasData(a)&&(f=L.access(a),g=L.set(b,f),j=f.events)){delete g.handle,g.events={};for(e in j)for(c=0,d=j[e].length;d>c;c++)n.event.add(b,e,j[e][c])}M.hasData(a)&&(h=M.access(a),i=n.extend({},h),M.set(b,i))}}function oa(a,b){var c=a.getElementsByTagName?a.getElementsByTagName(b||"*"):a.querySelectorAll?a.querySelectorAll(b||"*"):[];return void 0===b||b&&n.nodeName(a,b)?n.merge([a],c):c}function pa(a,b){var c=b.nodeName.toLowerCase();"input"===c&&T.test(a.type)?b.checked=a.checked:("input"===c||"textarea"===c)&&(b.defaultValue=a.defaultValue)}n.extend({clone:function(a,b,c){var d,e,f,g,h=a.cloneNode(!0),i=n.contains(a.ownerDocument,a);if(!(k.noCloneChecked||1!==a.nodeType&&11!==a.nodeType||n.isXMLDoc(a)))for(g=oa(h),f=oa(a),d=0,e=f.length;e>d;d++)pa(f[d],g[d]);if(b)if(c)for(f=f||oa(a),g=g||oa(h),d=0,e=f.length;e>d;d++)na(f[d],g[d]);else na(a,h);return g=oa(h,"script"),g.length>0&&ma(g,!i&&oa(a,"script")),h},buildFragment:function(a,b,c,d){for(var e,f,g,h,i,j,k=b.createDocumentFragment(),l=[],m=0,o=a.length;o>m;m++)if(e=a[m],e||0===e)if("object"===n.type(e))n.merge(l,e.nodeType?[e]:e);else if(ca.test(e)){f=f||k.appendChild(b.createElement("div")),g=(ba.exec(e)||["",""])[1].toLowerCase(),h=ia[g]||ia._default,f.innerHTML=h[1]+e.replace(aa,"<$1></$2>")+h[2],j=h[0];while(j--)f=f.lastChild;n.merge(l,f.childNodes),f=k.firstChild,f.textContent=""}else l.push(b.createTextNode(e));k.textContent="",m=0;while(e=l[m++])if((!d||-1===n.inArray(e,d))&&(i=n.contains(e.ownerDocument,e),f=oa(k.appendChild(e),"script"),i&&ma(f),c)){j=0;while(e=f[j++])fa.test(e.type||"")&&c.push(e)}return k},cleanData:function(a){for(var b,c,d,e,f=n.event.special,g=0;void 0!==(c=a[g]);g++){if(n.acceptData(c)&&(e=c[L.expando],e&&(b=L.cache[e]))){if(b.events)for(d in b.events)f[d]?n.event.remove(c,d):n.removeEvent(c,d,b.handle);L.cache[e]&&delete L.cache[e]}delete M.cache[c[M.expando]]}}}),n.fn.extend({text:function(a){return J(this,function(a){return void 0===a?n.text(this):this.empty().each(function(){(1===this.nodeType||11===this.nodeType||9===this.nodeType)&&(this.textContent=a)})},null,a,arguments.length)},append:function(){return this.domManip(arguments,function(a){if(1===this.nodeType||11===this.nodeType||9===this.nodeType){var b=ja(this,a);b.appendChild(a)}})},prepend:function(){return this.domManip(arguments,function(a){if(1===this.nodeType||11===this.nodeType||9===this.nodeType){var b=ja(this,a);b.insertBefore(a,b.firstChild)}})},before:function(){return this.domManip(arguments,function(a){this.parentNode&&this.parentNode.insertBefore(a,this)})},after:function(){return this.domManip(arguments,function(a){this.parentNode&&this.parentNode.insertBefore(a,this.nextSibling)})},remove:function(a,b){for(var c,d=a?n.filter(a,this):this,e=0;null!=(c=d[e]);e++)b||1!==c.nodeType||n.cleanData(oa(c)),c.parentNode&&(b&&n.contains(c.ownerDocument,c)&&ma(oa(c,"script")),c.parentNode.removeChild(c));return this},empty:function(){for(var a,b=0;null!=(a=this[b]);b++)1===a.nodeType&&(n.cleanData(oa(a,!1)),a.textContent="");return this},clone:function(a,b){return a=null==a?!1:a,b=null==b?a:b,this.map(function(){return n.clone(this,a,b)})},html:function(a){return J(this,function(a){var b=this[0]||{},c=0,d=this.length;if(void 0===a&&1===b.nodeType)return b.innerHTML;if("string"==typeof a&&!da.test(a)&&!ia[(ba.exec(a)||["",""])[1].toLowerCase()]){a=a.replace(aa,"<$1></$2>");try{for(;d>c;c++)b=this[c]||{},1===b.nodeType&&(n.cleanData(oa(b,!1)),b.innerHTML=a);b=0}catch(e){}}b&&this.empty().append(a)},null,a,arguments.length)},replaceWith:function(){var a=arguments[0];return this.domManip(arguments,function(b){a=this.parentNode,n.cleanData(oa(this)),a&&a.replaceChild(b,this)}),a&&(a.length||a.nodeType)?this:this.remove()},detach:function(a){return this.remove(a,!0)},domManip:function(a,b){a=e.apply([],a);var c,d,f,g,h,i,j=0,l=this.length,m=this,o=l-1,p=a[0],q=n.isFunction(p);if(q||l>1&&"string"==typeof p&&!k.checkClone&&ea.test(p))return this.each(function(c){var d=m.eq(c);q&&(a[0]=p.call(this,c,d.html())),d.domManip(a,b)});if(l&&(c=n.buildFragment(a,this[0].ownerDocument,!1,this),d=c.firstChild,1===c.childNodes.length&&(c=d),d)){for(f=n.map(oa(c,"script"),ka),g=f.length;l>j;j++)h=c,j!==o&&(h=n.clone(h,!0,!0),g&&n.merge(f,oa(h,"script"))),b.call(this[j],h,j);if(g)for(i=f[f.length-1].ownerDocument,n.map(f,la),j=0;g>j;j++)h=f[j],fa.test(h.type||"")&&!L.access(h,"globalEval")&&n.contains(i,h)&&(h.src?n._evalUrl&&n._evalUrl(h.src):n.globalEval(h.textContent.replace(ha,"")))}return this}}),n.each({appendTo:"append",prependTo:"prepend",insertBefore:"before",insertAfter:"after",replaceAll:"replaceWith"},function(a,b){n.fn[a]=function(a){for(var c,d=[],e=n(a),g=e.length-1,h=0;g>=h;h++)c=h===g?this:this.clone(!0),n(e[h])[b](c),f.apply(d,c.get());return this.pushStack(d)}});var qa,ra={};function sa(b,c){var d,e=n(c.createElement(b)).appendTo(c.body),f=a.getDefaultComputedStyle&&(d=a.getDefaultComputedStyle(e[0]))?d.display:n.css(e[0],"display");return e.detach(),f}function ta(a){var b=l,c=ra[a];return c||(c=sa(a,b),"none"!==c&&c||(qa=(qa||n("<iframe frameborder='0' width='0' height='0'/>")).appendTo(b.documentElement),b=qa[0].contentDocument,b.write(),b.close(),c=sa(a,b),qa.detach()),ra[a]=c),c}var ua=/^margin/,va=new RegExp("^("+Q+")(?!px)[a-z%]+$","i"),wa=function(b){return b.ownerDocument.defaultView.opener?b.ownerDocument.defaultView.getComputedStyle(b,null):a.getComputedStyle(b,null)};function xa(a,b,c){var d,e,f,g,h=a.style;return c=c||wa(a),c&&(g=c.getPropertyValue(b)||c[b]),c&&(""!==g||n.contains(a.ownerDocument,a)||(g=n.style(a,b)),va.test(g)&&ua.test(b)&&(d=h.width,e=h.minWidth,f=h.maxWidth,h.minWidth=h.maxWidth=h.width=g,g=c.width,h.width=d,h.minWidth=e,h.maxWidth=f)),void 0!==g?g+"":g}function ya(a,b){return{get:function(){return a()?void delete this.get:(this.get=b).apply(this,arguments)}}}!function(){var b,c,d=l.documentElement,e=l.createElement("div"),f=l.createElement("div");if(f.style){f.style.backgroundClip="content-box",f.cloneNode(!0).style.backgroundClip="",k.clearCloneStyle="content-box"===f.style.backgroundClip,e.style.cssText="border:0;width:0;height:0;top:0;left:-9999px;margin-top:1px;position:absolute",e.appendChild(f);function g(){f.style.cssText="-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;display:block;margin-top:1%;top:1%;border:1px;padding:1px;width:4px;position:absolute",f.innerHTML="",d.appendChild(e);var g=a.getComputedStyle(f,null);b="1%"!==g.top,c="4px"===g.width,d.removeChild(e)}a.getComputedStyle&&n.extend(k,{pixelPosition:function(){return g(),b},boxSizingReliable:function(){return null==c&&g(),c},reliableMarginRight:function(){var b,c=f.appendChild(l.createElement("div"));return c.style.cssText=f.style.cssText="-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;display:block;margin:0;border:0;padding:0",c.style.marginRight=c.style.width="0",f.style.width="1px",d.appendChild(e),b=!parseFloat(a.getComputedStyle(c,null).marginRight),d.removeChild(e),f.removeChild(c),b}})}}(),n.swap=function(a,b,c,d){var e,f,g={};for(f in b)g[f]=a.style[f],a.style[f]=b[f];e=c.apply(a,d||[]);for(f in b)a.style[f]=g[f];return e};var za=/^(none|table(?!-c[ea]).+)/,Aa=new RegExp("^("+Q+")(.*)$","i"),Ba=new RegExp("^([+-])=("+Q+")","i"),Ca={position:"absolute",visibility:"hidden",display:"block"},Da={letterSpacing:"0",fontWeight:"400"},Ea=["Webkit","O","Moz","ms"];function Fa(a,b){if(b in a)return b;var c=b[0].toUpperCase()+b.slice(1),d=b,e=Ea.length;while(e--)if(b=Ea[e]+c,b in a)return b;return d}function Ga(a,b,c){var d=Aa.exec(b);return d?Math.max(0,d[1]-(c||0))+(d[2]||"px"):b}function Ha(a,b,c,d,e){for(var f=c===(d?"border":"content")?4:"width"===b?1:0,g=0;4>f;f+=2)"margin"===c&&(g+=n.css(a,c+R[f],!0,e)),d?("content"===c&&(g-=n.css(a,"padding"+R[f],!0,e)),"margin"!==c&&(g-=n.css(a,"border"+R[f]+"Width",!0,e))):(g+=n.css(a,"padding"+R[f],!0,e),"padding"!==c&&(g+=n.css(a,"border"+R[f]+"Width",!0,e)));return g}function Ia(a,b,c){var d=!0,e="width"===b?a.offsetWidth:a.offsetHeight,f=wa(a),g="border-box"===n.css(a,"boxSizing",!1,f);if(0>=e||null==e){if(e=xa(a,b,f),(0>e||null==e)&&(e=a.style[b]),va.test(e))return e;d=g&&(k.boxSizingReliable()||e===a.style[b]),e=parseFloat(e)||0}return e+Ha(a,b,c||(g?"border":"content"),d,f)+"px"}function Ja(a,b){for(var c,d,e,f=[],g=0,h=a.length;h>g;g++)d=a[g],d.style&&(f[g]=L.get(d,"olddisplay"),c=d.style.display,b?(f[g]||"none"!==c||(d.style.display=""),""===d.style.display&&S(d)&&(f[g]=L.access(d,"olddisplay",ta(d.nodeName)))):(e=S(d),"none"===c&&e||L.set(d,"olddisplay",e?c:n.css(d,"display"))));for(g=0;h>g;g++)d=a[g],d.style&&(b&&"none"!==d.style.display&&""!==d.style.display||(d.style.display=b?f[g]||"":"none"));return a}n.extend({cssHooks:{opacity:{get:function(a,b){if(b){var c=xa(a,"opacity");return""===c?"1":c}}}},cssNumber:{columnCount:!0,fillOpacity:!0,flexGrow:!0,flexShrink:!0,fontWeight:!0,lineHeight:!0,opacity:!0,order:!0,orphans:!0,widows:!0,zIndex:!0,zoom:!0},cssProps:{"float":"cssFloat"},style:function(a,b,c,d){if(a&&3!==a.nodeType&&8!==a.nodeType&&a.style){var e,f,g,h=n.camelCase(b),i=a.style;return b=n.cssProps[h]||(n.cssProps[h]=Fa(i,h)),g=n.cssHooks[b]||n.cssHooks[h],void 0===c?g&&"get"in g&&void 0!==(e=g.get(a,!1,d))?e:i[b]:(f=typeof c,"string"===f&&(e=Ba.exec(c))&&(c=(e[1]+1)*e[2]+parseFloat(n.css(a,b)),f="number"),null!=c&&c===c&&("number"!==f||n.cssNumber[h]||(c+="px"),k.clearCloneStyle||""!==c||0!==b.indexOf("background")||(i[b]="inherit"),g&&"set"in g&&void 0===(c=g.set(a,c,d))||(i[b]=c)),void 0)}},css:function(a,b,c,d){var e,f,g,h=n.camelCase(b);return b=n.cssProps[h]||(n.cssProps[h]=Fa(a.style,h)),g=n.cssHooks[b]||n.cssHooks[h],g&&"get"in g&&(e=g.get(a,!0,c)),void 0===e&&(e=xa(a,b,d)),"normal"===e&&b in Da&&(e=Da[b]),""===c||c?(f=parseFloat(e),c===!0||n.isNumeric(f)?f||0:e):e}}),n.each(["height","width"],function(a,b){n.cssHooks[b]={get:function(a,c,d){return c?za.test(n.css(a,"display"))&&0===a.offsetWidth?n.swap(a,Ca,function(){return Ia(a,b,d)}):Ia(a,b,d):void 0},set:function(a,c,d){var e=d&&wa(a);return Ga(a,c,d?Ha(a,b,d,"border-box"===n.css(a,"boxSizing",!1,e),e):0)}}}),n.cssHooks.marginRight=ya(k.reliableMarginRight,function(a,b){return b?n.swap(a,{display:"inline-block"},xa,[a,"marginRight"]):void 0}),n.each({margin:"",padding:"",border:"Width"},function(a,b){n.cssHooks[a+b]={expand:function(c){for(var d=0,e={},f="string"==typeof c?c.split(" "):[c];4>d;d++)e[a+R[d]+b]=f[d]||f[d-2]||f[0];return e}},ua.test(a)||(n.cssHooks[a+b].set=Ga)}),n.fn.extend({css:function(a,b){return J(this,function(a,b,c){var d,e,f={},g=0;if(n.isArray(b)){for(d=wa(a),e=b.length;e>g;g++)f[b[g]]=n.css(a,b[g],!1,d);return f}return void 0!==c?n.style(a,b,c):n.css(a,b)},a,b,arguments.length>1)},show:function(){return Ja(this,!0)},hide:function(){return Ja(this)},toggle:function(a){return"boolean"==typeof a?a?this.show():this.hide():this.each(function(){S(this)?n(this).show():n(this).hide()})}});function Ka(a,b,c,d,e){return new Ka.prototype.init(a,b,c,d,e)}n.Tween=Ka,Ka.prototype={constructor:Ka,init:function(a,b,c,d,e,f){this.elem=a,this.prop=c,this.easing=e||"swing",this.options=b,this.start=this.now=this.cur(),this.end=d,this.unit=f||(n.cssNumber[c]?"":"px")},cur:function(){var a=Ka.propHooks[this.prop];return a&&a.get?a.get(this):Ka.propHooks._default.get(this)},run:function(a){var b,c=Ka.propHooks[this.prop];return this.options.duration?this.pos=b=n.easing[this.easing](a,this.options.duration*a,0,1,this.options.duration):this.pos=b=a,this.now=(this.end-this.start)*b+this.start,this.options.step&&this.options.step.call(this.elem,this.now,this),c&&c.set?c.set(this):Ka.propHooks._default.set(this),this}},Ka.prototype.init.prototype=Ka.prototype,Ka.propHooks={_default:{get:function(a){var b;return null==a.elem[a.prop]||a.elem.style&&null!=a.elem.style[a.prop]?(b=n.css(a.elem,a.prop,""),b&&"auto"!==b?b:0):a.elem[a.prop]},set:function(a){n.fx.step[a.prop]?n.fx.step[a.prop](a):a.elem.style&&(null!=a.elem.style[n.cssProps[a.prop]]||n.cssHooks[a.prop])?n.style(a.elem,a.prop,a.now+a.unit):a.elem[a.prop]=a.now}}},Ka.propHooks.scrollTop=Ka.propHooks.scrollLeft={set:function(a){a.elem.nodeType&&a.elem.parentNode&&(a.elem[a.prop]=a.now)}},n.easing={linear:function(a){return a},swing:function(a){return.5-Math.cos(a*Math.PI)/2}},n.fx=Ka.prototype.init,n.fx.step={};var La,Ma,Na=/^(?:toggle|show|hide)$/,Oa=new RegExp("^(?:([+-])=|)("+Q+")([a-z%]*)$","i"),Pa=/queueHooks$/,Qa=[Va],Ra={"*":[function(a,b){var c=this.createTween(a,b),d=c.cur(),e=Oa.exec(b),f=e&&e[3]||(n.cssNumber[a]?"":"px"),g=(n.cssNumber[a]||"px"!==f&&+d)&&Oa.exec(n.css(c.elem,a)),h=1,i=20;if(g&&g[3]!==f){f=f||g[3],e=e||[],g=+d||1;do h=h||".5",g/=h,n.style(c.elem,a,g+f);while(h!==(h=c.cur()/d)&&1!==h&&--i)}return e&&(g=c.start=+g||+d||0,c.unit=f,c.end=e[1]?g+(e[1]+1)*e[2]:+e[2]),c}]};function Sa(){return setTimeout(function(){La=void 0}),La=n.now()}function Ta(a,b){var c,d=0,e={height:a};for(b=b?1:0;4>d;d+=2-b)c=R[d],e["margin"+c]=e["padding"+c]=a;return b&&(e.opacity=e.width=a),e}function Ua(a,b,c){for(var d,e=(Ra[b]||[]).concat(Ra["*"]),f=0,g=e.length;g>f;f++)if(d=e[f].call(c,b,a))return d}function Va(a,b,c){var d,e,f,g,h,i,j,k,l=this,m={},o=a.style,p=a.nodeType&&S(a),q=L.get(a,"fxshow");c.queue||(h=n._queueHooks(a,"fx"),null==h.unqueued&&(h.unqueued=0,i=h.empty.fire,h.empty.fire=function(){h.unqueued||i()}),h.unqueued++,l.always(function(){l.always(function(){h.unqueued--,n.queue(a,"fx").length||h.empty.fire()})})),1===a.nodeType&&("height"in b||"width"in b)&&(c.overflow=[o.overflow,o.overflowX,o.overflowY],j=n.css(a,"display"),k="none"===j?L.get(a,"olddisplay")||ta(a.nodeName):j,"inline"===k&&"none"===n.css(a,"float")&&(o.display="inline-block")),c.overflow&&(o.overflow="hidden",l.always(function(){o.overflow=c.overflow[0],o.overflowX=c.overflow[1],o.overflowY=c.overflow[2]}));for(d in b)if(e=b[d],Na.exec(e)){if(delete b[d],f=f||"toggle"===e,e===(p?"hide":"show")){if("show"!==e||!q||void 0===q[d])continue;p=!0}m[d]=q&&q[d]||n.style(a,d)}else j=void 0;if(n.isEmptyObject(m))"inline"===("none"===j?ta(a.nodeName):j)&&(o.display=j);else{q?"hidden"in q&&(p=q.hidden):q=L.access(a,"fxshow",{}),f&&(q.hidden=!p),p?n(a).show():l.done(function(){n(a).hide()}),l.done(function(){var b;L.remove(a,"fxshow");for(b in m)n.style(a,b,m[b])});for(d in m)g=Ua(p?q[d]:0,d,l),d in q||(q[d]=g.start,p&&(g.end=g.start,g.start="width"===d||"height"===d?1:0))}}function Wa(a,b){var c,d,e,f,g;for(c in a)if(d=n.camelCase(c),e=b[d],f=a[c],n.isArray(f)&&(e=f[1],f=a[c]=f[0]),c!==d&&(a[d]=f,delete a[c]),g=n.cssHooks[d],g&&"expand"in g){f=g.expand(f),delete a[d];for(c in f)c in a||(a[c]=f[c],b[c]=e)}else b[d]=e}function Xa(a,b,c){var d,e,f=0,g=Qa.length,h=n.Deferred().always(function(){delete i.elem}),i=function(){if(e)return!1;for(var b=La||Sa(),c=Math.max(0,j.startTime+j.duration-b),d=c/j.duration||0,f=1-d,g=0,i=j.tweens.length;i>g;g++)j.tweens[g].run(f);return h.notifyWith(a,[j,f,c]),1>f&&i?c:(h.resolveWith(a,[j]),!1)},j=h.promise({elem:a,props:n.extend({},b),opts:n.extend(!0,{specialEasing:{}},c),originalProperties:b,originalOptions:c,startTime:La||Sa(),duration:c.duration,tweens:[],createTween:function(b,c){var d=n.Tween(a,j.opts,b,c,j.opts.specialEasing[b]||j.opts.easing);return j.tweens.push(d),d},stop:function(b){var c=0,d=b?j.tweens.length:0;if(e)return this;for(e=!0;d>c;c++)j.tweens[c].run(1);return b?h.resolveWith(a,[j,b]):h.rejectWith(a,[j,b]),this}}),k=j.props;for(Wa(k,j.opts.specialEasing);g>f;f++)if(d=Qa[f].call(j,a,k,j.opts))return d;return n.map(k,Ua,j),n.isFunction(j.opts.start)&&j.opts.start.call(a,j),n.fx.timer(n.extend(i,{elem:a,anim:j,queue:j.opts.queue})),j.progress(j.opts.progress).done(j.opts.done,j.opts.complete).fail(j.opts.fail).always(j.opts.always)}n.Animation=n.extend(Xa,{tweener:function(a,b){n.isFunction(a)?(b=a,a=["*"]):a=a.split(" ");for(var c,d=0,e=a.length;e>d;d++)c=a[d],Ra[c]=Ra[c]||[],Ra[c].unshift(b)},prefilter:function(a,b){b?Qa.unshift(a):Qa.push(a)}}),n.speed=function(a,b,c){var d=a&&"object"==typeof a?n.extend({},a):{complete:c||!c&&b||n.isFunction(a)&&a,duration:a,easing:c&&b||b&&!n.isFunction(b)&&b};return d.duration=n.fx.off?0:"number"==typeof d.duration?d.duration:d.duration in n.fx.speeds?n.fx.speeds[d.duration]:n.fx.speeds._default,(null==d.queue||d.queue===!0)&&(d.queue="fx"),d.old=d.complete,d.complete=function(){n.isFunction(d.old)&&d.old.call(this),d.queue&&n.dequeue(this,d.queue)},d},n.fn.extend({fadeTo:function(a,b,c,d){return this.filter(S).css("opacity",0).show().end().animate({opacity:b},a,c,d)},animate:function(a,b,c,d){var e=n.isEmptyObject(a),f=n.speed(b,c,d),g=function(){var b=Xa(this,n.extend({},a),f);(e||L.get(this,"finish"))&&b.stop(!0)};return g.finish=g,e||f.queue===!1?this.each(g):this.queue(f.queue,g)},stop:function(a,b,c){var d=function(a){var b=a.stop;delete a.stop,b(c)};return"string"!=typeof a&&(c=b,b=a,a=void 0),b&&a!==!1&&this.queue(a||"fx",[]),this.each(function(){var b=!0,e=null!=a&&a+"queueHooks",f=n.timers,g=L.get(this);if(e)g[e]&&g[e].stop&&d(g[e]);else for(e in g)g[e]&&g[e].stop&&Pa.test(e)&&d(g[e]);for(e=f.length;e--;)f[e].elem!==this||null!=a&&f[e].queue!==a||(f[e].anim.stop(c),b=!1,f.splice(e,1));(b||!c)&&n.dequeue(this,a)})},finish:function(a){return a!==!1&&(a=a||"fx"),this.each(function(){var b,c=L.get(this),d=c[a+"queue"],e=c[a+"queueHooks"],f=n.timers,g=d?d.length:0;for(c.finish=!0,n.queue(this,a,[]),e&&e.stop&&e.stop.call(this,!0),b=f.length;b--;)f[b].elem===this&&f[b].queue===a&&(f[b].anim.stop(!0),f.splice(b,1));for(b=0;g>b;b++)d[b]&&d[b].finish&&d[b].finish.call(this);delete c.finish})}}),n.each(["toggle","show","hide"],function(a,b){var c=n.fn[b];n.fn[b]=function(a,d,e){return null==a||"boolean"==typeof a?c.apply(this,arguments):this.animate(Ta(b,!0),a,d,e)}}),n.each({slideDown:Ta("show"),slideUp:Ta("hide"),slideToggle:Ta("toggle"),fadeIn:{opacity:"show"},fadeOut:{opacity:"hide"},fadeToggle:{opacity:"toggle"}},function(a,b){n.fn[a]=function(a,c,d){return this.animate(b,a,c,d)}}),n.timers=[],n.fx.tick=function(){var a,b=0,c=n.timers;for(La=n.now();b<c.length;b++)a=c[b],a()||c[b]!==a||c.splice(b--,1);c.length||n.fx.stop(),La=void 0},n.fx.timer=function(a){n.timers.push(a),a()?n.fx.start():n.timers.pop()},n.fx.interval=13,n.fx.start=function(){Ma||(Ma=setInterval(n.fx.tick,n.fx.interval))},n.fx.stop=function(){clearInterval(Ma),Ma=null},n.fx.speeds={slow:600,fast:200,_default:400},n.fn.delay=function(a,b){return a=n.fx?n.fx.speeds[a]||a:a,b=b||"fx",this.queue(b,function(b,c){var d=setTimeout(b,a);c.stop=function(){clearTimeout(d)}})},function(){var a=l.createElement("input"),b=l.createElement("select"),c=b.appendChild(l.createElement("option"));a.type="checkbox",k.checkOn=""!==a.value,k.optSelected=c.selected,b.disabled=!0,k.optDisabled=!c.disabled,a=l.createElement("input"),a.value="t",a.type="radio",k.radioValue="t"===a.value}();var Ya,Za,$a=n.expr.attrHandle;n.fn.extend({attr:function(a,b){return J(this,n.attr,a,b,arguments.length>1)},removeAttr:function(a){return this.each(function(){n.removeAttr(this,a)})}}),n.extend({attr:function(a,b,c){var d,e,f=a.nodeType;if(a&&3!==f&&8!==f&&2!==f)return typeof a.getAttribute===U?n.prop(a,b,c):(1===f&&n.isXMLDoc(a)||(b=b.toLowerCase(),d=n.attrHooks[b]||(n.expr.match.bool.test(b)?Za:Ya)),
-void 0===c?d&&"get"in d&&null!==(e=d.get(a,b))?e:(e=n.find.attr(a,b),null==e?void 0:e):null!==c?d&&"set"in d&&void 0!==(e=d.set(a,c,b))?e:(a.setAttribute(b,c+""),c):void n.removeAttr(a,b))},removeAttr:function(a,b){var c,d,e=0,f=b&&b.match(E);if(f&&1===a.nodeType)while(c=f[e++])d=n.propFix[c]||c,n.expr.match.bool.test(c)&&(a[d]=!1),a.removeAttribute(c)},attrHooks:{type:{set:function(a,b){if(!k.radioValue&&"radio"===b&&n.nodeName(a,"input")){var c=a.value;return a.setAttribute("type",b),c&&(a.value=c),b}}}}}),Za={set:function(a,b,c){return b===!1?n.removeAttr(a,c):a.setAttribute(c,c),c}},n.each(n.expr.match.bool.source.match(/\w+/g),function(a,b){var c=$a[b]||n.find.attr;$a[b]=function(a,b,d){var e,f;return d||(f=$a[b],$a[b]=e,e=null!=c(a,b,d)?b.toLowerCase():null,$a[b]=f),e}});var _a=/^(?:input|select|textarea|button)$/i;n.fn.extend({prop:function(a,b){return J(this,n.prop,a,b,arguments.length>1)},removeProp:function(a){return this.each(function(){delete this[n.propFix[a]||a]})}}),n.extend({propFix:{"for":"htmlFor","class":"className"},prop:function(a,b,c){var d,e,f,g=a.nodeType;if(a&&3!==g&&8!==g&&2!==g)return f=1!==g||!n.isXMLDoc(a),f&&(b=n.propFix[b]||b,e=n.propHooks[b]),void 0!==c?e&&"set"in e&&void 0!==(d=e.set(a,c,b))?d:a[b]=c:e&&"get"in e&&null!==(d=e.get(a,b))?d:a[b]},propHooks:{tabIndex:{get:function(a){return a.hasAttribute("tabindex")||_a.test(a.nodeName)||a.href?a.tabIndex:-1}}}}),k.optSelected||(n.propHooks.selected={get:function(a){var b=a.parentNode;return b&&b.parentNode&&b.parentNode.selectedIndex,null}}),n.each(["tabIndex","readOnly","maxLength","cellSpacing","cellPadding","rowSpan","colSpan","useMap","frameBorder","contentEditable"],function(){n.propFix[this.toLowerCase()]=this});var ab=/[\t\r\n\f]/g;n.fn.extend({addClass:function(a){var b,c,d,e,f,g,h="string"==typeof a&&a,i=0,j=this.length;if(n.isFunction(a))return this.each(function(b){n(this).addClass(a.call(this,b,this.className))});if(h)for(b=(a||"").match(E)||[];j>i;i++)if(c=this[i],d=1===c.nodeType&&(c.className?(" "+c.className+" ").replace(ab," "):" ")){f=0;while(e=b[f++])d.indexOf(" "+e+" ")<0&&(d+=e+" ");g=n.trim(d),c.className!==g&&(c.className=g)}return this},removeClass:function(a){var b,c,d,e,f,g,h=0===arguments.length||"string"==typeof a&&a,i=0,j=this.length;if(n.isFunction(a))return this.each(function(b){n(this).removeClass(a.call(this,b,this.className))});if(h)for(b=(a||"").match(E)||[];j>i;i++)if(c=this[i],d=1===c.nodeType&&(c.className?(" "+c.className+" ").replace(ab," "):"")){f=0;while(e=b[f++])while(d.indexOf(" "+e+" ")>=0)d=d.replace(" "+e+" "," ");g=a?n.trim(d):"",c.className!==g&&(c.className=g)}return this},toggleClass:function(a,b){var c=typeof a;return"boolean"==typeof b&&"string"===c?b?this.addClass(a):this.removeClass(a):this.each(n.isFunction(a)?function(c){n(this).toggleClass(a.call(this,c,this.className,b),b)}:function(){if("string"===c){var b,d=0,e=n(this),f=a.match(E)||[];while(b=f[d++])e.hasClass(b)?e.removeClass(b):e.addClass(b)}else(c===U||"boolean"===c)&&(this.className&&L.set(this,"__className__",this.className),this.className=this.className||a===!1?"":L.get(this,"__className__")||"")})},hasClass:function(a){for(var b=" "+a+" ",c=0,d=this.length;d>c;c++)if(1===this[c].nodeType&&(" "+this[c].className+" ").replace(ab," ").indexOf(b)>=0)return!0;return!1}});var bb=/\r/g;n.fn.extend({val:function(a){var b,c,d,e=this[0];{if(arguments.length)return d=n.isFunction(a),this.each(function(c){var e;1===this.nodeType&&(e=d?a.call(this,c,n(this).val()):a,null==e?e="":"number"==typeof e?e+="":n.isArray(e)&&(e=n.map(e,function(a){return null==a?"":a+""})),b=n.valHooks[this.type]||n.valHooks[this.nodeName.toLowerCase()],b&&"set"in b&&void 0!==b.set(this,e,"value")||(this.value=e))});if(e)return b=n.valHooks[e.type]||n.valHooks[e.nodeName.toLowerCase()],b&&"get"in b&&void 0!==(c=b.get(e,"value"))?c:(c=e.value,"string"==typeof c?c.replace(bb,""):null==c?"":c)}}}),n.extend({valHooks:{option:{get:function(a){var b=n.find.attr(a,"value");return null!=b?b:n.trim(n.text(a))}},select:{get:function(a){for(var b,c,d=a.options,e=a.selectedIndex,f="select-one"===a.type||0>e,g=f?null:[],h=f?e+1:d.length,i=0>e?h:f?e:0;h>i;i++)if(c=d[i],!(!c.selected&&i!==e||(k.optDisabled?c.disabled:null!==c.getAttribute("disabled"))||c.parentNode.disabled&&n.nodeName(c.parentNode,"optgroup"))){if(b=n(c).val(),f)return b;g.push(b)}return g},set:function(a,b){var c,d,e=a.options,f=n.makeArray(b),g=e.length;while(g--)d=e[g],(d.selected=n.inArray(d.value,f)>=0)&&(c=!0);return c||(a.selectedIndex=-1),f}}}}),n.each(["radio","checkbox"],function(){n.valHooks[this]={set:function(a,b){return n.isArray(b)?a.checked=n.inArray(n(a).val(),b)>=0:void 0}},k.checkOn||(n.valHooks[this].get=function(a){return null===a.getAttribute("value")?"on":a.value})}),n.each("blur focus focusin focusout load resize scroll unload click dblclick mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave change select submit keydown keypress keyup error contextmenu".split(" "),function(a,b){n.fn[b]=function(a,c){return arguments.length>0?this.on(b,null,a,c):this.trigger(b)}}),n.fn.extend({hover:function(a,b){return this.mouseenter(a).mouseleave(b||a)},bind:function(a,b,c){return this.on(a,null,b,c)},unbind:function(a,b){return this.off(a,null,b)},delegate:function(a,b,c,d){return this.on(b,a,c,d)},undelegate:function(a,b,c){return 1===arguments.length?this.off(a,"**"):this.off(b,a||"**",c)}});var cb=n.now(),db=/\?/;n.parseJSON=function(a){return JSON.parse(a+"")},n.parseXML=function(a){var b,c;if(!a||"string"!=typeof a)return null;try{c=new DOMParser,b=c.parseFromString(a,"text/xml")}catch(d){b=void 0}return(!b||b.getElementsByTagName("parsererror").length)&&n.error("Invalid XML: "+a),b};var eb=/#.*$/,fb=/([?&])_=[^&]*/,gb=/^(.*?):[ \t]*([^\r\n]*)$/gm,hb=/^(?:about|app|app-storage|.+-extension|file|res|widget):$/,ib=/^(?:GET|HEAD)$/,jb=/^\/\//,kb=/^([\w.+-]+:)(?:\/\/(?:[^\/?#]*@|)([^\/?#:]*)(?::(\d+)|)|)/,lb={},mb={},nb="*/".concat("*"),ob=a.location.href,pb=kb.exec(ob.toLowerCase())||[];function qb(a){return function(b,c){"string"!=typeof b&&(c=b,b="*");var d,e=0,f=b.toLowerCase().match(E)||[];if(n.isFunction(c))while(d=f[e++])"+"===d[0]?(d=d.slice(1)||"*",(a[d]=a[d]||[]).unshift(c)):(a[d]=a[d]||[]).push(c)}}function rb(a,b,c,d){var e={},f=a===mb;function g(h){var i;return e[h]=!0,n.each(a[h]||[],function(a,h){var j=h(b,c,d);return"string"!=typeof j||f||e[j]?f?!(i=j):void 0:(b.dataTypes.unshift(j),g(j),!1)}),i}return g(b.dataTypes[0])||!e["*"]&&g("*")}function sb(a,b){var c,d,e=n.ajaxSettings.flatOptions||{};for(c in b)void 0!==b[c]&&((e[c]?a:d||(d={}))[c]=b[c]);return d&&n.extend(!0,a,d),a}function tb(a,b,c){var d,e,f,g,h=a.contents,i=a.dataTypes;while("*"===i[0])i.shift(),void 0===d&&(d=a.mimeType||b.getResponseHeader("Content-Type"));if(d)for(e in h)if(h[e]&&h[e].test(d)){i.unshift(e);break}if(i[0]in c)f=i[0];else{for(e in c){if(!i[0]||a.converters[e+" "+i[0]]){f=e;break}g||(g=e)}f=f||g}return f?(f!==i[0]&&i.unshift(f),c[f]):void 0}function ub(a,b,c,d){var e,f,g,h,i,j={},k=a.dataTypes.slice();if(k[1])for(g in a.converters)j[g.toLowerCase()]=a.converters[g];f=k.shift();while(f)if(a.responseFields[f]&&(c[a.responseFields[f]]=b),!i&&d&&a.dataFilter&&(b=a.dataFilter(b,a.dataType)),i=f,f=k.shift())if("*"===f)f=i;else if("*"!==i&&i!==f){if(g=j[i+" "+f]||j["* "+f],!g)for(e in j)if(h=e.split(" "),h[1]===f&&(g=j[i+" "+h[0]]||j["* "+h[0]])){g===!0?g=j[e]:j[e]!==!0&&(f=h[0],k.unshift(h[1]));break}if(g!==!0)if(g&&a["throws"])b=g(b);else try{b=g(b)}catch(l){return{state:"parsererror",error:g?l:"No conversion from "+i+" to "+f}}}return{state:"success",data:b}}n.extend({active:0,lastModified:{},etag:{},ajaxSettings:{url:ob,type:"GET",isLocal:hb.test(pb[1]),global:!0,processData:!0,async:!0,contentType:"application/x-www-form-urlencoded; charset=UTF-8",accepts:{"*":nb,text:"text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/xml/,html:/html/,json:/json/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":n.parseJSON,"text xml":n.parseXML},flatOptions:{url:!0,context:!0}},ajaxSetup:function(a,b){return b?sb(sb(a,n.ajaxSettings),b):sb(n.ajaxSettings,a)},ajaxPrefilter:qb(lb),ajaxTransport:qb(mb),ajax:function(a,b){"object"==typeof a&&(b=a,a=void 0),b=b||{};var c,d,e,f,g,h,i,j,k=n.ajaxSetup({},b),l=k.context||k,m=k.context&&(l.nodeType||l.jquery)?n(l):n.event,o=n.Deferred(),p=n.Callbacks("once memory"),q=k.statusCode||{},r={},s={},t=0,u="canceled",v={readyState:0,getResponseHeader:function(a){var b;if(2===t){if(!f){f={};while(b=gb.exec(e))f[b[1].toLowerCase()]=b[2]}b=f[a.toLowerCase()]}return null==b?null:b},getAllResponseHeaders:function(){return 2===t?e:null},setRequestHeader:function(a,b){var c=a.toLowerCase();return t||(a=s[c]=s[c]||a,r[a]=b),this},overrideMimeType:function(a){return t||(k.mimeType=a),this},statusCode:function(a){var b;if(a)if(2>t)for(b in a)q[b]=[q[b],a[b]];else v.always(a[v.status]);return this},abort:function(a){var b=a||u;return c&&c.abort(b),x(0,b),this}};if(o.promise(v).complete=p.add,v.success=v.done,v.error=v.fail,k.url=((a||k.url||ob)+"").replace(eb,"").replace(jb,pb[1]+"//"),k.type=b.method||b.type||k.method||k.type,k.dataTypes=n.trim(k.dataType||"*").toLowerCase().match(E)||[""],null==k.crossDomain&&(h=kb.exec(k.url.toLowerCase()),k.crossDomain=!(!h||h[1]===pb[1]&&h[2]===pb[2]&&(h[3]||("http:"===h[1]?"80":"443"))===(pb[3]||("http:"===pb[1]?"80":"443")))),k.data&&k.processData&&"string"!=typeof k.data&&(k.data=n.param(k.data,k.traditional)),rb(lb,k,b,v),2===t)return v;i=n.event&&k.global,i&&0===n.active++&&n.event.trigger("ajaxStart"),k.type=k.type.toUpperCase(),k.hasContent=!ib.test(k.type),d=k.url,k.hasContent||(k.data&&(d=k.url+=(db.test(d)?"&":"?")+k.data,delete k.data),k.cache===!1&&(k.url=fb.test(d)?d.replace(fb,"$1_="+cb++):d+(db.test(d)?"&":"?")+"_="+cb++)),k.ifModified&&(n.lastModified[d]&&v.setRequestHeader("If-Modified-Since",n.lastModified[d]),n.etag[d]&&v.setRequestHeader("If-None-Match",n.etag[d])),(k.data&&k.hasContent&&k.contentType!==!1||b.contentType)&&v.setRequestHeader("Content-Type",k.contentType),v.setRequestHeader("Accept",k.dataTypes[0]&&k.accepts[k.dataTypes[0]]?k.accepts[k.dataTypes[0]]+("*"!==k.dataTypes[0]?", "+nb+"; q=0.01":""):k.accepts["*"]);for(j in k.headers)v.setRequestHeader(j,k.headers[j]);if(k.beforeSend&&(k.beforeSend.call(l,v,k)===!1||2===t))return v.abort();u="abort";for(j in{success:1,error:1,complete:1})v[j](k[j]);if(c=rb(mb,k,b,v)){v.readyState=1,i&&m.trigger("ajaxSend",[v,k]),k.async&&k.timeout>0&&(g=setTimeout(function(){v.abort("timeout")},k.timeout));try{t=1,c.send(r,x)}catch(w){if(!(2>t))throw w;x(-1,w)}}else x(-1,"No Transport");function x(a,b,f,h){var j,r,s,u,w,x=b;2!==t&&(t=2,g&&clearTimeout(g),c=void 0,e=h||"",v.readyState=a>0?4:0,j=a>=200&&300>a||304===a,f&&(u=tb(k,v,f)),u=ub(k,u,v,j),j?(k.ifModified&&(w=v.getResponseHeader("Last-Modified"),w&&(n.lastModified[d]=w),w=v.getResponseHeader("etag"),w&&(n.etag[d]=w)),204===a||"HEAD"===k.type?x="nocontent":304===a?x="notmodified":(x=u.state,r=u.data,s=u.error,j=!s)):(s=x,(a||!x)&&(x="error",0>a&&(a=0))),v.status=a,v.statusText=(b||x)+"",j?o.resolveWith(l,[r,x,v]):o.rejectWith(l,[v,x,s]),v.statusCode(q),q=void 0,i&&m.trigger(j?"ajaxSuccess":"ajaxError",[v,k,j?r:s]),p.fireWith(l,[v,x]),i&&(m.trigger("ajaxComplete",[v,k]),--n.active||n.event.trigger("ajaxStop")))}return v},getJSON:function(a,b,c){return n.get(a,b,c,"json")},getScript:function(a,b){return n.get(a,void 0,b,"script")}}),n.each(["get","post"],function(a,b){n[b]=function(a,c,d,e){return n.isFunction(c)&&(e=e||d,d=c,c=void 0),n.ajax({url:a,type:b,dataType:e,data:c,success:d})}}),n._evalUrl=function(a){return n.ajax({url:a,type:"GET",dataType:"script",async:!1,global:!1,"throws":!0})},n.fn.extend({wrapAll:function(a){var b;return n.isFunction(a)?this.each(function(b){n(this).wrapAll(a.call(this,b))}):(this[0]&&(b=n(a,this[0].ownerDocument).eq(0).clone(!0),this[0].parentNode&&b.insertBefore(this[0]),b.map(function(){var a=this;while(a.firstElementChild)a=a.firstElementChild;return a}).append(this)),this)},wrapInner:function(a){return this.each(n.isFunction(a)?function(b){n(this).wrapInner(a.call(this,b))}:function(){var b=n(this),c=b.contents();c.length?c.wrapAll(a):b.append(a)})},wrap:function(a){var b=n.isFunction(a);return this.each(function(c){n(this).wrapAll(b?a.call(this,c):a)})},unwrap:function(){return this.parent().each(function(){n.nodeName(this,"body")||n(this).replaceWith(this.childNodes)}).end()}}),n.expr.filters.hidden=function(a){return a.offsetWidth<=0&&a.offsetHeight<=0},n.expr.filters.visible=function(a){return!n.expr.filters.hidden(a)};var vb=/%20/g,wb=/\[\]$/,xb=/\r?\n/g,yb=/^(?:submit|button|image|reset|file)$/i,zb=/^(?:input|select|textarea|keygen)/i;function Ab(a,b,c,d){var e;if(n.isArray(b))n.each(b,function(b,e){c||wb.test(a)?d(a,e):Ab(a+"["+("object"==typeof e?b:"")+"]",e,c,d)});else if(c||"object"!==n.type(b))d(a,b);else for(e in b)Ab(a+"["+e+"]",b[e],c,d)}n.param=function(a,b){var c,d=[],e=function(a,b){b=n.isFunction(b)?b():null==b?"":b,d[d.length]=encodeURIComponent(a)+"="+encodeURIComponent(b)};if(void 0===b&&(b=n.ajaxSettings&&n.ajaxSettings.traditional),n.isArray(a)||a.jquery&&!n.isPlainObject(a))n.each(a,function(){e(this.name,this.value)});else for(c in a)Ab(c,a[c],b,e);return d.join("&").replace(vb,"+")},n.fn.extend({serialize:function(){return n.param(this.serializeArray())},serializeArray:function(){return this.map(function(){var a=n.prop(this,"elements");return a?n.makeArray(a):this}).filter(function(){var a=this.type;return this.name&&!n(this).is(":disabled")&&zb.test(this.nodeName)&&!yb.test(a)&&(this.checked||!T.test(a))}).map(function(a,b){var c=n(this).val();return null==c?null:n.isArray(c)?n.map(c,function(a){return{name:b.name,value:a.replace(xb,"\r\n")}}):{name:b.name,value:c.replace(xb,"\r\n")}}).get()}}),n.ajaxSettings.xhr=function(){try{return new XMLHttpRequest}catch(a){}};var Bb=0,Cb={},Db={0:200,1223:204},Eb=n.ajaxSettings.xhr();a.attachEvent&&a.attachEvent("onunload",function(){for(var a in Cb)Cb[a]()}),k.cors=!!Eb&&"withCredentials"in Eb,k.ajax=Eb=!!Eb,n.ajaxTransport(function(a){var b;return k.cors||Eb&&!a.crossDomain?{send:function(c,d){var e,f=a.xhr(),g=++Bb;if(f.open(a.type,a.url,a.async,a.username,a.password),a.xhrFields)for(e in a.xhrFields)f[e]=a.xhrFields[e];a.mimeType&&f.overrideMimeType&&f.overrideMimeType(a.mimeType),a.crossDomain||c["X-Requested-With"]||(c["X-Requested-With"]="XMLHttpRequest");for(e in c)f.setRequestHeader(e,c[e]);b=function(a){return function(){b&&(delete Cb[g],b=f.onload=f.onerror=null,"abort"===a?f.abort():"error"===a?d(f.status,f.statusText):d(Db[f.status]||f.status,f.statusText,"string"==typeof f.responseText?{text:f.responseText}:void 0,f.getAllResponseHeaders()))}},f.onload=b(),f.onerror=b("error"),b=Cb[g]=b("abort");try{f.send(a.hasContent&&a.data||null)}catch(h){if(b)throw h}},abort:function(){b&&b()}}:void 0}),n.ajaxSetup({accepts:{script:"text/javascript, application/javascript, application/ecmascript, application/x-ecmascript"},contents:{script:/(?:java|ecma)script/},converters:{"text script":function(a){return n.globalEval(a),a}}}),n.ajaxPrefilter("script",function(a){void 0===a.cache&&(a.cache=!1),a.crossDomain&&(a.type="GET")}),n.ajaxTransport("script",function(a){if(a.crossDomain){var b,c;return{send:function(d,e){b=n("<script>").prop({async:!0,charset:a.scriptCharset,src:a.url}).on("load error",c=function(a){b.remove(),c=null,a&&e("error"===a.type?404:200,a.type)}),l.head.appendChild(b[0])},abort:function(){c&&c()}}}});var Fb=[],Gb=/(=)\?(?=&|$)|\?\?/;n.ajaxSetup({jsonp:"callback",jsonpCallback:function(){var a=Fb.pop()||n.expando+"_"+cb++;return this[a]=!0,a}}),n.ajaxPrefilter("json jsonp",function(b,c,d){var e,f,g,h=b.jsonp!==!1&&(Gb.test(b.url)?"url":"string"==typeof b.data&&!(b.contentType||"").indexOf("application/x-www-form-urlencoded")&&Gb.test(b.data)&&"data");return h||"jsonp"===b.dataTypes[0]?(e=b.jsonpCallback=n.isFunction(b.jsonpCallback)?b.jsonpCallback():b.jsonpCallback,h?b[h]=b[h].replace(Gb,"$1"+e):b.jsonp!==!1&&(b.url+=(db.test(b.url)?"&":"?")+b.jsonp+"="+e),b.converters["script json"]=function(){return g||n.error(e+" was not called"),g[0]},b.dataTypes[0]="json",f=a[e],a[e]=function(){g=arguments},d.always(function(){a[e]=f,b[e]&&(b.jsonpCallback=c.jsonpCallback,Fb.push(e)),g&&n.isFunction(f)&&f(g[0]),g=f=void 0}),"script"):void 0}),n.parseHTML=function(a,b,c){if(!a||"string"!=typeof a)return null;"boolean"==typeof b&&(c=b,b=!1),b=b||l;var d=v.exec(a),e=!c&&[];return d?[b.createElement(d[1])]:(d=n.buildFragment([a],b,e),e&&e.length&&n(e).remove(),n.merge([],d.childNodes))};var Hb=n.fn.load;n.fn.load=function(a,b,c){if("string"!=typeof a&&Hb)return Hb.apply(this,arguments);var d,e,f,g=this,h=a.indexOf(" ");return h>=0&&(d=n.trim(a.slice(h)),a=a.slice(0,h)),n.isFunction(b)?(c=b,b=void 0):b&&"object"==typeof b&&(e="POST"),g.length>0&&n.ajax({url:a,type:e,dataType:"html",data:b}).done(function(a){f=arguments,g.html(d?n("<div>").append(n.parseHTML(a)).find(d):a)}).complete(c&&function(a,b){g.each(c,f||[a.responseText,b,a])}),this},n.each(["ajaxStart","ajaxStop","ajaxComplete","ajaxError","ajaxSuccess","ajaxSend"],function(a,b){n.fn[b]=function(a){return this.on(b,a)}}),n.expr.filters.animated=function(a){return n.grep(n.timers,function(b){return a===b.elem}).length};var Ib=a.document.documentElement;function Jb(a){return n.isWindow(a)?a:9===a.nodeType&&a.defaultView}n.offset={setOffset:function(a,b,c){var d,e,f,g,h,i,j,k=n.css(a,"position"),l=n(a),m={};"static"===k&&(a.style.position="relative"),h=l.offset(),f=n.css(a,"top"),i=n.css(a,"left"),j=("absolute"===k||"fixed"===k)&&(f+i).indexOf("auto")>-1,j?(d=l.position(),g=d.top,e=d.left):(g=parseFloat(f)||0,e=parseFloat(i)||0),n.isFunction(b)&&(b=b.call(a,c,h)),null!=b.top&&(m.top=b.top-h.top+g),null!=b.left&&(m.left=b.left-h.left+e),"using"in b?b.using.call(a,m):l.css(m)}},n.fn.extend({offset:function(a){if(arguments.length)return void 0===a?this:this.each(function(b){n.offset.setOffset(this,a,b)});var b,c,d=this[0],e={top:0,left:0},f=d&&d.ownerDocument;if(f)return b=f.documentElement,n.contains(b,d)?(typeof d.getBoundingClientRect!==U&&(e=d.getBoundingClientRect()),c=Jb(f),{top:e.top+c.pageYOffset-b.clientTop,left:e.left+c.pageXOffset-b.clientLeft}):e},position:function(){if(this[0]){var a,b,c=this[0],d={top:0,left:0};return"fixed"===n.css(c,"position")?b=c.getBoundingClientRect():(a=this.offsetParent(),b=this.offset(),n.nodeName(a[0],"html")||(d=a.offset()),d.top+=n.css(a[0],"borderTopWidth",!0),d.left+=n.css(a[0],"borderLeftWidth",!0)),{top:b.top-d.top-n.css(c,"marginTop",!0),left:b.left-d.left-n.css(c,"marginLeft",!0)}}},offsetParent:function(){return this.map(function(){var a=this.offsetParent||Ib;while(a&&!n.nodeName(a,"html")&&"static"===n.css(a,"position"))a=a.offsetParent;return a||Ib})}}),n.each({scrollLeft:"pageXOffset",scrollTop:"pageYOffset"},function(b,c){var d="pageYOffset"===c;n.fn[b]=function(e){return J(this,function(b,e,f){var g=Jb(b);return void 0===f?g?g[c]:b[e]:void(g?g.scrollTo(d?a.pageXOffset:f,d?f:a.pageYOffset):b[e]=f)},b,e,arguments.length,null)}}),n.each(["top","left"],function(a,b){n.cssHooks[b]=ya(k.pixelPosition,function(a,c){return c?(c=xa(a,b),va.test(c)?n(a).position()[b]+"px":c):void 0})}),n.each({Height:"height",Width:"width"},function(a,b){n.each({padding:"inner"+a,content:b,"":"outer"+a},function(c,d){n.fn[d]=function(d,e){var f=arguments.length&&(c||"boolean"!=typeof d),g=c||(d===!0||e===!0?"margin":"border");return J(this,function(b,c,d){var e;return n.isWindow(b)?b.document.documentElement["client"+a]:9===b.nodeType?(e=b.documentElement,Math.max(b.body["scroll"+a],e["scroll"+a],b.body["offset"+a],e["offset"+a],e["client"+a])):void 0===d?n.css(b,c,g):n.style(b,c,d,g)},b,f?d:void 0,f,null)}})}),n.fn.size=function(){return this.length},n.fn.andSelf=n.fn.addBack,"function"==typeof define&&define.amd&&define("jquery",[],function(){return n});var Kb=a.jQuery,Lb=a.$;return n.noConflict=function(b){return a.$===n&&(a.$=Lb),b&&a.jQuery===n&&(a.jQuery=Kb),n},typeof b===U&&(a.jQuery=a.$=n),n});
-//# sourceMappingURL=jquery.min.map
+/*! jQuery v2.2.1 | (c) jQuery Foundation | jquery.org/license */
+!function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=a.document,e=c.slice,f=c.concat,g=c.push,h=c.indexOf,i={},j=i.toString,k=i.hasOwnProperty,l={},m="2.2.1",n=function(a,b){return new n.fn.init(a,b)},o=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,p=/^-ms-/,q=/-([\da-z])/gi,r=function(a,b){return b.toUpperCase()};n.fn=n.prototype={jquery:m,constructor:n,selector:"",length:0,toArray:function(){return e.call(this)},get:function(a){return null!=a?0>a?this[a+this.length]:this[a]:e.call(this)},pushStack:function(a){var b=n.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a){return n.each(this,a)},map:function(a){return this.pushStack(n.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(e.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0>a?b:0);return this.pushStack(c>=0&&b>c?[this[c]]:[])},end:function(){return this.prevObject||this.constructor()},push:g,sort:c.sort,splice:c.splice},n.extend=n.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||n.isFunction(g)||(g={}),h===i&&(g=this,h--);i>h;h++)if(null!=(a=arguments[h]))for(b in a)c=g[b],d=a[b],g!==d&&(j&&d&&(n.isPlainObject(d)||(e=n.isArray(d)))?(e?(e=!1,f=c&&n.isArray(c)?c:[]):f=c&&n.isPlainObject(c)?c:{},g[b]=n.extend(j,f,d)):void 0!==d&&(g[b]=d));return g},n.extend({expando:"jQuery"+(m+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===n.type(a)},isArray:Array.isArray,isWindow:function(a){return null!=a&&a===a.window},isNumeric:function(a){var b=a&&a.toString();return!n.isArray(a)&&b-parseFloat(b)+1>=0},isPlainObject:function(a){return"object"!==n.type(a)||a.nodeType||n.isWindow(a)?!1:a.constructor&&!k.call(a.constructor.prototype,"isPrototypeOf")?!1:!0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},type:function(a){return null==a?a+"":"object"==typeof a||"function"==typeof a?i[j.call(a)]||"object":typeof a},globalEval:function(a){var b,c=eval;a=n.trim(a),a&&(1===a.indexOf("use strict")?(b=d.createElement("script"),b.text=a,d.head.appendChild(b).parentNode.removeChild(b)):c(a))},camelCase:function(a){return a.replace(p,"ms-").replace(q,r)},nodeName:function(a,b){return a.nodeName&&a.nodeName.toLowerCase()===b.toLowerCase()},each:function(a,b){var c,d=0;if(s(a)){for(c=a.length;c>d;d++)if(b.call(a[d],d,a[d])===!1)break}else for(d in a)if(b.call(a[d],d,a[d])===!1)break;return a},trim:function(a){return null==a?"":(a+"").replace(o,"")},makeArray:function(a,b){var c=b||[];return null!=a&&(s(Object(a))?n.merge(c,"string"==typeof a?[a]:a):g.call(c,a)),c},inArray:function(a,b,c){return null==b?-1:h.call(b,a,c)},merge:function(a,b){for(var c=+b.length,d=0,e=a.length;c>d;d++)a[e++]=b[d];return a.length=e,a},grep:function(a,b,c){for(var d,e=[],f=0,g=a.length,h=!c;g>f;f++)d=!b(a[f],f),d!==h&&e.push(a[f]);return e},map:function(a,b,c){var d,e,g=0,h=[];if(s(a))for(d=a.length;d>g;g++)e=b(a[g],g,c),null!=e&&h.push(e);else for(g in a)e=b(a[g],g,c),null!=e&&h.push(e);return f.apply([],h)},guid:1,proxy:function(a,b){var c,d,f;return"string"==typeof b&&(c=a[b],b=a,a=c),n.isFunction(a)?(d=e.call(arguments,2),f=function(){return a.apply(b||this,d.concat(e.call(arguments)))},f.guid=a.guid=a.guid||n.guid++,f):void 0},now:Date.now,support:l}),"function"==typeof Symbol&&(n.fn[Symbol.iterator]=c[Symbol.iterator]),n.each("Boolean Number String Function Array Date RegExp Object Error Symbol".split(" "),function(a,b){i["[object "+b+"]"]=b.toLowerCase()});function s(a){var b=!!a&&"length"in a&&a.length,c=n.type(a);return"function"===c||n.isWindow(a)?!1:"array"===c||0===b||"number"==typeof b&&b>0&&b-1 in a}var t=function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u="sizzle"+1*new Date,v=a.document,w=0,x=0,y=ga(),z=ga(),A=ga(),B=function(a,b){return a===b&&(l=!0),0},C=1<<31,D={}.hasOwnProperty,E=[],F=E.pop,G=E.push,H=E.push,I=E.slice,J=function(a,b){for(var c=0,d=a.length;d>c;c++)if(a[c]===b)return c;return-1},K="checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",L="[\\x20\\t\\r\\n\\f]",M="(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",N="\\["+L+"*("+M+")(?:"+L+"*([*^$|!~]?=)"+L+"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|("+M+"))|)"+L+"*\\]",O=":("+M+")(?:\\((('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|((?:\\\\.|[^\\\\()[\\]]|"+N+")*)|.*)\\)|)",P=new RegExp(L+"+","g"),Q=new RegExp("^"+L+"+|((?:^|[^\\\\])(?:\\\\.)*)"+L+"+$","g"),R=new RegExp("^"+L+"*,"+L+"*"),S=new RegExp("^"+L+"*([>+~]|"+L+")"+L+"*"),T=new RegExp("="+L+"*([^\\]'\"]*?)"+L+"*\\]","g"),U=new RegExp(O),V=new RegExp("^"+M+"$"),W={ID:new RegExp("^#("+M+")"),CLASS:new RegExp("^\\.("+M+")"),TAG:new RegExp("^("+M+"|[*])"),ATTR:new RegExp("^"+N),PSEUDO:new RegExp("^"+O),CHILD:new RegExp("^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\("+L+"*(even|odd|(([+-]|)(\\d*)n|)"+L+"*(?:([+-]|)"+L+"*(\\d+)|))"+L+"*\\)|)","i"),bool:new RegExp("^(?:"+K+")$","i"),needsContext:new RegExp("^"+L+"*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\("+L+"*((?:-\\d)?\\d*)"+L+"*\\)|)(?=[^-]|$)","i")},X=/^(?:input|select|textarea|button)$/i,Y=/^h\d$/i,Z=/^[^{]+\{\s*\[native \w/,$=/^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,_=/[+~]/,aa=/'|\\/g,ba=new RegExp("\\\\([\\da-f]{1,6}"+L+"?|("+L+")|.)","ig"),ca=function(a,b,c){var d="0x"+b-65536;return d!==d||c?b:0>d?String.fromCharCode(d+65536):String.fromCharCode(d>>10|55296,1023&d|56320)},da=function(){m()};try{H.apply(E=I.call(v.childNodes),v.childNodes),E[v.childNodes.length].nodeType}catch(ea){H={apply:E.length?function(a,b){G.apply(a,I.call(b))}:function(a,b){var c=a.length,d=0;while(a[c++]=b[d++]);a.length=c-1}}}function fa(a,b,d,e){var f,h,j,k,l,o,r,s,w=b&&b.ownerDocument,x=b?b.nodeType:9;if(d=d||[],"string"!=typeof a||!a||1!==x&&9!==x&&11!==x)return d;if(!e&&((b?b.ownerDocument||b:v)!==n&&m(b),b=b||n,p)){if(11!==x&&(o=$.exec(a)))if(f=o[1]){if(9===x){if(!(j=b.getElementById(f)))return d;if(j.id===f)return d.push(j),d}else if(w&&(j=w.getElementById(f))&&t(b,j)&&j.id===f)return d.push(j),d}else{if(o[2])return H.apply(d,b.getElementsByTagName(a)),d;if((f=o[3])&&c.getElementsByClassName&&b.getElementsByClassName)return H.apply(d,b.getElementsByClassName(f)),d}if(c.qsa&&!A[a+" "]&&(!q||!q.test(a))){if(1!==x)w=b,s=a;else if("object"!==b.nodeName.toLowerCase()){(k=b.getAttribute("id"))?k=k.replace(aa,"\\$&"):b.setAttribute("id",k=u),r=g(a),h=r.length,l=V.test(k)?"#"+k:"[id='"+k+"']";while(h--)r[h]=l+" "+qa(r[h]);s=r.join(","),w=_.test(a)&&oa(b.parentNode)||b}if(s)try{return H.apply(d,w.querySelectorAll(s)),d}catch(y){}finally{k===u&&b.removeAttribute("id")}}}return i(a.replace(Q,"$1"),b,d,e)}function ga(){var a=[];function b(c,e){return a.push(c+" ")>d.cacheLength&&delete b[a.shift()],b[c+" "]=e}return b}function ha(a){return a[u]=!0,a}function ia(a){var b=n.createElement("div");try{return!!a(b)}catch(c){return!1}finally{b.parentNode&&b.parentNode.removeChild(b),b=null}}function ja(a,b){var c=a.split("|"),e=c.length;while(e--)d.attrHandle[c[e]]=b}function ka(a,b){var c=b&&a,d=c&&1===a.nodeType&&1===b.nodeType&&(~b.sourceIndex||C)-(~a.sourceIndex||C);if(d)return d;if(c)while(c=c.nextSibling)if(c===b)return-1;return a?1:-1}function la(a){return function(b){var c=b.nodeName.toLowerCase();return"input"===c&&b.type===a}}function ma(a){return function(b){var c=b.nodeName.toLowerCase();return("input"===c||"button"===c)&&b.type===a}}function na(a){return ha(function(b){return b=+b,ha(function(c,d){var e,f=a([],c.length,b),g=f.length;while(g--)c[e=f[g]]&&(c[e]=!(d[e]=c[e]))})})}function oa(a){return a&&"undefined"!=typeof a.getElementsByTagName&&a}c=fa.support={},f=fa.isXML=function(a){var b=a&&(a.ownerDocument||a).documentElement;return b?"HTML"!==b.nodeName:!1},m=fa.setDocument=function(a){var b,e,g=a?a.ownerDocument||a:v;return g!==n&&9===g.nodeType&&g.documentElement?(n=g,o=n.documentElement,p=!f(n),(e=n.defaultView)&&e.top!==e&&(e.addEventListener?e.addEventListener("unload",da,!1):e.attachEvent&&e.attachEvent("onunload",da)),c.attributes=ia(function(a){return a.className="i",!a.getAttribute("className")}),c.getElementsByTagName=ia(function(a){return a.appendChild(n.createComment("")),!a.getElementsByTagName("*").length}),c.getElementsByClassName=Z.test(n.getElementsByClassName),c.getById=ia(function(a){return o.appendChild(a).id=u,!n.getElementsByName||!n.getElementsByName(u).length}),c.getById?(d.find.ID=function(a,b){if("undefined"!=typeof b.getElementById&&p){var c=b.getElementById(a);return c?[c]:[]}},d.filter.ID=function(a){var b=a.replace(ba,ca);return function(a){return a.getAttribute("id")===b}}):(delete d.find.ID,d.filter.ID=function(a){var b=a.replace(ba,ca);return function(a){var c="undefined"!=typeof a.getAttributeNode&&a.getAttributeNode("id");return c&&c.value===b}}),d.find.TAG=c.getElementsByTagName?function(a,b){return"undefined"!=typeof b.getElementsByTagName?b.getElementsByTagName(a):c.qsa?b.querySelectorAll(a):void 0}:function(a,b){var c,d=[],e=0,f=b.getElementsByTagName(a);if("*"===a){while(c=f[e++])1===c.nodeType&&d.push(c);return d}return f},d.find.CLASS=c.getElementsByClassName&&function(a,b){return"undefined"!=typeof b.getElementsByClassName&&p?b.getElementsByClassName(a):void 0},r=[],q=[],(c.qsa=Z.test(n.querySelectorAll))&&(ia(function(a){o.appendChild(a).innerHTML="<a id='"+u+"'></a><select id='"+u+"-\r\\' msallowcapture=''><option selected=''></option></select>",a.querySelectorAll("[msallowcapture^='']").length&&q.push("[*^$]="+L+"*(?:''|\"\")"),a.querySelectorAll("[selected]").length||q.push("\\["+L+"*(?:value|"+K+")"),a.querySelectorAll("[id~="+u+"-]").length||q.push("~="),a.querySelectorAll(":checked").length||q.push(":checked"),a.querySelectorAll("a#"+u+"+*").length||q.push(".#.+[+~]")}),ia(function(a){var b=n.createElement("input");b.setAttribute("type","hidden"),a.appendChild(b).setAttribute("name","D"),a.querySelectorAll("[name=d]").length&&q.push("name"+L+"*[*^$|!~]?="),a.querySelectorAll(":enabled").length||q.push(":enabled",":disabled"),a.querySelectorAll("*,:x"),q.push(",.*:")})),(c.matchesSelector=Z.test(s=o.matches||o.webkitMatchesSelector||o.mozMatchesSelector||o.oMatchesSelector||o.msMatchesSelector))&&ia(function(a){c.disconnectedMatch=s.call(a,"div"),s.call(a,"[s!='']:x"),r.push("!=",O)}),q=q.length&&new RegExp(q.join("|")),r=r.length&&new RegExp(r.join("|")),b=Z.test(o.compareDocumentPosition),t=b||Z.test(o.contains)?function(a,b){var c=9===a.nodeType?a.documentElement:a,d=b&&b.parentNode;return a===d||!(!d||1!==d.nodeType||!(c.contains?c.contains(d):a.compareDocumentPosition&&16&a.compareDocumentPosition(d)))}:function(a,b){if(b)while(b=b.parentNode)if(b===a)return!0;return!1},B=b?function(a,b){if(a===b)return l=!0,0;var d=!a.compareDocumentPosition-!b.compareDocumentPosition;return d?d:(d=(a.ownerDocument||a)===(b.ownerDocument||b)?a.compareDocumentPosition(b):1,1&d||!c.sortDetached&&b.compareDocumentPosition(a)===d?a===n||a.ownerDocument===v&&t(v,a)?-1:b===n||b.ownerDocument===v&&t(v,b)?1:k?J(k,a)-J(k,b):0:4&d?-1:1)}:function(a,b){if(a===b)return l=!0,0;var c,d=0,e=a.parentNode,f=b.parentNode,g=[a],h=[b];if(!e||!f)return a===n?-1:b===n?1:e?-1:f?1:k?J(k,a)-J(k,b):0;if(e===f)return ka(a,b);c=a;while(c=c.parentNode)g.unshift(c);c=b;while(c=c.parentNode)h.unshift(c);while(g[d]===h[d])d++;return d?ka(g[d],h[d]):g[d]===v?-1:h[d]===v?1:0},n):n},fa.matches=function(a,b){return fa(a,null,null,b)},fa.matchesSelector=function(a,b){if((a.ownerDocument||a)!==n&&m(a),b=b.replace(T,"='$1']"),c.matchesSelector&&p&&!A[b+" "]&&(!r||!r.test(b))&&(!q||!q.test(b)))try{var d=s.call(a,b);if(d||c.disconnectedMatch||a.document&&11!==a.document.nodeType)return d}catch(e){}return fa(b,n,null,[a]).length>0},fa.contains=function(a,b){return(a.ownerDocument||a)!==n&&m(a),t(a,b)},fa.attr=function(a,b){(a.ownerDocument||a)!==n&&m(a);var e=d.attrHandle[b.toLowerCase()],f=e&&D.call(d.attrHandle,b.toLowerCase())?e(a,b,!p):void 0;return void 0!==f?f:c.attributes||!p?a.getAttribute(b):(f=a.getAttributeNode(b))&&f.specified?f.value:null},fa.error=function(a){throw new Error("Syntax error, unrecognized expression: "+a)},fa.uniqueSort=function(a){var b,d=[],e=0,f=0;if(l=!c.detectDuplicates,k=!c.sortStable&&a.slice(0),a.sort(B),l){while(b=a[f++])b===a[f]&&(e=d.push(f));while(e--)a.splice(d[e],1)}return k=null,a},e=fa.getText=function(a){var b,c="",d=0,f=a.nodeType;if(f){if(1===f||9===f||11===f){if("string"==typeof a.textContent)return a.textContent;for(a=a.firstChild;a;a=a.nextSibling)c+=e(a)}else if(3===f||4===f)return a.nodeValue}else while(b=a[d++])c+=e(b);return c},d=fa.selectors={cacheLength:50,createPseudo:ha,match:W,attrHandle:{},find:{},relative:{">":{dir:"parentNode",first:!0}," ":{dir:"parentNode"},"+":{dir:"previousSibling",first:!0},"~":{dir:"previousSibling"}},preFilter:{ATTR:function(a){return a[1]=a[1].replace(ba,ca),a[3]=(a[3]||a[4]||a[5]||"").replace(ba,ca),"~="===a[2]&&(a[3]=" "+a[3]+" "),a.slice(0,4)},CHILD:function(a){return a[1]=a[1].toLowerCase(),"nth"===a[1].slice(0,3)?(a[3]||fa.error(a[0]),a[4]=+(a[4]?a[5]+(a[6]||1):2*("even"===a[3]||"odd"===a[3])),a[5]=+(a[7]+a[8]||"odd"===a[3])):a[3]&&fa.error(a[0]),a},PSEUDO:function(a){var b,c=!a[6]&&a[2];return W.CHILD.test(a[0])?null:(a[3]?a[2]=a[4]||a[5]||"":c&&U.test(c)&&(b=g(c,!0))&&(b=c.indexOf(")",c.length-b)-c.length)&&(a[0]=a[0].slice(0,b),a[2]=c.slice(0,b)),a.slice(0,3))}},filter:{TAG:function(a){var b=a.replace(ba,ca).toLowerCase();return"*"===a?function(){return!0}:function(a){return a.nodeName&&a.nodeName.toLowerCase()===b}},CLASS:function(a){var b=y[a+" "];return b||(b=new RegExp("(^|"+L+")"+a+"("+L+"|$)"))&&y(a,function(a){return b.test("string"==typeof a.className&&a.className||"undefined"!=typeof a.getAttribute&&a.getAttribute("class")||"")})},ATTR:function(a,b,c){return function(d){var e=fa.attr(d,a);return null==e?"!="===b:b?(e+="","="===b?e===c:"!="===b?e!==c:"^="===b?c&&0===e.indexOf(c):"*="===b?c&&e.indexOf(c)>-1:"$="===b?c&&e.slice(-c.length)===c:"~="===b?(" "+e.replace(P," ")+" ").indexOf(c)>-1:"|="===b?e===c||e.slice(0,c.length+1)===c+"-":!1):!0}},CHILD:function(a,b,c,d,e){var f="nth"!==a.slice(0,3),g="last"!==a.slice(-4),h="of-type"===b;return 1===d&&0===e?function(a){return!!a.parentNode}:function(b,c,i){var j,k,l,m,n,o,p=f!==g?"nextSibling":"previousSibling",q=b.parentNode,r=h&&b.nodeName.toLowerCase(),s=!i&&!h,t=!1;if(q){if(f){while(p){m=b;while(m=m[p])if(h?m.nodeName.toLowerCase()===r:1===m.nodeType)return!1;o=p="only"===a&&!o&&"nextSibling"}return!0}if(o=[g?q.firstChild:q.lastChild],g&&s){m=q,l=m[u]||(m[u]={}),k=l[m.uniqueID]||(l[m.uniqueID]={}),j=k[a]||[],n=j[0]===w&&j[1],t=n&&j[2],m=n&&q.childNodes[n];while(m=++n&&m&&m[p]||(t=n=0)||o.pop())if(1===m.nodeType&&++t&&m===b){k[a]=[w,n,t];break}}else if(s&&(m=b,l=m[u]||(m[u]={}),k=l[m.uniqueID]||(l[m.uniqueID]={}),j=k[a]||[],n=j[0]===w&&j[1],t=n),t===!1)while(m=++n&&m&&m[p]||(t=n=0)||o.pop())if((h?m.nodeName.toLowerCase()===r:1===m.nodeType)&&++t&&(s&&(l=m[u]||(m[u]={}),k=l[m.uniqueID]||(l[m.uniqueID]={}),k[a]=[w,t]),m===b))break;return t-=e,t===d||t%d===0&&t/d>=0}}},PSEUDO:function(a,b){var c,e=d.pseudos[a]||d.setFilters[a.toLowerCase()]||fa.error("unsupported pseudo: "+a);return e[u]?e(b):e.length>1?(c=[a,a,"",b],d.setFilters.hasOwnProperty(a.toLowerCase())?ha(function(a,c){var d,f=e(a,b),g=f.length;while(g--)d=J(a,f[g]),a[d]=!(c[d]=f[g])}):function(a){return e(a,0,c)}):e}},pseudos:{not:ha(function(a){var b=[],c=[],d=h(a.replace(Q,"$1"));return d[u]?ha(function(a,b,c,e){var f,g=d(a,null,e,[]),h=a.length;while(h--)(f=g[h])&&(a[h]=!(b[h]=f))}):function(a,e,f){return b[0]=a,d(b,null,f,c),b[0]=null,!c.pop()}}),has:ha(function(a){return function(b){return fa(a,b).length>0}}),contains:ha(function(a){return a=a.replace(ba,ca),function(b){return(b.textContent||b.innerText||e(b)).indexOf(a)>-1}}),lang:ha(function(a){return V.test(a||"")||fa.error("unsupported lang: "+a),a=a.replace(ba,ca).toLowerCase(),function(b){var c;do if(c=p?b.lang:b.getAttribute("xml:lang")||b.getAttribute("lang"))return c=c.toLowerCase(),c===a||0===c.indexOf(a+"-");while((b=b.parentNode)&&1===b.nodeType);return!1}}),target:function(b){var c=a.location&&a.location.hash;return c&&c.slice(1)===b.id},root:function(a){return a===o},focus:function(a){return a===n.activeElement&&(!n.hasFocus||n.hasFocus())&&!!(a.type||a.href||~a.tabIndex)},enabled:function(a){return a.disabled===!1},disabled:function(a){return a.disabled===!0},checked:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&!!a.checked||"option"===b&&!!a.selected},selected:function(a){return a.parentNode&&a.parentNode.selectedIndex,a.selected===!0},empty:function(a){for(a=a.firstChild;a;a=a.nextSibling)if(a.nodeType<6)return!1;return!0},parent:function(a){return!d.pseudos.empty(a)},header:function(a){return Y.test(a.nodeName)},input:function(a){return X.test(a.nodeName)},button:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&"button"===a.type||"button"===b},text:function(a){var b;return"input"===a.nodeName.toLowerCase()&&"text"===a.type&&(null==(b=a.getAttribute("type"))||"text"===b.toLowerCase())},first:na(function(){return[0]}),last:na(function(a,b){return[b-1]}),eq:na(function(a,b,c){return[0>c?c+b:c]}),even:na(function(a,b){for(var c=0;b>c;c+=2)a.push(c);return a}),odd:na(function(a,b){for(var c=1;b>c;c+=2)a.push(c);return a}),lt:na(function(a,b,c){for(var d=0>c?c+b:c;--d>=0;)a.push(d);return a}),gt:na(function(a,b,c){for(var d=0>c?c+b:c;++d<b;)a.push(d);return a})}},d.pseudos.nth=d.pseudos.eq;for(b in{radio:!0,checkbox:!0,file:!0,password:!0,image:!0})d.pseudos[b]=la(b);for(b in{submit:!0,reset:!0})d.pseudos[b]=ma(b);function pa(){}pa.prototype=d.filters=d.pseudos,d.setFilters=new pa,g=fa.tokenize=function(a,b){var c,e,f,g,h,i,j,k=z[a+" "];if(k)return b?0:k.slice(0);h=a,i=[],j=d.preFilter;while(h){(!c||(e=R.exec(h)))&&(e&&(h=h.slice(e[0].length)||h),i.push(f=[])),c=!1,(e=S.exec(h))&&(c=e.shift(),f.push({value:c,type:e[0].replace(Q," ")}),h=h.slice(c.length));for(g in d.filter)!(e=W[g].exec(h))||j[g]&&!(e=j[g](e))||(c=e.shift(),f.push({value:c,type:g,matches:e}),h=h.slice(c.length));if(!c)break}return b?h.length:h?fa.error(a):z(a,i).slice(0)};function qa(a){for(var b=0,c=a.length,d="";c>b;b++)d+=a[b].value;return d}function ra(a,b,c){var d=b.dir,e=c&&"parentNode"===d,f=x++;return b.first?function(b,c,f){while(b=b[d])if(1===b.nodeType||e)return a(b,c,f)}:function(b,c,g){var h,i,j,k=[w,f];if(g){while(b=b[d])if((1===b.nodeType||e)&&a(b,c,g))return!0}else while(b=b[d])if(1===b.nodeType||e){if(j=b[u]||(b[u]={}),i=j[b.uniqueID]||(j[b.uniqueID]={}),(h=i[d])&&h[0]===w&&h[1]===f)return k[2]=h[2];if(i[d]=k,k[2]=a(b,c,g))return!0}}}function sa(a){return a.length>1?function(b,c,d){var e=a.length;while(e--)if(!a[e](b,c,d))return!1;return!0}:a[0]}function ta(a,b,c){for(var d=0,e=b.length;e>d;d++)fa(a,b[d],c);return c}function ua(a,b,c,d,e){for(var f,g=[],h=0,i=a.length,j=null!=b;i>h;h++)(f=a[h])&&(!c||c(f,d,e))&&(g.push(f),j&&b.push(h));return g}function va(a,b,c,d,e,f){return d&&!d[u]&&(d=va(d)),e&&!e[u]&&(e=va(e,f)),ha(function(f,g,h,i){var j,k,l,m=[],n=[],o=g.length,p=f||ta(b||"*",h.nodeType?[h]:h,[]),q=!a||!f&&b?p:ua(p,m,a,h,i),r=c?e||(f?a:o||d)?[]:g:q;if(c&&c(q,r,h,i),d){j=ua(r,n),d(j,[],h,i),k=j.length;while(k--)(l=j[k])&&(r[n[k]]=!(q[n[k]]=l))}if(f){if(e||a){if(e){j=[],k=r.length;while(k--)(l=r[k])&&j.push(q[k]=l);e(null,r=[],j,i)}k=r.length;while(k--)(l=r[k])&&(j=e?J(f,l):m[k])>-1&&(f[j]=!(g[j]=l))}}else r=ua(r===g?r.splice(o,r.length):r),e?e(null,g,r,i):H.apply(g,r)})}function wa(a){for(var b,c,e,f=a.length,g=d.relative[a[0].type],h=g||d.relative[" "],i=g?1:0,k=ra(function(a){return a===b},h,!0),l=ra(function(a){return J(b,a)>-1},h,!0),m=[function(a,c,d){var e=!g&&(d||c!==j)||((b=c).nodeType?k(a,c,d):l(a,c,d));return b=null,e}];f>i;i++)if(c=d.relative[a[i].type])m=[ra(sa(m),c)];else{if(c=d.filter[a[i].type].apply(null,a[i].matches),c[u]){for(e=++i;f>e;e++)if(d.relative[a[e].type])break;return va(i>1&&sa(m),i>1&&qa(a.slice(0,i-1).concat({value:" "===a[i-2].type?"*":""})).replace(Q,"$1"),c,e>i&&wa(a.slice(i,e)),f>e&&wa(a=a.slice(e)),f>e&&qa(a))}m.push(c)}return sa(m)}function xa(a,b){var c=b.length>0,e=a.length>0,f=function(f,g,h,i,k){var l,o,q,r=0,s="0",t=f&&[],u=[],v=j,x=f||e&&d.find.TAG("*",k),y=w+=null==v?1:Math.random()||.1,z=x.length;for(k&&(j=g===n||g||k);s!==z&&null!=(l=x[s]);s++){if(e&&l){o=0,g||l.ownerDocument===n||(m(l),h=!p);while(q=a[o++])if(q(l,g||n,h)){i.push(l);break}k&&(w=y)}c&&((l=!q&&l)&&r--,f&&t.push(l))}if(r+=s,c&&s!==r){o=0;while(q=b[o++])q(t,u,g,h);if(f){if(r>0)while(s--)t[s]||u[s]||(u[s]=F.call(i));u=ua(u)}H.apply(i,u),k&&!f&&u.length>0&&r+b.length>1&&fa.uniqueSort(i)}return k&&(w=y,j=v),t};return c?ha(f):f}return h=fa.compile=function(a,b){var c,d=[],e=[],f=A[a+" "];if(!f){b||(b=g(a)),c=b.length;while(c--)f=wa(b[c]),f[u]?d.push(f):e.push(f);f=A(a,xa(e,d)),f.selector=a}return f},i=fa.select=function(a,b,e,f){var i,j,k,l,m,n="function"==typeof a&&a,o=!f&&g(a=n.selector||a);if(e=e||[],1===o.length){if(j=o[0]=o[0].slice(0),j.length>2&&"ID"===(k=j[0]).type&&c.getById&&9===b.nodeType&&p&&d.relative[j[1].type]){if(b=(d.find.ID(k.matches[0].replace(ba,ca),b)||[])[0],!b)return e;n&&(b=b.parentNode),a=a.slice(j.shift().value.length)}i=W.needsContext.test(a)?0:j.length;while(i--){if(k=j[i],d.relative[l=k.type])break;if((m=d.find[l])&&(f=m(k.matches[0].replace(ba,ca),_.test(j[0].type)&&oa(b.parentNode)||b))){if(j.splice(i,1),a=f.length&&qa(j),!a)return H.apply(e,f),e;break}}}return(n||h(a,o))(f,b,!p,e,!b||_.test(a)&&oa(b.parentNode)||b),e},c.sortStable=u.split("").sort(B).join("")===u,c.detectDuplicates=!!l,m(),c.sortDetached=ia(function(a){return 1&a.compareDocumentPosition(n.createElement("div"))}),ia(function(a){return a.innerHTML="<a href='#'></a>","#"===a.firstChild.getAttribute("href")})||ja("type|href|height|width",function(a,b,c){return c?void 0:a.getAttribute(b,"type"===b.toLowerCase()?1:2)}),c.attributes&&ia(function(a){return a.innerHTML="<input/>",a.firstChild.setAttribute("value",""),""===a.firstChild.getAttribute("value")})||ja("value",function(a,b,c){return c||"input"!==a.nodeName.toLowerCase()?void 0:a.defaultValue}),ia(function(a){return null==a.getAttribute("disabled")})||ja(K,function(a,b,c){var d;return c?void 0:a[b]===!0?b.toLowerCase():(d=a.getAttributeNode(b))&&d.specified?d.value:null}),fa}(a);n.find=t,n.expr=t.selectors,n.expr[":"]=n.expr.pseudos,n.uniqueSort=n.unique=t.uniqueSort,n.text=t.getText,n.isXMLDoc=t.isXML,n.contains=t.contains;var u=function(a,b,c){var d=[],e=void 0!==c;while((a=a[b])&&9!==a.nodeType)if(1===a.nodeType){if(e&&n(a).is(c))break;d.push(a)}return d},v=function(a,b){for(var c=[];a;a=a.nextSibling)1===a.nodeType&&a!==b&&c.push(a);return c},w=n.expr.match.needsContext,x=/^<([\w-]+)\s*\/?>(?:<\/\1>|)$/,y=/^.[^:#\[\.,]*$/;function z(a,b,c){if(n.isFunction(b))return n.grep(a,function(a,d){return!!b.call(a,d,a)!==c});if(b.nodeType)return n.grep(a,function(a){return a===b!==c});if("string"==typeof b){if(y.test(b))return n.filter(b,a,c);b=n.filter(b,a)}return n.grep(a,function(a){return h.call(b,a)>-1!==c})}n.filter=function(a,b,c){var d=b[0];return c&&(a=":not("+a+")"),1===b.length&&1===d.nodeType?n.find.matchesSelector(d,a)?[d]:[]:n.find.matches(a,n.grep(b,function(a){return 1===a.nodeType}))},n.fn.extend({find:function(a){var b,c=this.length,d=[],e=this;if("string"!=typeof a)return this.pushStack(n(a).filter(function(){for(b=0;c>b;b++)if(n.contains(e[b],this))return!0}));for(b=0;c>b;b++)n.find(a,e[b],d);return d=this.pushStack(c>1?n.unique(d):d),d.selector=this.selector?this.selector+" "+a:a,d},filter:function(a){return this.pushStack(z(this,a||[],!1))},not:function(a){return this.pushStack(z(this,a||[],!0))},is:function(a){return!!z(this,"string"==typeof a&&w.test(a)?n(a):a||[],!1).length}});var A,B=/^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,C=n.fn.init=function(a,b,c){var e,f;if(!a)return this;if(c=c||A,"string"==typeof a){if(e="<"===a[0]&&">"===a[a.length-1]&&a.length>=3?[null,a,null]:B.exec(a),!e||!e[1]&&b)return!b||b.jquery?(b||c).find(a):this.constructor(b).find(a);if(e[1]){if(b=b instanceof n?b[0]:b,n.merge(this,n.parseHTML(e[1],b&&b.nodeType?b.ownerDocument||b:d,!0)),x.test(e[1])&&n.isPlainObject(b))for(e in b)n.isFunction(this[e])?this[e](b[e]):this.attr(e,b[e]);return this}return f=d.getElementById(e[2]),f&&f.parentNode&&(this.length=1,this[0]=f),this.context=d,this.selector=a,this}return a.nodeType?(this.context=this[0]=a,this.length=1,this):n.isFunction(a)?void 0!==c.ready?c.ready(a):a(n):(void 0!==a.selector&&(this.selector=a.selector,this.context=a.context),n.makeArray(a,this))};C.prototype=n.fn,A=n(d);var D=/^(?:parents|prev(?:Until|All))/,E={children:!0,contents:!0,next:!0,prev:!0};n.fn.extend({has:function(a){var b=n(a,this),c=b.length;return this.filter(function(){for(var a=0;c>a;a++)if(n.contains(this,b[a]))return!0})},closest:function(a,b){for(var c,d=0,e=this.length,f=[],g=w.test(a)||"string"!=typeof a?n(a,b||this.context):0;e>d;d++)for(c=this[d];c&&c!==b;c=c.parentNode)if(c.nodeType<11&&(g?g.index(c)>-1:1===c.nodeType&&n.find.matchesSelector(c,a))){f.push(c);break}return this.pushStack(f.length>1?n.uniqueSort(f):f)},index:function(a){return a?"string"==typeof a?h.call(n(a),this[0]):h.call(this,a.jquery?a[0]:a):this[0]&&this[0].parentNode?this.first().prevAll().length:-1},add:function(a,b){return this.pushStack(n.uniqueSort(n.merge(this.get(),n(a,b))))},addBack:function(a){return this.add(null==a?this.prevObject:this.prevObject.filter(a))}});function F(a,b){while((a=a[b])&&1!==a.nodeType);return a}n.each({parent:function(a){var b=a.parentNode;return b&&11!==b.nodeType?b:null},parents:function(a){return u(a,"parentNode")},parentsUntil:function(a,b,c){return u(a,"parentNode",c)},next:function(a){return F(a,"nextSibling")},prev:function(a){return F(a,"previousSibling")},nextAll:function(a){return u(a,"nextSibling")},prevAll:function(a){return u(a,"previousSibling")},nextUntil:function(a,b,c){return u(a,"nextSibling",c)},prevUntil:function(a,b,c){return u(a,"previousSibling",c)},siblings:function(a){return v((a.parentNode||{}).firstChild,a)},children:function(a){return v(a.firstChild)},contents:function(a){return a.contentDocument||n.merge([],a.childNodes)}},function(a,b){n.fn[a]=function(c,d){var e=n.map(this,b,c);return"Until"!==a.slice(-5)&&(d=c),d&&"string"==typeof d&&(e=n.filter(d,e)),this.length>1&&(E[a]||n.uniqueSort(e),D.test(a)&&e.reverse()),this.pushStack(e)}});var G=/\S+/g;function H(a){var b={};return n.each(a.match(G)||[],function(a,c){b[c]=!0}),b}n.Callbacks=function(a){a="string"==typeof a?H(a):n.extend({},a);var b,c,d,e,f=[],g=[],h=-1,i=function(){for(e=a.once,d=b=!0;g.length;h=-1){c=g.shift();while(++h<f.length)f[h].apply(c[0],c[1])===!1&&a.stopOnFalse&&(h=f.length,c=!1)}a.memory||(c=!1),b=!1,e&&(f=c?[]:"")},j={add:function(){return f&&(c&&!b&&(h=f.length-1,g.push(c)),function d(b){n.each(b,function(b,c){n.isFunction(c)?a.unique&&j.has(c)||f.push(c):c&&c.length&&"string"!==n.type(c)&&d(c)})}(arguments),c&&!b&&i()),this},remove:function(){return n.each(arguments,function(a,b){var c;while((c=n.inArray(b,f,c))>-1)f.splice(c,1),h>=c&&h--}),this},has:function(a){return a?n.inArray(a,f)>-1:f.length>0},empty:function(){return f&&(f=[]),this},disable:function(){return e=g=[],f=c="",this},disabled:function(){return!f},lock:function(){return e=g=[],c||(f=c=""),this},locked:function(){return!!e},fireWith:function(a,c){return e||(c=c||[],c=[a,c.slice?c.slice():c],g.push(c),b||i()),this},fire:function(){return j.fireWith(this,arguments),this},fired:function(){return!!d}};return j},n.extend({Deferred:function(a){var b=[["resolve","done",n.Callbacks("once memory"),"resolved"],["reject","fail",n.Callbacks("once memory"),"rejected"],["notify","progress",n.Callbacks("memory")]],c="pending",d={state:function(){return c},always:function(){return e.done(arguments).fail(arguments),this},then:function(){var a=arguments;return n.Deferred(function(c){n.each(b,function(b,f){var g=n.isFunction(a[b])&&a[b];e[f[1]](function(){var a=g&&g.apply(this,arguments);a&&n.isFunction(a.promise)?a.promise().progress(c.notify).done(c.resolve).fail(c.reject):c[f[0]+"With"](this===d?c.promise():this,g?[a]:arguments)})}),a=null}).promise()},promise:function(a){return null!=a?n.extend(a,d):d}},e={};return d.pipe=d.then,n.each(b,function(a,f){var g=f[2],h=f[3];d[f[1]]=g.add,h&&g.add(function(){c=h},b[1^a][2].disable,b[2][2].lock),e[f[0]]=function(){return e[f[0]+"With"](this===e?d:this,arguments),this},e[f[0]+"With"]=g.fireWith}),d.promise(e),a&&a.call(e,e),e},when:function(a){var b=0,c=e.call(arguments),d=c.length,f=1!==d||a&&n.isFunction(a.promise)?d:0,g=1===f?a:n.Deferred(),h=function(a,b,c){return function(d){b[a]=this,c[a]=arguments.length>1?e.call(arguments):d,c===i?g.notifyWith(b,c):--f||g.resolveWith(b,c)}},i,j,k;if(d>1)for(i=new Array(d),j=new Array(d),k=new Array(d);d>b;b++)c[b]&&n.isFunction(c[b].promise)?c[b].promise().progress(h(b,j,i)).done(h(b,k,c)).fail(g.reject):--f;return f||g.resolveWith(k,c),g.promise()}});var I;n.fn.ready=function(a){return n.ready.promise().done(a),this},n.extend({isReady:!1,readyWait:1,holdReady:function(a){a?n.readyWait++:n.ready(!0)},ready:function(a){(a===!0?--n.readyWait:n.isReady)||(n.isReady=!0,a!==!0&&--n.readyWait>0||(I.resolveWith(d,[n]),n.fn.triggerHandler&&(n(d).triggerHandler("ready"),n(d).off("ready"))))}});function J(){d.removeEventListener("DOMContentLoaded",J),a.removeEventListener("load",J),n.ready()}n.ready.promise=function(b){return I||(I=n.Deferred(),"complete"===d.readyState||"loading"!==d.readyState&&!d.documentElement.doScroll?a.setTimeout(n.ready):(d.addEventListener("DOMContentLoaded",J),a.addEventListener("load",J))),I.promise(b)},n.ready.promise();var K=function(a,b,c,d,e,f,g){var h=0,i=a.length,j=null==c;if("object"===n.type(c)){e=!0;for(h in c)K(a,b,h,c[h],!0,f,g)}else if(void 0!==d&&(e=!0,n.isFunction(d)||(g=!0),j&&(g?(b.call(a,d),b=null):(j=b,b=function(a,b,c){return j.call(n(a),c)})),b))for(;i>h;h++)b(a[h],c,g?d:d.call(a[h],h,b(a[h],c)));return e?a:j?b.call(a):i?b(a[0],c):f},L=function(a){return 1===a.nodeType||9===a.nodeType||!+a.nodeType};function M(){this.expando=n.expando+M.uid++}M.uid=1,M.prototype={register:function(a,b){var c=b||{};return a.nodeType?a[this.expando]=c:Object.defineProperty(a,this.expando,{value:c,writable:!0,configurable:!0}),a[this.expando]},cache:function(a){if(!L(a))return{};var b=a[this.expando];return b||(b={},L(a)&&(a.nodeType?a[this.expando]=b:Object.defineProperty(a,this.expando,{value:b,configurable:!0}))),b},set:function(a,b,c){var d,e=this.cache(a);if("string"==typeof b)e[b]=c;else for(d in b)e[d]=b[d];return e},get:function(a,b){return void 0===b?this.cache(a):a[this.expando]&&a[this.expando][b]},access:function(a,b,c){var d;return void 0===b||b&&"string"==typeof b&&void 0===c?(d=this.get(a,b),void 0!==d?d:this.get(a,n.camelCase(b))):(this.set(a,b,c),void 0!==c?c:b)},remove:function(a,b){var c,d,e,f=a[this.expando];if(void 0!==f){if(void 0===b)this.register(a);else{n.isArray(b)?d=b.concat(b.map(n.camelCase)):(e=n.camelCase(b),b in f?d=[b,e]:(d=e,d=d in f?[d]:d.match(G)||[])),c=d.length;while(c--)delete f[d[c]]}(void 0===b||n.isEmptyObject(f))&&(a.nodeType?a[this.expando]=void 0:delete a[this.expando])}},hasData:function(a){var b=a[this.expando];return void 0!==b&&!n.isEmptyObject(b)}};var N=new M,O=new M,P=/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,Q=/[A-Z]/g;function R(a,b,c){var d;if(void 0===c&&1===a.nodeType)if(d="data-"+b.replace(Q,"-$&").toLowerCase(),c=a.getAttribute(d),"string"==typeof c){try{c="true"===c?!0:"false"===c?!1:"null"===c?null:+c+""===c?+c:P.test(c)?n.parseJSON(c):c}catch(e){}O.set(a,b,c);
+}else c=void 0;return c}n.extend({hasData:function(a){return O.hasData(a)||N.hasData(a)},data:function(a,b,c){return O.access(a,b,c)},removeData:function(a,b){O.remove(a,b)},_data:function(a,b,c){return N.access(a,b,c)},_removeData:function(a,b){N.remove(a,b)}}),n.fn.extend({data:function(a,b){var c,d,e,f=this[0],g=f&&f.attributes;if(void 0===a){if(this.length&&(e=O.get(f),1===f.nodeType&&!N.get(f,"hasDataAttrs"))){c=g.length;while(c--)g[c]&&(d=g[c].name,0===d.indexOf("data-")&&(d=n.camelCase(d.slice(5)),R(f,d,e[d])));N.set(f,"hasDataAttrs",!0)}return e}return"object"==typeof a?this.each(function(){O.set(this,a)}):K(this,function(b){var c,d;if(f&&void 0===b){if(c=O.get(f,a)||O.get(f,a.replace(Q,"-$&").toLowerCase()),void 0!==c)return c;if(d=n.camelCase(a),c=O.get(f,d),void 0!==c)return c;if(c=R(f,d,void 0),void 0!==c)return c}else d=n.camelCase(a),this.each(function(){var c=O.get(this,d);O.set(this,d,b),a.indexOf("-")>-1&&void 0!==c&&O.set(this,a,b)})},null,b,arguments.length>1,null,!0)},removeData:function(a){return this.each(function(){O.remove(this,a)})}}),n.extend({queue:function(a,b,c){var d;return a?(b=(b||"fx")+"queue",d=N.get(a,b),c&&(!d||n.isArray(c)?d=N.access(a,b,n.makeArray(c)):d.push(c)),d||[]):void 0},dequeue:function(a,b){b=b||"fx";var c=n.queue(a,b),d=c.length,e=c.shift(),f=n._queueHooks(a,b),g=function(){n.dequeue(a,b)};"inprogress"===e&&(e=c.shift(),d--),e&&("fx"===b&&c.unshift("inprogress"),delete f.stop,e.call(a,g,f)),!d&&f&&f.empty.fire()},_queueHooks:function(a,b){var c=b+"queueHooks";return N.get(a,c)||N.access(a,c,{empty:n.Callbacks("once memory").add(function(){N.remove(a,[b+"queue",c])})})}}),n.fn.extend({queue:function(a,b){var c=2;return"string"!=typeof a&&(b=a,a="fx",c--),arguments.length<c?n.queue(this[0],a):void 0===b?this:this.each(function(){var c=n.queue(this,a,b);n._queueHooks(this,a),"fx"===a&&"inprogress"!==c[0]&&n.dequeue(this,a)})},dequeue:function(a){return this.each(function(){n.dequeue(this,a)})},clearQueue:function(a){return this.queue(a||"fx",[])},promise:function(a,b){var c,d=1,e=n.Deferred(),f=this,g=this.length,h=function(){--d||e.resolveWith(f,[f])};"string"!=typeof a&&(b=a,a=void 0),a=a||"fx";while(g--)c=N.get(f[g],a+"queueHooks"),c&&c.empty&&(d++,c.empty.add(h));return h(),e.promise(b)}});var S=/[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,T=new RegExp("^(?:([+-])=|)("+S+")([a-z%]*)$","i"),U=["Top","Right","Bottom","Left"],V=function(a,b){return a=b||a,"none"===n.css(a,"display")||!n.contains(a.ownerDocument,a)};function W(a,b,c,d){var e,f=1,g=20,h=d?function(){return d.cur()}:function(){return n.css(a,b,"")},i=h(),j=c&&c[3]||(n.cssNumber[b]?"":"px"),k=(n.cssNumber[b]||"px"!==j&&+i)&&T.exec(n.css(a,b));if(k&&k[3]!==j){j=j||k[3],c=c||[],k=+i||1;do f=f||".5",k/=f,n.style(a,b,k+j);while(f!==(f=h()/i)&&1!==f&&--g)}return c&&(k=+k||+i||0,e=c[1]?k+(c[1]+1)*c[2]:+c[2],d&&(d.unit=j,d.start=k,d.end=e)),e}var X=/^(?:checkbox|radio)$/i,Y=/<([\w:-]+)/,Z=/^$|\/(?:java|ecma)script/i,$={option:[1,"<select multiple='multiple'>","</select>"],thead:[1,"<table>","</table>"],col:[2,"<table><colgroup>","</colgroup></table>"],tr:[2,"<table><tbody>","</tbody></table>"],td:[3,"<table><tbody><tr>","</tr></tbody></table>"],_default:[0,"",""]};$.optgroup=$.option,$.tbody=$.tfoot=$.colgroup=$.caption=$.thead,$.th=$.td;function _(a,b){var c="undefined"!=typeof a.getElementsByTagName?a.getElementsByTagName(b||"*"):"undefined"!=typeof a.querySelectorAll?a.querySelectorAll(b||"*"):[];return void 0===b||b&&n.nodeName(a,b)?n.merge([a],c):c}function aa(a,b){for(var c=0,d=a.length;d>c;c++)N.set(a[c],"globalEval",!b||N.get(b[c],"globalEval"))}var ba=/<|&#?\w+;/;function ca(a,b,c,d,e){for(var f,g,h,i,j,k,l=b.createDocumentFragment(),m=[],o=0,p=a.length;p>o;o++)if(f=a[o],f||0===f)if("object"===n.type(f))n.merge(m,f.nodeType?[f]:f);else if(ba.test(f)){g=g||l.appendChild(b.createElement("div")),h=(Y.exec(f)||["",""])[1].toLowerCase(),i=$[h]||$._default,g.innerHTML=i[1]+n.htmlPrefilter(f)+i[2],k=i[0];while(k--)g=g.lastChild;n.merge(m,g.childNodes),g=l.firstChild,g.textContent=""}else m.push(b.createTextNode(f));l.textContent="",o=0;while(f=m[o++])if(d&&n.inArray(f,d)>-1)e&&e.push(f);else if(j=n.contains(f.ownerDocument,f),g=_(l.appendChild(f),"script"),j&&aa(g),c){k=0;while(f=g[k++])Z.test(f.type||"")&&c.push(f)}return l}!function(){var a=d.createDocumentFragment(),b=a.appendChild(d.createElement("div")),c=d.createElement("input");c.setAttribute("type","radio"),c.setAttribute("checked","checked"),c.setAttribute("name","t"),b.appendChild(c),l.checkClone=b.cloneNode(!0).cloneNode(!0).lastChild.checked,b.innerHTML="<textarea>x</textarea>",l.noCloneChecked=!!b.cloneNode(!0).lastChild.defaultValue}();var da=/^key/,ea=/^(?:mouse|pointer|contextmenu|drag|drop)|click/,fa=/^([^.]*)(?:\.(.+)|)/;function ga(){return!0}function ha(){return!1}function ia(){try{return d.activeElement}catch(a){}}function ja(a,b,c,d,e,f){var g,h;if("object"==typeof b){"string"!=typeof c&&(d=d||c,c=void 0);for(h in b)ja(a,h,c,d,b[h],f);return a}if(null==d&&null==e?(e=c,d=c=void 0):null==e&&("string"==typeof c?(e=d,d=void 0):(e=d,d=c,c=void 0)),e===!1)e=ha;else if(!e)return a;return 1===f&&(g=e,e=function(a){return n().off(a),g.apply(this,arguments)},e.guid=g.guid||(g.guid=n.guid++)),a.each(function(){n.event.add(this,b,e,d,c)})}n.event={global:{},add:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,o,p,q,r=N.get(a);if(r){c.handler&&(f=c,c=f.handler,e=f.selector),c.guid||(c.guid=n.guid++),(i=r.events)||(i=r.events={}),(g=r.handle)||(g=r.handle=function(b){return"undefined"!=typeof n&&n.event.triggered!==b.type?n.event.dispatch.apply(a,arguments):void 0}),b=(b||"").match(G)||[""],j=b.length;while(j--)h=fa.exec(b[j])||[],o=q=h[1],p=(h[2]||"").split(".").sort(),o&&(l=n.event.special[o]||{},o=(e?l.delegateType:l.bindType)||o,l=n.event.special[o]||{},k=n.extend({type:o,origType:q,data:d,handler:c,guid:c.guid,selector:e,needsContext:e&&n.expr.match.needsContext.test(e),namespace:p.join(".")},f),(m=i[o])||(m=i[o]=[],m.delegateCount=0,l.setup&&l.setup.call(a,d,p,g)!==!1||a.addEventListener&&a.addEventListener(o,g)),l.add&&(l.add.call(a,k),k.handler.guid||(k.handler.guid=c.guid)),e?m.splice(m.delegateCount++,0,k):m.push(k),n.event.global[o]=!0)}},remove:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,o,p,q,r=N.hasData(a)&&N.get(a);if(r&&(i=r.events)){b=(b||"").match(G)||[""],j=b.length;while(j--)if(h=fa.exec(b[j])||[],o=q=h[1],p=(h[2]||"").split(".").sort(),o){l=n.event.special[o]||{},o=(d?l.delegateType:l.bindType)||o,m=i[o]||[],h=h[2]&&new RegExp("(^|\\.)"+p.join("\\.(?:.*\\.|)")+"(\\.|$)"),g=f=m.length;while(f--)k=m[f],!e&&q!==k.origType||c&&c.guid!==k.guid||h&&!h.test(k.namespace)||d&&d!==k.selector&&("**"!==d||!k.selector)||(m.splice(f,1),k.selector&&m.delegateCount--,l.remove&&l.remove.call(a,k));g&&!m.length&&(l.teardown&&l.teardown.call(a,p,r.handle)!==!1||n.removeEvent(a,o,r.handle),delete i[o])}else for(o in i)n.event.remove(a,o+b[j],c,d,!0);n.isEmptyObject(i)&&N.remove(a,"handle events")}},dispatch:function(a){a=n.event.fix(a);var b,c,d,f,g,h=[],i=e.call(arguments),j=(N.get(this,"events")||{})[a.type]||[],k=n.event.special[a.type]||{};if(i[0]=a,a.delegateTarget=this,!k.preDispatch||k.preDispatch.call(this,a)!==!1){h=n.event.handlers.call(this,a,j),b=0;while((f=h[b++])&&!a.isPropagationStopped()){a.currentTarget=f.elem,c=0;while((g=f.handlers[c++])&&!a.isImmediatePropagationStopped())(!a.rnamespace||a.rnamespace.test(g.namespace))&&(a.handleObj=g,a.data=g.data,d=((n.event.special[g.origType]||{}).handle||g.handler).apply(f.elem,i),void 0!==d&&(a.result=d)===!1&&(a.preventDefault(),a.stopPropagation()))}return k.postDispatch&&k.postDispatch.call(this,a),a.result}},handlers:function(a,b){var c,d,e,f,g=[],h=b.delegateCount,i=a.target;if(h&&i.nodeType&&("click"!==a.type||isNaN(a.button)||a.button<1))for(;i!==this;i=i.parentNode||this)if(1===i.nodeType&&(i.disabled!==!0||"click"!==a.type)){for(d=[],c=0;h>c;c++)f=b[c],e=f.selector+" ",void 0===d[e]&&(d[e]=f.needsContext?n(e,this).index(i)>-1:n.find(e,this,null,[i]).length),d[e]&&d.push(f);d.length&&g.push({elem:i,handlers:d})}return h<b.length&&g.push({elem:this,handlers:b.slice(h)}),g},props:"altKey bubbles cancelable ctrlKey currentTarget detail eventPhase metaKey relatedTarget shiftKey target timeStamp view which".split(" "),fixHooks:{},keyHooks:{props:"char charCode key keyCode".split(" "),filter:function(a,b){return null==a.which&&(a.which=null!=b.charCode?b.charCode:b.keyCode),a}},mouseHooks:{props:"button buttons clientX clientY offsetX offsetY pageX pageY screenX screenY toElement".split(" "),filter:function(a,b){var c,e,f,g=b.button;return null==a.pageX&&null!=b.clientX&&(c=a.target.ownerDocument||d,e=c.documentElement,f=c.body,a.pageX=b.clientX+(e&&e.scrollLeft||f&&f.scrollLeft||0)-(e&&e.clientLeft||f&&f.clientLeft||0),a.pageY=b.clientY+(e&&e.scrollTop||f&&f.scrollTop||0)-(e&&e.clientTop||f&&f.clientTop||0)),a.which||void 0===g||(a.which=1&g?1:2&g?3:4&g?2:0),a}},fix:function(a){if(a[n.expando])return a;var b,c,e,f=a.type,g=a,h=this.fixHooks[f];h||(this.fixHooks[f]=h=ea.test(f)?this.mouseHooks:da.test(f)?this.keyHooks:{}),e=h.props?this.props.concat(h.props):this.props,a=new n.Event(g),b=e.length;while(b--)c=e[b],a[c]=g[c];return a.target||(a.target=d),3===a.target.nodeType&&(a.target=a.target.parentNode),h.filter?h.filter(a,g):a},special:{load:{noBubble:!0},focus:{trigger:function(){return this!==ia()&&this.focus?(this.focus(),!1):void 0},delegateType:"focusin"},blur:{trigger:function(){return this===ia()&&this.blur?(this.blur(),!1):void 0},delegateType:"focusout"},click:{trigger:function(){return"checkbox"===this.type&&this.click&&n.nodeName(this,"input")?(this.click(),!1):void 0},_default:function(a){return n.nodeName(a.target,"a")}},beforeunload:{postDispatch:function(a){void 0!==a.result&&a.originalEvent&&(a.originalEvent.returnValue=a.result)}}}},n.removeEvent=function(a,b,c){a.removeEventListener&&a.removeEventListener(b,c)},n.Event=function(a,b){return this instanceof n.Event?(a&&a.type?(this.originalEvent=a,this.type=a.type,this.isDefaultPrevented=a.defaultPrevented||void 0===a.defaultPrevented&&a.returnValue===!1?ga:ha):this.type=a,b&&n.extend(this,b),this.timeStamp=a&&a.timeStamp||n.now(),void(this[n.expando]=!0)):new n.Event(a,b)},n.Event.prototype={constructor:n.Event,isDefaultPrevented:ha,isPropagationStopped:ha,isImmediatePropagationStopped:ha,preventDefault:function(){var a=this.originalEvent;this.isDefaultPrevented=ga,a&&a.preventDefault()},stopPropagation:function(){var a=this.originalEvent;this.isPropagationStopped=ga,a&&a.stopPropagation()},stopImmediatePropagation:function(){var a=this.originalEvent;this.isImmediatePropagationStopped=ga,a&&a.stopImmediatePropagation(),this.stopPropagation()}},n.each({mouseenter:"mouseover",mouseleave:"mouseout",pointerenter:"pointerover",pointerleave:"pointerout"},function(a,b){n.event.special[a]={delegateType:b,bindType:b,handle:function(a){var c,d=this,e=a.relatedTarget,f=a.handleObj;return(!e||e!==d&&!n.contains(d,e))&&(a.type=f.origType,c=f.handler.apply(this,arguments),a.type=b),c}}}),n.fn.extend({on:function(a,b,c,d){return ja(this,a,b,c,d)},one:function(a,b,c,d){return ja(this,a,b,c,d,1)},off:function(a,b,c){var d,e;if(a&&a.preventDefault&&a.handleObj)return d=a.handleObj,n(a.delegateTarget).off(d.namespace?d.origType+"."+d.namespace:d.origType,d.selector,d.handler),this;if("object"==typeof a){for(e in a)this.off(e,b,a[e]);return this}return(b===!1||"function"==typeof b)&&(c=b,b=void 0),c===!1&&(c=ha),this.each(function(){n.event.remove(this,a,c,b)})}});var ka=/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:-]+)[^>]*)\/>/gi,la=/<script|<style|<link/i,ma=/checked\s*(?:[^=]|=\s*.checked.)/i,na=/^true\/(.*)/,oa=/^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g;function pa(a,b){return n.nodeName(a,"table")&&n.nodeName(11!==b.nodeType?b:b.firstChild,"tr")?a.getElementsByTagName("tbody")[0]||a.appendChild(a.ownerDocument.createElement("tbody")):a}function qa(a){return a.type=(null!==a.getAttribute("type"))+"/"+a.type,a}function ra(a){var b=na.exec(a.type);return b?a.type=b[1]:a.removeAttribute("type"),a}function sa(a,b){var c,d,e,f,g,h,i,j;if(1===b.nodeType){if(N.hasData(a)&&(f=N.access(a),g=N.set(b,f),j=f.events)){delete g.handle,g.events={};for(e in j)for(c=0,d=j[e].length;d>c;c++)n.event.add(b,e,j[e][c])}O.hasData(a)&&(h=O.access(a),i=n.extend({},h),O.set(b,i))}}function ta(a,b){var c=b.nodeName.toLowerCase();"input"===c&&X.test(a.type)?b.checked=a.checked:("input"===c||"textarea"===c)&&(b.defaultValue=a.defaultValue)}function ua(a,b,c,d){b=f.apply([],b);var e,g,h,i,j,k,m=0,o=a.length,p=o-1,q=b[0],r=n.isFunction(q);if(r||o>1&&"string"==typeof q&&!l.checkClone&&ma.test(q))return a.each(function(e){var f=a.eq(e);r&&(b[0]=q.call(this,e,f.html())),ua(f,b,c,d)});if(o&&(e=ca(b,a[0].ownerDocument,!1,a,d),g=e.firstChild,1===e.childNodes.length&&(e=g),g||d)){for(h=n.map(_(e,"script"),qa),i=h.length;o>m;m++)j=e,m!==p&&(j=n.clone(j,!0,!0),i&&n.merge(h,_(j,"script"))),c.call(a[m],j,m);if(i)for(k=h[h.length-1].ownerDocument,n.map(h,ra),m=0;i>m;m++)j=h[m],Z.test(j.type||"")&&!N.access(j,"globalEval")&&n.contains(k,j)&&(j.src?n._evalUrl&&n._evalUrl(j.src):n.globalEval(j.textContent.replace(oa,"")))}return a}function va(a,b,c){for(var d,e=b?n.filter(b,a):a,f=0;null!=(d=e[f]);f++)c||1!==d.nodeType||n.cleanData(_(d)),d.parentNode&&(c&&n.contains(d.ownerDocument,d)&&aa(_(d,"script")),d.parentNode.removeChild(d));return a}n.extend({htmlPrefilter:function(a){return a.replace(ka,"<$1></$2>")},clone:function(a,b,c){var d,e,f,g,h=a.cloneNode(!0),i=n.contains(a.ownerDocument,a);if(!(l.noCloneChecked||1!==a.nodeType&&11!==a.nodeType||n.isXMLDoc(a)))for(g=_(h),f=_(a),d=0,e=f.length;e>d;d++)ta(f[d],g[d]);if(b)if(c)for(f=f||_(a),g=g||_(h),d=0,e=f.length;e>d;d++)sa(f[d],g[d]);else sa(a,h);return g=_(h,"script"),g.length>0&&aa(g,!i&&_(a,"script")),h},cleanData:function(a){for(var b,c,d,e=n.event.special,f=0;void 0!==(c=a[f]);f++)if(L(c)){if(b=c[N.expando]){if(b.events)for(d in b.events)e[d]?n.event.remove(c,d):n.removeEvent(c,d,b.handle);c[N.expando]=void 0}c[O.expando]&&(c[O.expando]=void 0)}}}),n.fn.extend({domManip:ua,detach:function(a){return va(this,a,!0)},remove:function(a){return va(this,a)},text:function(a){return K(this,function(a){return void 0===a?n.text(this):this.empty().each(function(){(1===this.nodeType||11===this.nodeType||9===this.nodeType)&&(this.textContent=a)})},null,a,arguments.length)},append:function(){return ua(this,arguments,function(a){if(1===this.nodeType||11===this.nodeType||9===this.nodeType){var b=pa(this,a);b.appendChild(a)}})},prepend:function(){return ua(this,arguments,function(a){if(1===this.nodeType||11===this.nodeType||9===this.nodeType){var b=pa(this,a);b.insertBefore(a,b.firstChild)}})},before:function(){return ua(this,arguments,function(a){this.parentNode&&this.parentNode.insertBefore(a,this)})},after:function(){return ua(this,arguments,function(a){this.parentNode&&this.parentNode.insertBefore(a,this.nextSibling)})},empty:function(){for(var a,b=0;null!=(a=this[b]);b++)1===a.nodeType&&(n.cleanData(_(a,!1)),a.textContent="");return this},clone:function(a,b){return a=null==a?!1:a,b=null==b?a:b,this.map(function(){return n.clone(this,a,b)})},html:function(a){return K(this,function(a){var b=this[0]||{},c=0,d=this.length;if(void 0===a&&1===b.nodeType)return b.innerHTML;if("string"==typeof a&&!la.test(a)&&!$[(Y.exec(a)||["",""])[1].toLowerCase()]){a=n.htmlPrefilter(a);try{for(;d>c;c++)b=this[c]||{},1===b.nodeType&&(n.cleanData(_(b,!1)),b.innerHTML=a);b=0}catch(e){}}b&&this.empty().append(a)},null,a,arguments.length)},replaceWith:function(){var a=[];return ua(this,arguments,function(b){var c=this.parentNode;n.inArray(this,a)<0&&(n.cleanData(_(this)),c&&c.replaceChild(b,this))},a)}}),n.each({appendTo:"append",prependTo:"prepend",insertBefore:"before",insertAfter:"after",replaceAll:"replaceWith"},function(a,b){n.fn[a]=function(a){for(var c,d=[],e=n(a),f=e.length-1,h=0;f>=h;h++)c=h===f?this:this.clone(!0),n(e[h])[b](c),g.apply(d,c.get());return this.pushStack(d)}});var wa,xa={HTML:"block",BODY:"block"};function ya(a,b){var c=n(b.createElement(a)).appendTo(b.body),d=n.css(c[0],"display");return c.detach(),d}function za(a){var b=d,c=xa[a];return c||(c=ya(a,b),"none"!==c&&c||(wa=(wa||n("<iframe frameborder='0' width='0' height='0'/>")).appendTo(b.documentElement),b=wa[0].contentDocument,b.write(),b.close(),c=ya(a,b),wa.detach()),xa[a]=c),c}var Aa=/^margin/,Ba=new RegExp("^("+S+")(?!px)[a-z%]+$","i"),Ca=function(b){var c=b.ownerDocument.defaultView;return c&&c.opener||(c=a),c.getComputedStyle(b)},Da=function(a,b,c,d){var e,f,g={};for(f in b)g[f]=a.style[f],a.style[f]=b[f];e=c.apply(a,d||[]);for(f in b)a.style[f]=g[f];return e},Ea=d.documentElement;!function(){var b,c,e,f,g=d.createElement("div"),h=d.createElement("div");if(h.style){h.style.backgroundClip="content-box",h.cloneNode(!0).style.backgroundClip="",l.clearCloneStyle="content-box"===h.style.backgroundClip,g.style.cssText="border:0;width:8px;height:0;top:0;left:-9999px;padding:0;margin-top:1px;position:absolute",g.appendChild(h);function i(){h.style.cssText="-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;position:relative;display:block;margin:auto;border:1px;padding:1px;top:1%;width:50%",h.innerHTML="",Ea.appendChild(g);var d=a.getComputedStyle(h);b="1%"!==d.top,f="2px"===d.marginLeft,c="4px"===d.width,h.style.marginRight="50%",e="4px"===d.marginRight,Ea.removeChild(g)}n.extend(l,{pixelPosition:function(){return i(),b},boxSizingReliable:function(){return null==c&&i(),c},pixelMarginRight:function(){return null==c&&i(),e},reliableMarginLeft:function(){return null==c&&i(),f},reliableMarginRight:function(){var b,c=h.appendChild(d.createElement("div"));return c.style.cssText=h.style.cssText="-webkit-box-sizing:content-box;box-sizing:content-box;display:block;margin:0;border:0;padding:0",c.style.marginRight=c.style.width="0",h.style.width="1px",Ea.appendChild(g),b=!parseFloat(a.getComputedStyle(c).marginRight),Ea.removeChild(g),h.removeChild(c),b}})}}();function Fa(a,b,c){var d,e,f,g,h=a.style;return c=c||Ca(a),g=c?c.getPropertyValue(b)||c[b]:void 0,""!==g&&void 0!==g||n.contains(a.ownerDocument,a)||(g=n.style(a,b)),c&&!l.pixelMarginRight()&&Ba.test(g)&&Aa.test(b)&&(d=h.width,e=h.minWidth,f=h.maxWidth,h.minWidth=h.maxWidth=h.width=g,g=c.width,h.width=d,h.minWidth=e,h.maxWidth=f),void 0!==g?g+"":g}function Ga(a,b){return{get:function(){return a()?void delete this.get:(this.get=b).apply(this,arguments)}}}var Ha=/^(none|table(?!-c[ea]).+)/,Ia={position:"absolute",visibility:"hidden",display:"block"},Ja={letterSpacing:"0",fontWeight:"400"},Ka=["Webkit","O","Moz","ms"],La=d.createElement("div").style;function Ma(a){if(a in La)return a;var b=a[0].toUpperCase()+a.slice(1),c=Ka.length;while(c--)if(a=Ka[c]+b,a in La)return a}function Na(a,b,c){var d=T.exec(b);return d?Math.max(0,d[2]-(c||0))+(d[3]||"px"):b}function Oa(a,b,c,d,e){for(var f=c===(d?"border":"content")?4:"width"===b?1:0,g=0;4>f;f+=2)"margin"===c&&(g+=n.css(a,c+U[f],!0,e)),d?("content"===c&&(g-=n.css(a,"padding"+U[f],!0,e)),"margin"!==c&&(g-=n.css(a,"border"+U[f]+"Width",!0,e))):(g+=n.css(a,"padding"+U[f],!0,e),"padding"!==c&&(g+=n.css(a,"border"+U[f]+"Width",!0,e)));return g}function Pa(b,c,e){var f=!0,g="width"===c?b.offsetWidth:b.offsetHeight,h=Ca(b),i="border-box"===n.css(b,"boxSizing",!1,h);if(d.msFullscreenElement&&a.top!==a&&b.getClientRects().length&&(g=Math.round(100*b.getBoundingClientRect()[c])),0>=g||null==g){if(g=Fa(b,c,h),(0>g||null==g)&&(g=b.style[c]),Ba.test(g))return g;f=i&&(l.boxSizingReliable()||g===b.style[c]),g=parseFloat(g)||0}return g+Oa(b,c,e||(i?"border":"content"),f,h)+"px"}function Qa(a,b){for(var c,d,e,f=[],g=0,h=a.length;h>g;g++)d=a[g],d.style&&(f[g]=N.get(d,"olddisplay"),c=d.style.display,b?(f[g]||"none"!==c||(d.style.display=""),""===d.style.display&&V(d)&&(f[g]=N.access(d,"olddisplay",za(d.nodeName)))):(e=V(d),"none"===c&&e||N.set(d,"olddisplay",e?c:n.css(d,"display"))));for(g=0;h>g;g++)d=a[g],d.style&&(b&&"none"!==d.style.display&&""!==d.style.display||(d.style.display=b?f[g]||"":"none"));return a}n.extend({cssHooks:{opacity:{get:function(a,b){if(b){var c=Fa(a,"opacity");return""===c?"1":c}}}},cssNumber:{animationIterationCount:!0,columnCount:!0,fillOpacity:!0,flexGrow:!0,flexShrink:!0,fontWeight:!0,lineHeight:!0,opacity:!0,order:!0,orphans:!0,widows:!0,zIndex:!0,zoom:!0},cssProps:{"float":"cssFloat"},style:function(a,b,c,d){if(a&&3!==a.nodeType&&8!==a.nodeType&&a.style){var e,f,g,h=n.camelCase(b),i=a.style;return b=n.cssProps[h]||(n.cssProps[h]=Ma(h)||h),g=n.cssHooks[b]||n.cssHooks[h],void 0===c?g&&"get"in g&&void 0!==(e=g.get(a,!1,d))?e:i[b]:(f=typeof c,"string"===f&&(e=T.exec(c))&&e[1]&&(c=W(a,b,e),f="number"),null!=c&&c===c&&("number"===f&&(c+=e&&e[3]||(n.cssNumber[h]?"":"px")),l.clearCloneStyle||""!==c||0!==b.indexOf("background")||(i[b]="inherit"),g&&"set"in g&&void 0===(c=g.set(a,c,d))||(i[b]=c)),void 0)}},css:function(a,b,c,d){var e,f,g,h=n.camelCase(b);return b=n.cssProps[h]||(n.cssProps[h]=Ma(h)||h),g=n.cssHooks[b]||n.cssHooks[h],g&&"get"in g&&(e=g.get(a,!0,c)),void 0===e&&(e=Fa(a,b,d)),"normal"===e&&b in Ja&&(e=Ja[b]),""===c||c?(f=parseFloat(e),c===!0||isFinite(f)?f||0:e):e}}),n.each(["height","width"],function(a,b){n.cssHooks[b]={get:function(a,c,d){return c?Ha.test(n.css(a,"display"))&&0===a.offsetWidth?Da(a,Ia,function(){return Pa(a,b,d)}):Pa(a,b,d):void 0},set:function(a,c,d){var e,f=d&&Ca(a),g=d&&Oa(a,b,d,"border-box"===n.css(a,"boxSizing",!1,f),f);return g&&(e=T.exec(c))&&"px"!==(e[3]||"px")&&(a.style[b]=c,c=n.css(a,b)),Na(a,c,g)}}}),n.cssHooks.marginLeft=Ga(l.reliableMarginLeft,function(a,b){return b?(parseFloat(Fa(a,"marginLeft"))||a.getBoundingClientRect().left-Da(a,{marginLeft:0},function(){return a.getBoundingClientRect().left}))+"px":void 0}),n.cssHooks.marginRight=Ga(l.reliableMarginRight,function(a,b){return b?Da(a,{display:"inline-block"},Fa,[a,"marginRight"]):void 0}),n.each({margin:"",padding:"",border:"Width"},function(a,b){n.cssHooks[a+b]={expand:function(c){for(var d=0,e={},f="string"==typeof c?c.split(" "):[c];4>d;d++)e[a+U[d]+b]=f[d]||f[d-2]||f[0];return e}},Aa.test(a)||(n.cssHooks[a+b].set=Na)}),n.fn.extend({css:function(a,b){return K(this,function(a,b,c){var d,e,f={},g=0;if(n.isArray(b)){for(d=Ca(a),e=b.length;e>g;g++)f[b[g]]=n.css(a,b[g],!1,d);return f}return void 0!==c?n.style(a,b,c):n.css(a,b)},a,b,arguments.length>1)},show:function(){return Qa(this,!0)},hide:function(){return Qa(this)},toggle:function(a){return"boolean"==typeof a?a?this.show():this.hide():this.each(function(){V(this)?n(this).show():n(this).hide()})}});function Ra(a,b,c,d,e){return new Ra.prototype.init(a,b,c,d,e)}n.Tween=Ra,Ra.prototype={constructor:Ra,init:function(a,b,c,d,e,f){this.elem=a,this.prop=c,this.easing=e||n.easing._default,this.options=b,this.start=this.now=this.cur(),this.end=d,this.unit=f||(n.cssNumber[c]?"":"px")},cur:function(){var a=Ra.propHooks[this.prop];return a&&a.get?a.get(this):Ra.propHooks._default.get(this)},run:function(a){var b,c=Ra.propHooks[this.prop];return this.options.duration?this.pos=b=n.easing[this.easing](a,this.options.duration*a,0,1,this.options.duration):this.pos=b=a,this.now=(this.end-this.start)*b+this.start,this.options.step&&this.options.step.call(this.elem,this.now,this),c&&c.set?c.set(this):Ra.propHooks._default.set(this),this}},Ra.prototype.init.prototype=Ra.prototype,Ra.propHooks={_default:{get:function(a){var b;return 1!==a.elem.nodeType||null!=a.elem[a.prop]&&null==a.elem.style[a.prop]?a.elem[a.prop]:(b=n.css(a.elem,a.prop,""),b&&"auto"!==b?b:0)},set:function(a){n.fx.step[a.prop]?n.fx.step[a.prop](a):1!==a.elem.nodeType||null==a.elem.style[n.cssProps[a.prop]]&&!n.cssHooks[a.prop]?a.elem[a.prop]=a.now:n.style(a.elem,a.prop,a.now+a.unit)}}},Ra.propHooks.scrollTop=Ra.propHooks.scrollLeft={set:function(a){a.elem.nodeType&&a.elem.parentNode&&(a.elem[a.prop]=a.now)}},n.easing={linear:function(a){return a},swing:function(a){return.5-Math.cos(a*Math.PI)/2},_default:"swing"},n.fx=Ra.prototype.init,n.fx.step={};var Sa,Ta,Ua=/^(?:toggle|show|hide)$/,Va=/queueHooks$/;function Wa(){return a.setTimeout(function(){Sa=void 0}),Sa=n.now()}function Xa(a,b){var c,d=0,e={height:a};for(b=b?1:0;4>d;d+=2-b)c=U[d],e["margin"+c]=e["padding"+c]=a;return b&&(e.opacity=e.width=a),e}function Ya(a,b,c){for(var d,e=(_a.tweeners[b]||[]).concat(_a.tweeners["*"]),f=0,g=e.length;g>f;f++)if(d=e[f].call(c,b,a))return d}function Za(a,b,c){var d,e,f,g,h,i,j,k,l=this,m={},o=a.style,p=a.nodeType&&V(a),q=N.get(a,"fxshow");c.queue||(h=n._queueHooks(a,"fx"),null==h.unqueued&&(h.unqueued=0,i=h.empty.fire,h.empty.fire=function(){h.unqueued||i()}),h.unqueued++,l.always(function(){l.always(function(){h.unqueued--,n.queue(a,"fx").length||h.empty.fire()})})),1===a.nodeType&&("height"in b||"width"in b)&&(c.overflow=[o.overflow,o.overflowX,o.overflowY],j=n.css(a,"display"),k="none"===j?N.get(a,"olddisplay")||za(a.nodeName):j,"inline"===k&&"none"===n.css(a,"float")&&(o.display="inline-block")),c.overflow&&(o.overflow="hidden",l.always(function(){o.overflow=c.overflow[0],o.overflowX=c.overflow[1],o.overflowY=c.overflow[2]}));for(d in b)if(e=b[d],Ua.exec(e)){if(delete b[d],f=f||"toggle"===e,e===(p?"hide":"show")){if("show"!==e||!q||void 0===q[d])continue;p=!0}m[d]=q&&q[d]||n.style(a,d)}else j=void 0;if(n.isEmptyObject(m))"inline"===("none"===j?za(a.nodeName):j)&&(o.display=j);else{q?"hidden"in q&&(p=q.hidden):q=N.access(a,"fxshow",{}),f&&(q.hidden=!p),p?n(a).show():l.done(function(){n(a).hide()}),l.done(function(){var b;N.remove(a,"fxshow");for(b in m)n.style(a,b,m[b])});for(d in m)g=Ya(p?q[d]:0,d,l),d in q||(q[d]=g.start,p&&(g.end=g.start,g.start="width"===d||"height"===d?1:0))}}function $a(a,b){var c,d,e,f,g;for(c in a)if(d=n.camelCase(c),e=b[d],f=a[c],n.isArray(f)&&(e=f[1],f=a[c]=f[0]),c!==d&&(a[d]=f,delete a[c]),g=n.cssHooks[d],g&&"expand"in g){f=g.expand(f),delete a[d];for(c in f)c in a||(a[c]=f[c],b[c]=e)}else b[d]=e}function _a(a,b,c){var d,e,f=0,g=_a.prefilters.length,h=n.Deferred().always(function(){delete i.elem}),i=function(){if(e)return!1;for(var b=Sa||Wa(),c=Math.max(0,j.startTime+j.duration-b),d=c/j.duration||0,f=1-d,g=0,i=j.tweens.length;i>g;g++)j.tweens[g].run(f);return h.notifyWith(a,[j,f,c]),1>f&&i?c:(h.resolveWith(a,[j]),!1)},j=h.promise({elem:a,props:n.extend({},b),opts:n.extend(!0,{specialEasing:{},easing:n.easing._default},c),originalProperties:b,originalOptions:c,startTime:Sa||Wa(),duration:c.duration,tweens:[],createTween:function(b,c){var d=n.Tween(a,j.opts,b,c,j.opts.specialEasing[b]||j.opts.easing);return j.tweens.push(d),d},stop:function(b){var c=0,d=b?j.tweens.length:0;if(e)return this;for(e=!0;d>c;c++)j.tweens[c].run(1);return b?(h.notifyWith(a,[j,1,0]),h.resolveWith(a,[j,b])):h.rejectWith(a,[j,b]),this}}),k=j.props;for($a(k,j.opts.specialEasing);g>f;f++)if(d=_a.prefilters[f].call(j,a,k,j.opts))return n.isFunction(d.stop)&&(n._queueHooks(j.elem,j.opts.queue).stop=n.proxy(d.stop,d)),d;return n.map(k,Ya,j),n.isFunction(j.opts.start)&&j.opts.start.call(a,j),n.fx.timer(n.extend(i,{elem:a,anim:j,queue:j.opts.queue})),j.progress(j.opts.progress).done(j.opts.done,j.opts.complete).fail(j.opts.fail).always(j.opts.always)}n.Animation=n.extend(_a,{tweeners:{"*":[function(a,b){var c=this.createTween(a,b);return W(c.elem,a,T.exec(b),c),c}]},tweener:function(a,b){n.isFunction(a)?(b=a,a=["*"]):a=a.match(G);for(var c,d=0,e=a.length;e>d;d++)c=a[d],_a.tweeners[c]=_a.tweeners[c]||[],_a.tweeners[c].unshift(b)},prefilters:[Za],prefilter:function(a,b){b?_a.prefilters.unshift(a):_a.prefilters.push(a)}}),n.speed=function(a,b,c){var d=a&&"object"==typeof a?n.extend({},a):{complete:c||!c&&b||n.isFunction(a)&&a,duration:a,easing:c&&b||b&&!n.isFunction(b)&&b};return d.duration=n.fx.off?0:"number"==typeof d.duration?d.duration:d.duration in n.fx.speeds?n.fx.speeds[d.duration]:n.fx.speeds._default,(null==d.queue||d.queue===!0)&&(d.queue="fx"),d.old=d.complete,d.complete=function(){n.isFunction(d.old)&&d.old.call(this),d.queue&&n.dequeue(this,d.queue)},d},n.fn.extend({fadeTo:function(a,b,c,d){return this.filter(V).css("opacity",0).show().end().animate({opacity:b},a,c,d)},animate:function(a,b,c,d){var e=n.isEmptyObject(a),f=n.speed(b,c,d),g=function(){var b=_a(this,n.extend({},a),f);(e||N.get(this,"finish"))&&b.stop(!0)};return g.finish=g,e||f.queue===!1?this.each(g):this.queue(f.queue,g)},stop:function(a,b,c){var d=function(a){var b=a.stop;delete a.stop,b(c)};return"string"!=typeof a&&(c=b,b=a,a=void 0),b&&a!==!1&&this.queue(a||"fx",[]),this.each(function(){var b=!0,e=null!=a&&a+"queueHooks",f=n.timers,g=N.get(this);if(e)g[e]&&g[e].stop&&d(g[e]);else for(e in g)g[e]&&g[e].stop&&Va.test(e)&&d(g[e]);for(e=f.length;e--;)f[e].elem!==this||null!=a&&f[e].queue!==a||(f[e].anim.stop(c),b=!1,f.splice(e,1));(b||!c)&&n.dequeue(this,a)})},finish:function(a){return a!==!1&&(a=a||"fx"),this.each(function(){var b,c=N.get(this),d=c[a+"queue"],e=c[a+"queueHooks"],f=n.timers,g=d?d.length:0;for(c.finish=!0,n.queue(this,a,[]),e&&e.stop&&e.stop.call(this,!0),b=f.length;b--;)f[b].elem===this&&f[b].queue===a&&(f[b].anim.stop(!0),f.splice(b,1));for(b=0;g>b;b++)d[b]&&d[b].finish&&d[b].finish.call(this);delete c.finish})}}),n.each(["toggle","show","hide"],function(a,b){var c=n.fn[b];n.fn[b]=function(a,d,e){return null==a||"boolean"==typeof a?c.apply(this,arguments):this.animate(Xa(b,!0),a,d,e)}}),n.each({slideDown:Xa("show"),slideUp:Xa("hide"),slideToggle:Xa("toggle"),fadeIn:{opacity:"show"},fadeOut:{opacity:"hide"},fadeToggle:{opacity:"toggle"}},function(a,b){n.fn[a]=function(a,c,d){return this.animate(b,a,c,d)}}),n.timers=[],n.fx.tick=function(){var a,b=0,c=n.timers;for(Sa=n.now();b<c.length;b++)a=c[b],a()||c[b]!==a||c.splice(b--,1);c.length||n.fx.stop(),Sa=void 0},n.fx.timer=function(a){n.timers.push(a),a()?n.fx.start():n.timers.pop()},n.fx.interval=13,n.fx.start=function(){Ta||(Ta=a.setInterval(n.fx.tick,n.fx.interval))},n.fx.stop=function(){a.clearInterval(Ta),Ta=null},n.fx.speeds={slow:600,fast:200,_default:400},n.fn.delay=function(b,c){return b=n.fx?n.fx.speeds[b]||b:b,c=c||"fx",this.queue(c,function(c,d){var e=a.setTimeout(c,b);d.stop=function(){a.clearTimeout(e)}})},function(){var a=d.createElement("input"),b=d.createElement("select"),c=b.appendChild(d.createElement("option"));a.type="checkbox",l.checkOn=""!==a.value,l.optSelected=c.selected,b.disabled=!0,l.optDisabled=!c.disabled,a=d.createElement("input"),a.value="t",a.type="radio",l.radioValue="t"===a.value}();var ab,bb=n.expr.attrHandle;n.fn.extend({attr:function(a,b){return K(this,n.attr,a,b,arguments.length>1)},removeAttr:function(a){return this.each(function(){n.removeAttr(this,a)})}}),n.extend({attr:function(a,b,c){var d,e,f=a.nodeType;if(3!==f&&8!==f&&2!==f)return"undefined"==typeof a.getAttribute?n.prop(a,b,c):(1===f&&n.isXMLDoc(a)||(b=b.toLowerCase(),e=n.attrHooks[b]||(n.expr.match.bool.test(b)?ab:void 0)),void 0!==c?null===c?void n.removeAttr(a,b):e&&"set"in e&&void 0!==(d=e.set(a,c,b))?d:(a.setAttribute(b,c+""),c):e&&"get"in e&&null!==(d=e.get(a,b))?d:(d=n.find.attr(a,b),null==d?void 0:d))},attrHooks:{type:{set:function(a,b){if(!l.radioValue&&"radio"===b&&n.nodeName(a,"input")){var c=a.value;return a.setAttribute("type",b),c&&(a.value=c),b}}}},removeAttr:function(a,b){var c,d,e=0,f=b&&b.match(G);if(f&&1===a.nodeType)while(c=f[e++])d=n.propFix[c]||c,n.expr.match.bool.test(c)&&(a[d]=!1),a.removeAttribute(c)}}),ab={set:function(a,b,c){return b===!1?n.removeAttr(a,c):a.setAttribute(c,c),c}},n.each(n.expr.match.bool.source.match(/\w+/g),function(a,b){var c=bb[b]||n.find.attr;bb[b]=function(a,b,d){var e,f;return d||(f=bb[b],bb[b]=e,e=null!=c(a,b,d)?b.toLowerCase():null,bb[b]=f),e}});var cb=/^(?:input|select|textarea|button)$/i,db=/^(?:a|area)$/i;n.fn.extend({prop:function(a,b){return K(this,n.prop,a,b,arguments.length>1)},removeProp:function(a){return this.each(function(){delete this[n.propFix[a]||a]})}}),n.extend({prop:function(a,b,c){var d,e,f=a.nodeType;if(3!==f&&8!==f&&2!==f)return 1===f&&n.isXMLDoc(a)||(b=n.propFix[b]||b,
+e=n.propHooks[b]),void 0!==c?e&&"set"in e&&void 0!==(d=e.set(a,c,b))?d:a[b]=c:e&&"get"in e&&null!==(d=e.get(a,b))?d:a[b]},propHooks:{tabIndex:{get:function(a){var b=n.find.attr(a,"tabindex");return b?parseInt(b,10):cb.test(a.nodeName)||db.test(a.nodeName)&&a.href?0:-1}}},propFix:{"for":"htmlFor","class":"className"}}),l.optSelected||(n.propHooks.selected={get:function(a){var b=a.parentNode;return b&&b.parentNode&&b.parentNode.selectedIndex,null}}),n.each(["tabIndex","readOnly","maxLength","cellSpacing","cellPadding","rowSpan","colSpan","useMap","frameBorder","contentEditable"],function(){n.propFix[this.toLowerCase()]=this});var eb=/[\t\r\n\f]/g;function fb(a){return a.getAttribute&&a.getAttribute("class")||""}n.fn.extend({addClass:function(a){var b,c,d,e,f,g,h,i=0;if(n.isFunction(a))return this.each(function(b){n(this).addClass(a.call(this,b,fb(this)))});if("string"==typeof a&&a){b=a.match(G)||[];while(c=this[i++])if(e=fb(c),d=1===c.nodeType&&(" "+e+" ").replace(eb," ")){g=0;while(f=b[g++])d.indexOf(" "+f+" ")<0&&(d+=f+" ");h=n.trim(d),e!==h&&c.setAttribute("class",h)}}return this},removeClass:function(a){var b,c,d,e,f,g,h,i=0;if(n.isFunction(a))return this.each(function(b){n(this).removeClass(a.call(this,b,fb(this)))});if(!arguments.length)return this.attr("class","");if("string"==typeof a&&a){b=a.match(G)||[];while(c=this[i++])if(e=fb(c),d=1===c.nodeType&&(" "+e+" ").replace(eb," ")){g=0;while(f=b[g++])while(d.indexOf(" "+f+" ")>-1)d=d.replace(" "+f+" "," ");h=n.trim(d),e!==h&&c.setAttribute("class",h)}}return this},toggleClass:function(a,b){var c=typeof a;return"boolean"==typeof b&&"string"===c?b?this.addClass(a):this.removeClass(a):n.isFunction(a)?this.each(function(c){n(this).toggleClass(a.call(this,c,fb(this),b),b)}):this.each(function(){var b,d,e,f;if("string"===c){d=0,e=n(this),f=a.match(G)||[];while(b=f[d++])e.hasClass(b)?e.removeClass(b):e.addClass(b)}else(void 0===a||"boolean"===c)&&(b=fb(this),b&&N.set(this,"__className__",b),this.setAttribute&&this.setAttribute("class",b||a===!1?"":N.get(this,"__className__")||""))})},hasClass:function(a){var b,c,d=0;b=" "+a+" ";while(c=this[d++])if(1===c.nodeType&&(" "+fb(c)+" ").replace(eb," ").indexOf(b)>-1)return!0;return!1}});var gb=/\r/g;n.fn.extend({val:function(a){var b,c,d,e=this[0];{if(arguments.length)return d=n.isFunction(a),this.each(function(c){var e;1===this.nodeType&&(e=d?a.call(this,c,n(this).val()):a,null==e?e="":"number"==typeof e?e+="":n.isArray(e)&&(e=n.map(e,function(a){return null==a?"":a+""})),b=n.valHooks[this.type]||n.valHooks[this.nodeName.toLowerCase()],b&&"set"in b&&void 0!==b.set(this,e,"value")||(this.value=e))});if(e)return b=n.valHooks[e.type]||n.valHooks[e.nodeName.toLowerCase()],b&&"get"in b&&void 0!==(c=b.get(e,"value"))?c:(c=e.value,"string"==typeof c?c.replace(gb,""):null==c?"":c)}}}),n.extend({valHooks:{option:{get:function(a){return n.trim(a.value)}},select:{get:function(a){for(var b,c,d=a.options,e=a.selectedIndex,f="select-one"===a.type||0>e,g=f?null:[],h=f?e+1:d.length,i=0>e?h:f?e:0;h>i;i++)if(c=d[i],(c.selected||i===e)&&(l.optDisabled?!c.disabled:null===c.getAttribute("disabled"))&&(!c.parentNode.disabled||!n.nodeName(c.parentNode,"optgroup"))){if(b=n(c).val(),f)return b;g.push(b)}return g},set:function(a,b){var c,d,e=a.options,f=n.makeArray(b),g=e.length;while(g--)d=e[g],(d.selected=n.inArray(n.valHooks.option.get(d),f)>-1)&&(c=!0);return c||(a.selectedIndex=-1),f}}}}),n.each(["radio","checkbox"],function(){n.valHooks[this]={set:function(a,b){return n.isArray(b)?a.checked=n.inArray(n(a).val(),b)>-1:void 0}},l.checkOn||(n.valHooks[this].get=function(a){return null===a.getAttribute("value")?"on":a.value})});var hb=/^(?:focusinfocus|focusoutblur)$/;n.extend(n.event,{trigger:function(b,c,e,f){var g,h,i,j,l,m,o,p=[e||d],q=k.call(b,"type")?b.type:b,r=k.call(b,"namespace")?b.namespace.split("."):[];if(h=i=e=e||d,3!==e.nodeType&&8!==e.nodeType&&!hb.test(q+n.event.triggered)&&(q.indexOf(".")>-1&&(r=q.split("."),q=r.shift(),r.sort()),l=q.indexOf(":")<0&&"on"+q,b=b[n.expando]?b:new n.Event(q,"object"==typeof b&&b),b.isTrigger=f?2:3,b.namespace=r.join("."),b.rnamespace=b.namespace?new RegExp("(^|\\.)"+r.join("\\.(?:.*\\.|)")+"(\\.|$)"):null,b.result=void 0,b.target||(b.target=e),c=null==c?[b]:n.makeArray(c,[b]),o=n.event.special[q]||{},f||!o.trigger||o.trigger.apply(e,c)!==!1)){if(!f&&!o.noBubble&&!n.isWindow(e)){for(j=o.delegateType||q,hb.test(j+q)||(h=h.parentNode);h;h=h.parentNode)p.push(h),i=h;i===(e.ownerDocument||d)&&p.push(i.defaultView||i.parentWindow||a)}g=0;while((h=p[g++])&&!b.isPropagationStopped())b.type=g>1?j:o.bindType||q,m=(N.get(h,"events")||{})[b.type]&&N.get(h,"handle"),m&&m.apply(h,c),m=l&&h[l],m&&m.apply&&L(h)&&(b.result=m.apply(h,c),b.result===!1&&b.preventDefault());return b.type=q,f||b.isDefaultPrevented()||o._default&&o._default.apply(p.pop(),c)!==!1||!L(e)||l&&n.isFunction(e[q])&&!n.isWindow(e)&&(i=e[l],i&&(e[l]=null),n.event.triggered=q,e[q](),n.event.triggered=void 0,i&&(e[l]=i)),b.result}},simulate:function(a,b,c){var d=n.extend(new n.Event,c,{type:a,isSimulated:!0});n.event.trigger(d,null,b),d.isDefaultPrevented()&&c.preventDefault()}}),n.fn.extend({trigger:function(a,b){return this.each(function(){n.event.trigger(a,b,this)})},triggerHandler:function(a,b){var c=this[0];return c?n.event.trigger(a,b,c,!0):void 0}}),n.each("blur focus focusin focusout load resize scroll unload click dblclick mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave change select submit keydown keypress keyup error contextmenu".split(" "),function(a,b){n.fn[b]=function(a,c){return arguments.length>0?this.on(b,null,a,c):this.trigger(b)}}),n.fn.extend({hover:function(a,b){return this.mouseenter(a).mouseleave(b||a)}}),l.focusin="onfocusin"in a,l.focusin||n.each({focus:"focusin",blur:"focusout"},function(a,b){var c=function(a){n.event.simulate(b,a.target,n.event.fix(a))};n.event.special[b]={setup:function(){var d=this.ownerDocument||this,e=N.access(d,b);e||d.addEventListener(a,c,!0),N.access(d,b,(e||0)+1)},teardown:function(){var d=this.ownerDocument||this,e=N.access(d,b)-1;e?N.access(d,b,e):(d.removeEventListener(a,c,!0),N.remove(d,b))}}});var ib=a.location,jb=n.now(),kb=/\?/;n.parseJSON=function(a){return JSON.parse(a+"")},n.parseXML=function(b){var c;if(!b||"string"!=typeof b)return null;try{c=(new a.DOMParser).parseFromString(b,"text/xml")}catch(d){c=void 0}return(!c||c.getElementsByTagName("parsererror").length)&&n.error("Invalid XML: "+b),c};var lb=/#.*$/,mb=/([?&])_=[^&]*/,nb=/^(.*?):[ \t]*([^\r\n]*)$/gm,ob=/^(?:about|app|app-storage|.+-extension|file|res|widget):$/,pb=/^(?:GET|HEAD)$/,qb=/^\/\//,rb={},sb={},tb="*/".concat("*"),ub=d.createElement("a");ub.href=ib.href;function vb(a){return function(b,c){"string"!=typeof b&&(c=b,b="*");var d,e=0,f=b.toLowerCase().match(G)||[];if(n.isFunction(c))while(d=f[e++])"+"===d[0]?(d=d.slice(1)||"*",(a[d]=a[d]||[]).unshift(c)):(a[d]=a[d]||[]).push(c)}}function wb(a,b,c,d){var e={},f=a===sb;function g(h){var i;return e[h]=!0,n.each(a[h]||[],function(a,h){var j=h(b,c,d);return"string"!=typeof j||f||e[j]?f?!(i=j):void 0:(b.dataTypes.unshift(j),g(j),!1)}),i}return g(b.dataTypes[0])||!e["*"]&&g("*")}function xb(a,b){var c,d,e=n.ajaxSettings.flatOptions||{};for(c in b)void 0!==b[c]&&((e[c]?a:d||(d={}))[c]=b[c]);return d&&n.extend(!0,a,d),a}function yb(a,b,c){var d,e,f,g,h=a.contents,i=a.dataTypes;while("*"===i[0])i.shift(),void 0===d&&(d=a.mimeType||b.getResponseHeader("Content-Type"));if(d)for(e in h)if(h[e]&&h[e].test(d)){i.unshift(e);break}if(i[0]in c)f=i[0];else{for(e in c){if(!i[0]||a.converters[e+" "+i[0]]){f=e;break}g||(g=e)}f=f||g}return f?(f!==i[0]&&i.unshift(f),c[f]):void 0}function zb(a,b,c,d){var e,f,g,h,i,j={},k=a.dataTypes.slice();if(k[1])for(g in a.converters)j[g.toLowerCase()]=a.converters[g];f=k.shift();while(f)if(a.responseFields[f]&&(c[a.responseFields[f]]=b),!i&&d&&a.dataFilter&&(b=a.dataFilter(b,a.dataType)),i=f,f=k.shift())if("*"===f)f=i;else if("*"!==i&&i!==f){if(g=j[i+" "+f]||j["* "+f],!g)for(e in j)if(h=e.split(" "),h[1]===f&&(g=j[i+" "+h[0]]||j["* "+h[0]])){g===!0?g=j[e]:j[e]!==!0&&(f=h[0],k.unshift(h[1]));break}if(g!==!0)if(g&&a["throws"])b=g(b);else try{b=g(b)}catch(l){return{state:"parsererror",error:g?l:"No conversion from "+i+" to "+f}}}return{state:"success",data:b}}n.extend({active:0,lastModified:{},etag:{},ajaxSettings:{url:ib.href,type:"GET",isLocal:ob.test(ib.protocol),global:!0,processData:!0,async:!0,contentType:"application/x-www-form-urlencoded; charset=UTF-8",accepts:{"*":tb,text:"text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/\bxml\b/,html:/\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":n.parseJSON,"text xml":n.parseXML},flatOptions:{url:!0,context:!0}},ajaxSetup:function(a,b){return b?xb(xb(a,n.ajaxSettings),b):xb(n.ajaxSettings,a)},ajaxPrefilter:vb(rb),ajaxTransport:vb(sb),ajax:function(b,c){"object"==typeof b&&(c=b,b=void 0),c=c||{};var e,f,g,h,i,j,k,l,m=n.ajaxSetup({},c),o=m.context||m,p=m.context&&(o.nodeType||o.jquery)?n(o):n.event,q=n.Deferred(),r=n.Callbacks("once memory"),s=m.statusCode||{},t={},u={},v=0,w="canceled",x={readyState:0,getResponseHeader:function(a){var b;if(2===v){if(!h){h={};while(b=nb.exec(g))h[b[1].toLowerCase()]=b[2]}b=h[a.toLowerCase()]}return null==b?null:b},getAllResponseHeaders:function(){return 2===v?g:null},setRequestHeader:function(a,b){var c=a.toLowerCase();return v||(a=u[c]=u[c]||a,t[a]=b),this},overrideMimeType:function(a){return v||(m.mimeType=a),this},statusCode:function(a){var b;if(a)if(2>v)for(b in a)s[b]=[s[b],a[b]];else x.always(a[x.status]);return this},abort:function(a){var b=a||w;return e&&e.abort(b),z(0,b),this}};if(q.promise(x).complete=r.add,x.success=x.done,x.error=x.fail,m.url=((b||m.url||ib.href)+"").replace(lb,"").replace(qb,ib.protocol+"//"),m.type=c.method||c.type||m.method||m.type,m.dataTypes=n.trim(m.dataType||"*").toLowerCase().match(G)||[""],null==m.crossDomain){j=d.createElement("a");try{j.href=m.url,j.href=j.href,m.crossDomain=ub.protocol+"//"+ub.host!=j.protocol+"//"+j.host}catch(y){m.crossDomain=!0}}if(m.data&&m.processData&&"string"!=typeof m.data&&(m.data=n.param(m.data,m.traditional)),wb(rb,m,c,x),2===v)return x;k=n.event&&m.global,k&&0===n.active++&&n.event.trigger("ajaxStart"),m.type=m.type.toUpperCase(),m.hasContent=!pb.test(m.type),f=m.url,m.hasContent||(m.data&&(f=m.url+=(kb.test(f)?"&":"?")+m.data,delete m.data),m.cache===!1&&(m.url=mb.test(f)?f.replace(mb,"$1_="+jb++):f+(kb.test(f)?"&":"?")+"_="+jb++)),m.ifModified&&(n.lastModified[f]&&x.setRequestHeader("If-Modified-Since",n.lastModified[f]),n.etag[f]&&x.setRequestHeader("If-None-Match",n.etag[f])),(m.data&&m.hasContent&&m.contentType!==!1||c.contentType)&&x.setRequestHeader("Content-Type",m.contentType),x.setRequestHeader("Accept",m.dataTypes[0]&&m.accepts[m.dataTypes[0]]?m.accepts[m.dataTypes[0]]+("*"!==m.dataTypes[0]?", "+tb+"; q=0.01":""):m.accepts["*"]);for(l in m.headers)x.setRequestHeader(l,m.headers[l]);if(m.beforeSend&&(m.beforeSend.call(o,x,m)===!1||2===v))return x.abort();w="abort";for(l in{success:1,error:1,complete:1})x[l](m[l]);if(e=wb(sb,m,c,x)){if(x.readyState=1,k&&p.trigger("ajaxSend",[x,m]),2===v)return x;m.async&&m.timeout>0&&(i=a.setTimeout(function(){x.abort("timeout")},m.timeout));try{v=1,e.send(t,z)}catch(y){if(!(2>v))throw y;z(-1,y)}}else z(-1,"No Transport");function z(b,c,d,h){var j,l,t,u,w,y=c;2!==v&&(v=2,i&&a.clearTimeout(i),e=void 0,g=h||"",x.readyState=b>0?4:0,j=b>=200&&300>b||304===b,d&&(u=yb(m,x,d)),u=zb(m,u,x,j),j?(m.ifModified&&(w=x.getResponseHeader("Last-Modified"),w&&(n.lastModified[f]=w),w=x.getResponseHeader("etag"),w&&(n.etag[f]=w)),204===b||"HEAD"===m.type?y="nocontent":304===b?y="notmodified":(y=u.state,l=u.data,t=u.error,j=!t)):(t=y,(b||!y)&&(y="error",0>b&&(b=0))),x.status=b,x.statusText=(c||y)+"",j?q.resolveWith(o,[l,y,x]):q.rejectWith(o,[x,y,t]),x.statusCode(s),s=void 0,k&&p.trigger(j?"ajaxSuccess":"ajaxError",[x,m,j?l:t]),r.fireWith(o,[x,y]),k&&(p.trigger("ajaxComplete",[x,m]),--n.active||n.event.trigger("ajaxStop")))}return x},getJSON:function(a,b,c){return n.get(a,b,c,"json")},getScript:function(a,b){return n.get(a,void 0,b,"script")}}),n.each(["get","post"],function(a,b){n[b]=function(a,c,d,e){return n.isFunction(c)&&(e=e||d,d=c,c=void 0),n.ajax(n.extend({url:a,type:b,dataType:e,data:c,success:d},n.isPlainObject(a)&&a))}}),n._evalUrl=function(a){return n.ajax({url:a,type:"GET",dataType:"script",async:!1,global:!1,"throws":!0})},n.fn.extend({wrapAll:function(a){var b;return n.isFunction(a)?this.each(function(b){n(this).wrapAll(a.call(this,b))}):(this[0]&&(b=n(a,this[0].ownerDocument).eq(0).clone(!0),this[0].parentNode&&b.insertBefore(this[0]),b.map(function(){var a=this;while(a.firstElementChild)a=a.firstElementChild;return a}).append(this)),this)},wrapInner:function(a){return n.isFunction(a)?this.each(function(b){n(this).wrapInner(a.call(this,b))}):this.each(function(){var b=n(this),c=b.contents();c.length?c.wrapAll(a):b.append(a)})},wrap:function(a){var b=n.isFunction(a);return this.each(function(c){n(this).wrapAll(b?a.call(this,c):a)})},unwrap:function(){return this.parent().each(function(){n.nodeName(this,"body")||n(this).replaceWith(this.childNodes)}).end()}}),n.expr.filters.hidden=function(a){return!n.expr.filters.visible(a)},n.expr.filters.visible=function(a){return a.offsetWidth>0||a.offsetHeight>0||a.getClientRects().length>0};var Ab=/%20/g,Bb=/\[\]$/,Cb=/\r?\n/g,Db=/^(?:submit|button|image|reset|file)$/i,Eb=/^(?:input|select|textarea|keygen)/i;function Fb(a,b,c,d){var e;if(n.isArray(b))n.each(b,function(b,e){c||Bb.test(a)?d(a,e):Fb(a+"["+("object"==typeof e&&null!=e?b:"")+"]",e,c,d)});else if(c||"object"!==n.type(b))d(a,b);else for(e in b)Fb(a+"["+e+"]",b[e],c,d)}n.param=function(a,b){var c,d=[],e=function(a,b){b=n.isFunction(b)?b():null==b?"":b,d[d.length]=encodeURIComponent(a)+"="+encodeURIComponent(b)};if(void 0===b&&(b=n.ajaxSettings&&n.ajaxSettings.traditional),n.isArray(a)||a.jquery&&!n.isPlainObject(a))n.each(a,function(){e(this.name,this.value)});else for(c in a)Fb(c,a[c],b,e);return d.join("&").replace(Ab,"+")},n.fn.extend({serialize:function(){return n.param(this.serializeArray())},serializeArray:function(){return this.map(function(){var a=n.prop(this,"elements");return a?n.makeArray(a):this}).filter(function(){var a=this.type;return this.name&&!n(this).is(":disabled")&&Eb.test(this.nodeName)&&!Db.test(a)&&(this.checked||!X.test(a))}).map(function(a,b){var c=n(this).val();return null==c?null:n.isArray(c)?n.map(c,function(a){return{name:b.name,value:a.replace(Cb,"\r\n")}}):{name:b.name,value:c.replace(Cb,"\r\n")}}).get()}}),n.ajaxSettings.xhr=function(){try{return new a.XMLHttpRequest}catch(b){}};var Gb={0:200,1223:204},Hb=n.ajaxSettings.xhr();l.cors=!!Hb&&"withCredentials"in Hb,l.ajax=Hb=!!Hb,n.ajaxTransport(function(b){var c,d;return l.cors||Hb&&!b.crossDomain?{send:function(e,f){var g,h=b.xhr();if(h.open(b.type,b.url,b.async,b.username,b.password),b.xhrFields)for(g in b.xhrFields)h[g]=b.xhrFields[g];b.mimeType&&h.overrideMimeType&&h.overrideMimeType(b.mimeType),b.crossDomain||e["X-Requested-With"]||(e["X-Requested-With"]="XMLHttpRequest");for(g in e)h.setRequestHeader(g,e[g]);c=function(a){return function(){c&&(c=d=h.onload=h.onerror=h.onabort=h.onreadystatechange=null,"abort"===a?h.abort():"error"===a?"number"!=typeof h.status?f(0,"error"):f(h.status,h.statusText):f(Gb[h.status]||h.status,h.statusText,"text"!==(h.responseType||"text")||"string"!=typeof h.responseText?{binary:h.response}:{text:h.responseText},h.getAllResponseHeaders()))}},h.onload=c(),d=h.onerror=c("error"),void 0!==h.onabort?h.onabort=d:h.onreadystatechange=function(){4===h.readyState&&a.setTimeout(function(){c&&d()})},c=c("abort");try{h.send(b.hasContent&&b.data||null)}catch(i){if(c)throw i}},abort:function(){c&&c()}}:void 0}),n.ajaxSetup({accepts:{script:"text/javascript, application/javascript, application/ecmascript, application/x-ecmascript"},contents:{script:/\b(?:java|ecma)script\b/},converters:{"text script":function(a){return n.globalEval(a),a}}}),n.ajaxPrefilter("script",function(a){void 0===a.cache&&(a.cache=!1),a.crossDomain&&(a.type="GET")}),n.ajaxTransport("script",function(a){if(a.crossDomain){var b,c;return{send:function(e,f){b=n("<script>").prop({charset:a.scriptCharset,src:a.url}).on("load error",c=function(a){b.remove(),c=null,a&&f("error"===a.type?404:200,a.type)}),d.head.appendChild(b[0])},abort:function(){c&&c()}}}});var Ib=[],Jb=/(=)\?(?=&|$)|\?\?/;n.ajaxSetup({jsonp:"callback",jsonpCallback:function(){var a=Ib.pop()||n.expando+"_"+jb++;return this[a]=!0,a}}),n.ajaxPrefilter("json jsonp",function(b,c,d){var e,f,g,h=b.jsonp!==!1&&(Jb.test(b.url)?"url":"string"==typeof b.data&&0===(b.contentType||"").indexOf("application/x-www-form-urlencoded")&&Jb.test(b.data)&&"data");return h||"jsonp"===b.dataTypes[0]?(e=b.jsonpCallback=n.isFunction(b.jsonpCallback)?b.jsonpCallback():b.jsonpCallback,h?b[h]=b[h].replace(Jb,"$1"+e):b.jsonp!==!1&&(b.url+=(kb.test(b.url)?"&":"?")+b.jsonp+"="+e),b.converters["script json"]=function(){return g||n.error(e+" was not called"),g[0]},b.dataTypes[0]="json",f=a[e],a[e]=function(){g=arguments},d.always(function(){void 0===f?n(a).removeProp(e):a[e]=f,b[e]&&(b.jsonpCallback=c.jsonpCallback,Ib.push(e)),g&&n.isFunction(f)&&f(g[0]),g=f=void 0}),"script"):void 0}),l.createHTMLDocument=function(){var a=d.implementation.createHTMLDocument("").body;return a.innerHTML="<form></form><form></form>",2===a.childNodes.length}(),n.parseHTML=function(a,b,c){if(!a||"string"!=typeof a)return null;"boolean"==typeof b&&(c=b,b=!1),b=b||(l.createHTMLDocument?d.implementation.createHTMLDocument(""):d);var e=x.exec(a),f=!c&&[];return e?[b.createElement(e[1])]:(e=ca([a],b,f),f&&f.length&&n(f).remove(),n.merge([],e.childNodes))};var Kb=n.fn.load;n.fn.load=function(a,b,c){if("string"!=typeof a&&Kb)return Kb.apply(this,arguments);var d,e,f,g=this,h=a.indexOf(" ");return h>-1&&(d=n.trim(a.slice(h)),a=a.slice(0,h)),n.isFunction(b)?(c=b,b=void 0):b&&"object"==typeof b&&(e="POST"),g.length>0&&n.ajax({url:a,type:e||"GET",dataType:"html",data:b}).done(function(a){f=arguments,g.html(d?n("<div>").append(n.parseHTML(a)).find(d):a)}).always(c&&function(a,b){g.each(function(){c.apply(g,f||[a.responseText,b,a])})}),this},n.each(["ajaxStart","ajaxStop","ajaxComplete","ajaxError","ajaxSuccess","ajaxSend"],function(a,b){n.fn[b]=function(a){return this.on(b,a)}}),n.expr.filters.animated=function(a){return n.grep(n.timers,function(b){return a===b.elem}).length};function Lb(a){return n.isWindow(a)?a:9===a.nodeType&&a.defaultView}n.offset={setOffset:function(a,b,c){var d,e,f,g,h,i,j,k=n.css(a,"position"),l=n(a),m={};"static"===k&&(a.style.position="relative"),h=l.offset(),f=n.css(a,"top"),i=n.css(a,"left"),j=("absolute"===k||"fixed"===k)&&(f+i).indexOf("auto")>-1,j?(d=l.position(),g=d.top,e=d.left):(g=parseFloat(f)||0,e=parseFloat(i)||0),n.isFunction(b)&&(b=b.call(a,c,n.extend({},h))),null!=b.top&&(m.top=b.top-h.top+g),null!=b.left&&(m.left=b.left-h.left+e),"using"in b?b.using.call(a,m):l.css(m)}},n.fn.extend({offset:function(a){if(arguments.length)return void 0===a?this:this.each(function(b){n.offset.setOffset(this,a,b)});var b,c,d=this[0],e={top:0,left:0},f=d&&d.ownerDocument;if(f)return b=f.documentElement,n.contains(b,d)?(e=d.getBoundingClientRect(),c=Lb(f),{top:e.top+c.pageYOffset-b.clientTop,left:e.left+c.pageXOffset-b.clientLeft}):e},position:function(){if(this[0]){var a,b,c=this[0],d={top:0,left:0};return"fixed"===n.css(c,"position")?b=c.getBoundingClientRect():(a=this.offsetParent(),b=this.offset(),n.nodeName(a[0],"html")||(d=a.offset()),d.top+=n.css(a[0],"borderTopWidth",!0),d.left+=n.css(a[0],"borderLeftWidth",!0)),{top:b.top-d.top-n.css(c,"marginTop",!0),left:b.left-d.left-n.css(c,"marginLeft",!0)}}},offsetParent:function(){return this.map(function(){var a=this.offsetParent;while(a&&"static"===n.css(a,"position"))a=a.offsetParent;return a||Ea})}}),n.each({scrollLeft:"pageXOffset",scrollTop:"pageYOffset"},function(a,b){var c="pageYOffset"===b;n.fn[a]=function(d){return K(this,function(a,d,e){var f=Lb(a);return void 0===e?f?f[b]:a[d]:void(f?f.scrollTo(c?f.pageXOffset:e,c?e:f.pageYOffset):a[d]=e)},a,d,arguments.length)}}),n.each(["top","left"],function(a,b){n.cssHooks[b]=Ga(l.pixelPosition,function(a,c){return c?(c=Fa(a,b),Ba.test(c)?n(a).position()[b]+"px":c):void 0})}),n.each({Height:"height",Width:"width"},function(a,b){n.each({padding:"inner"+a,content:b,"":"outer"+a},function(c,d){n.fn[d]=function(d,e){var f=arguments.length&&(c||"boolean"!=typeof d),g=c||(d===!0||e===!0?"margin":"border");return K(this,function(b,c,d){var e;return n.isWindow(b)?b.document.documentElement["client"+a]:9===b.nodeType?(e=b.documentElement,Math.max(b.body["scroll"+a],e["scroll"+a],b.body["offset"+a],e["offset"+a],e["client"+a])):void 0===d?n.css(b,c,g):n.style(b,c,d,g)},b,f?d:void 0,f,null)}})}),n.fn.extend({bind:function(a,b,c){return this.on(a,null,b,c)},unbind:function(a,b){return this.off(a,null,b)},delegate:function(a,b,c,d){return this.on(b,a,c,d)},undelegate:function(a,b,c){return 1===arguments.length?this.off(a,"**"):this.off(b,a||"**",c)},size:function(){return this.length}}),n.fn.andSelf=n.fn.addBack,"function"==typeof define&&define.amd&&define("jquery",[],function(){return n});var Mb=a.jQuery,Nb=a.$;return n.noConflict=function(b){return a.$===n&&(a.$=Nb),b&&a.jQuery===n&&(a.jQuery=Mb),n},b||(a.jQuery=a.$=n),n});
+
 /*!
- * Cropper v0.9.3
+ * Cropper v2.3.0
  * https://github.com/fengyuanchen/cropper
  *
- * Copyright (c) 2014-2015 Fengyuan Chen and contributors
+ * Copyright (c) 2014-2016 Fengyuan Chen and contributors
  * Released under the MIT license
  *
- * Date: 2015-05-10T07:25:08.257Z
+ * Date: 2016-02-22T02:13:13.332Z
  */
-!function(a){"function"==typeof define&&define.amd?define(["jquery"],a):a("object"==typeof exports?require("jquery"):jQuery)}(function(a){"use strict";function b(a){return"number"==typeof a&&!isNaN(a)}function c(a){return"undefined"==typeof a}function d(a,c){var d=[];return b(c)&&d.push(c),d.slice.apply(a,d)}function e(a,b){var c=d(arguments,2);return function(){return a.apply(b,c.concat(d(arguments)))}}function f(a){var b=a.match(/^(https?:)\/\/([^\:\/\?#]+):?(\d*)/i);return b&&(b[1]!==n.protocol||b[2]!==n.hostname||b[3]!==n.port)}function g(a){var b="timestamp="+(new Date).getTime();return a+(-1===a.indexOf("?")?"?":"&")+b}function h(a){return a?"rotate("+a+"deg)":"none"}function i(a,b){var c,d,e=Q(a.degree)%180,f=(e>90?180-e:e)*Math.PI/180,g=R(f),h=S(f),i=a.width,j=a.height,k=a.aspectRatio;return b?(c=i/(h+g/k),d=c/k):(c=i*h+j*g,d=i*g+j*h),{width:c,height:d}}function j(b,c){var d=a("<canvas>")[0],e=d.getContext("2d"),f=c.naturalWidth,g=c.naturalHeight,h=c.rotate,j=i({width:f,height:g,degree:h});return h?(d.width=j.width,d.height=j.height,e.save(),e.translate(j.width/2,j.height/2),e.rotate(h*Math.PI/180),e.drawImage(b,-f/2,-g/2,f,g),e.restore()):(d.width=f,d.height=g,e.drawImage(b,0,0,f,g)),d}function k(b,c){this.$element=a(b),this.options=a.extend({},k.DEFAULTS,a.isPlainObject(c)&&c),this.ready=!1,this.built=!1,this.rotated=!1,this.cropped=!1,this.disabled=!1,this.canvas=null,this.cropBox=null,this.load()}var l=a(window),m=a(document),n=window.location,o=".cropper",p="preview"+o,q=/^(e|n|w|s|ne|nw|sw|se|all|crop|move|zoom)$/,r="cropper-modal",s="cropper-hide",t="cropper-hidden",u="cropper-invisible",v="cropper-move",w="cropper-crop",x="cropper-disabled",y="cropper-bg",z="mousedown touchstart",A="mousemove touchmove",B="mouseup mouseleave touchend touchleave touchcancel",C="wheel mousewheel DOMMouseScroll",D="dblclick",E="resize"+o,F="build"+o,G="built"+o,H="dragstart"+o,I="dragmove"+o,J="dragend"+o,K="zoomin"+o,L="zoomout"+o,M=a.isFunction(a("<canvas>")[0].getContext),N=Math.sqrt,O=Math.min,P=Math.max,Q=Math.abs,R=Math.sin,S=Math.cos,T=parseFloat,U={};U.load=function(b){var c,d,e,h,i=this.options,j=this.$element;if(!b)if(j.is("img")){if(!j.attr("src"))return;b=j.prop("src")}else j.is("canvas")&&M&&(b=j[0].toDataURL());b&&(e=a.Event(F),j.one(F,i.build).trigger(e),e.isDefaultPrevented()||(i.checkImageOrigin&&f(b)&&(c="anonymous",j.prop("crossOrigin")||(d=g(b))),this.$clone=h=a("<img>"),h.one("load",a.proxy(function(){var a=h.prop("naturalWidth")||h.width(),c=h.prop("naturalHeight")||h.height();this.image={naturalWidth:a,naturalHeight:c,aspectRatio:a/c,rotate:0},this.url=b,this.ready=!0,this.build()},this)).one("error",function(){h.remove()}).attr({crossOrigin:c,src:d||b}),h.addClass(s).insertAfter(j)))},U.build=function(){var b,c,d=this.$element,e=this.$clone,f=this.options;this.ready&&(this.built&&this.unbuild(),this.$cropper=b=a(k.TEMPLATE),d.addClass(t),e.removeClass(s),this.$container=d.parent().append(b),this.$canvas=b.find(".cropper-canvas").append(e),this.$dragBox=b.find(".cropper-drag-box"),this.$cropBox=c=b.find(".cropper-crop-box"),this.$viewBox=b.find(".cropper-view-box"),this.addListeners(),this.initPreview(),f.aspectRatio=T(f.aspectRatio)||NaN,f.autoCrop?(this.cropped=!0,f.modal&&this.$dragBox.addClass(r)):c.addClass(t),f.background&&b.addClass(y),f.highlight||c.find(".cropper-face").addClass(u),f.guides||c.find(".cropper-dashed").addClass(t),f.movable||c.find(".cropper-face").data("drag","move"),f.resizable||c.find(".cropper-line, .cropper-point").addClass(t),this.setDragMode(f.dragCrop?"crop":"move"),this.built=!0,this.render(),this.setData(f.data),d.one(G,f.built).trigger(G))},U.unbuild=function(){this.built&&(this.built=!1,this.initialImage=null,this.initialCanvas=null,this.initialCropBox=null,this.container=null,this.canvas=null,this.cropBox=null,this.removeListeners(),this.resetPreview(),this.$preview=null,this.$viewBox=null,this.$cropBox=null,this.$dragBox=null,this.$canvas=null,this.$container=null,this.$cropper.remove(),this.$cropper=null)},a.extend(U,{render:function(){this.initContainer(),this.initCanvas(),this.initCropBox(),this.renderCanvas(),this.cropped&&this.renderCropBox()},initContainer:function(){var a=this.$element,b=this.$container,c=this.$cropper,d=this.options;c.addClass(t),a.removeClass(t),c.css(this.container={width:P(b.width(),T(d.minContainerWidth)||200),height:P(b.height(),T(d.minContainerHeight)||100)}),a.addClass(t),c.removeClass(t)},initCanvas:function(){var b=this.container,c=b.width,d=b.height,e=this.image,f=e.aspectRatio,g={aspectRatio:f,width:c,height:d};d*f>c?g.height=c/f:g.width=d*f,g.oldLeft=g.left=(c-g.width)/2,g.oldTop=g.top=(d-g.height)/2,this.canvas=g,this.limitCanvas(!0,!0),this.initialImage=a.extend({},e),this.initialCanvas=a.extend({},g)},limitCanvas:function(b,c){var d,e,f=this.options,g=f.strict,h=this.container,i=h.width,j=h.height,k=this.canvas,l=k.aspectRatio,m=this.cropBox,n=this.cropped&&m,o=this.initialCanvas||k,p=o.width,q=o.height;b&&(d=T(f.minCanvasWidth)||0,e=T(f.minCanvasHeight)||0,d?(g&&(d=P(n?m.width:p,d)),e=d/l):e?(g&&(e=P(n?m.height:q,e)),d=e*l):g&&(n?(d=m.width,e=m.height,e*l>d?d=e*l:e=d/l):(d=p,e=q)),a.extend(k,{minWidth:d,minHeight:e,maxWidth:1/0,maxHeight:1/0})),c&&(g?n?(k.minLeft=O(m.left,m.left+m.width-k.width),k.minTop=O(m.top,m.top+m.height-k.height),k.maxLeft=m.left,k.maxTop=m.top):(k.minLeft=O(0,i-k.width),k.minTop=O(0,j-k.height),k.maxLeft=P(0,i-k.width),k.maxTop=P(0,j-k.height)):(k.minLeft=-k.width,k.minTop=-k.height,k.maxLeft=i,k.maxTop=j))},renderCanvas:function(a){var b,c,d=this.options,e=this.canvas,f=this.image;this.rotated&&(this.rotated=!1,c=i({width:f.width,height:f.height,degree:f.rotate}),b=c.width/c.height,b!==e.aspectRatio&&(e.left-=(c.width-e.width)/2,e.top-=(c.height-e.height)/2,e.width=c.width,e.height=c.height,e.aspectRatio=b,this.limitCanvas(!0,!1))),(e.width>e.maxWidth||e.width<e.minWidth)&&(e.left=e.oldLeft),(e.height>e.maxHeight||e.height<e.minHeight)&&(e.top=e.oldTop),e.width=O(P(e.width,e.minWidth),e.maxWidth),e.height=O(P(e.height,e.minHeight),e.maxHeight),this.limitCanvas(!1,!0),e.oldLeft=e.left=O(P(e.left,e.minLeft),e.maxLeft),e.oldTop=e.top=O(P(e.top,e.minTop),e.maxTop),this.$canvas.css({width:e.width,height:e.height,left:e.left,top:e.top}),this.renderImage(),this.cropped&&d.strict&&this.limitCropBox(!0,!0),a&&this.output()},renderImage:function(){var b,c=this.canvas,d=this.image;d.rotate&&(b=i({width:c.width,height:c.height,degree:d.rotate,aspectRatio:d.aspectRatio},!0)),a.extend(d,b?{width:b.width,height:b.height,left:(c.width-b.width)/2,top:(c.height-b.height)/2}:{width:c.width,height:c.height,left:0,top:0}),this.$clone.css({width:d.width,height:d.height,marginLeft:d.left,marginTop:d.top,transform:h(d.rotate)})},initCropBox:function(){var b=this.options,c=this.canvas,d=b.aspectRatio,e=T(b.autoCropArea)||.8,f={width:c.width,height:c.height};d&&(c.height*d>c.width?f.height=f.width/d:f.width=f.height*d),this.cropBox=f,this.limitCropBox(!0,!0),f.width=O(P(f.width,f.minWidth),f.maxWidth),f.height=O(P(f.height,f.minHeight),f.maxHeight),f.width=P(f.minWidth,f.width*e),f.height=P(f.minHeight,f.height*e),f.oldLeft=f.left=c.left+(c.width-f.width)/2,f.oldTop=f.top=c.top+(c.height-f.height)/2,this.initialCropBox=a.extend({},f)},limitCropBox:function(a,b){var c,d,e=this.options,f=e.strict,g=this.container,h=g.width,i=g.height,j=this.canvas,k=this.cropBox,l=e.aspectRatio;a&&(c=T(e.minCropBoxWidth)||0,d=T(e.minCropBoxHeight)||0,k.minWidth=O(h,c),k.minHeight=O(i,d),k.maxWidth=O(h,f?j.width:h),k.maxHeight=O(i,f?j.height:i),l&&(k.maxHeight*l>k.maxWidth?(k.minHeight=k.minWidth/l,k.maxHeight=k.maxWidth/l):(k.minWidth=k.minHeight*l,k.maxWidth=k.maxHeight*l)),k.minWidth=O(k.maxWidth,k.minWidth),k.minHeight=O(k.maxHeight,k.minHeight)),b&&(f?(k.minLeft=P(0,j.left),k.minTop=P(0,j.top),k.maxLeft=O(h,j.left+j.width)-k.width,k.maxTop=O(i,j.top+j.height)-k.height):(k.minLeft=0,k.minTop=0,k.maxLeft=h-k.width,k.maxTop=i-k.height))},renderCropBox:function(){var a=this.options,b=this.container,c=b.width,d=b.height,e=this.$cropBox,f=this.cropBox;(f.width>f.maxWidth||f.width<f.minWidth)&&(f.left=f.oldLeft),(f.height>f.maxHeight||f.height<f.minHeight)&&(f.top=f.oldTop),f.width=O(P(f.width,f.minWidth),f.maxWidth),f.height=O(P(f.height,f.minHeight),f.maxHeight),this.limitCropBox(!1,!0),f.oldLeft=f.left=O(P(f.left,f.minLeft),f.maxLeft),f.oldTop=f.top=O(P(f.top,f.minTop),f.maxTop),a.movable&&e.find(".cropper-face").data("drag",f.width===c&&f.height===d?"move":"all"),e.css({width:f.width,height:f.height,left:f.left,top:f.top}),this.cropped&&a.strict&&this.limitCanvas(!0,!0),this.disabled||this.output()},output:function(){var a=this.options;this.preview(),a.crop&&a.crop.call(this.$element,this.getData())}}),U.initPreview=function(){var b=this.url;this.$preview=a(this.options.preview),this.$viewBox.html('<img src="'+b+'">'),this.$preview.each(function(){var c=a(this);c.data(p,{width:c.width(),height:c.height(),original:c.html()}).html('<img src="'+b+'" style="display:block;width:100%;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;image-orientation: 0deg!important">')})},U.resetPreview=function(){this.$preview.each(function(){var b=a(this);b.html(b.data(p).original).removeData(p)})},U.preview=function(){var b=this.image,c=this.canvas,d=this.cropBox,e=b.width,f=b.height,g=d.left-c.left-b.left,i=d.top-c.top-b.top,j=b.rotate;this.cropped&&!this.disabled&&(this.$viewBox.find("img").css({width:e,height:f,marginLeft:-g,marginTop:-i,transform:h(j)}),this.$preview.each(function(){var b=a(this),c=b.data(p),k=c.width/d.width,l=c.width,m=d.height*k;m>c.height&&(k=c.height/d.height,l=d.width*k,m=c.height),b.width(l).height(m).find("img").css({width:e*k,height:f*k,marginLeft:-g*k,marginTop:-i*k,transform:h(j)})}))},U.addListeners=function(){var b=this.options;this.$element.on(H,b.dragstart).on(I,b.dragmove).on(J,b.dragend).on(K,b.zoomin).on(L,b.zoomout),this.$cropper.on(z,a.proxy(this.dragstart,this)).on(D,a.proxy(this.dblclick,this)),b.zoomable&&b.mouseWheelZoom&&this.$cropper.on(C,a.proxy(this.wheel,this)),m.on(A,this._dragmove=e(this.dragmove,this)).on(B,this._dragend=e(this.dragend,this)),b.responsive&&l.on(E,this._resize=e(this.resize,this))},U.removeListeners=function(){var a=this.options;this.$element.off(H,a.dragstart).off(I,a.dragmove).off(J,a.dragend).off(K,a.zoomin).off(L,a.zoomout),this.$cropper.off(z,this.dragstart).off(D,this.dblclick),a.zoomable&&a.mouseWheelZoom&&this.$cropper.off(C,this.wheel),m.off(A,this._dragmove).off(B,this._dragend),a.responsive&&l.off(E,this._resize)},a.extend(U,{resize:function(){var b,c,d,e=this.$container,f=this.container;this.disabled||(d=e.width()/f.width,(1!==d||e.height()!==f.height)&&(b=this.getCanvasData(),c=this.getCropBoxData(),this.render(),this.setCanvasData(a.each(b,function(a,c){b[a]=c*d})),this.setCropBoxData(a.each(c,function(a,b){c[a]=b*d}))))},dblclick:function(){this.disabled||this.setDragMode(this.$dragBox.hasClass(w)?"move":"crop")},wheel:function(a){var b=a.originalEvent,c=1;this.disabled||(a.preventDefault(),b.deltaY?c=b.deltaY>0?1:-1:b.wheelDelta?c=-b.wheelDelta/120:b.detail&&(c=b.detail>0?1:-1),this.zoom(.1*-c))},dragstart:function(b){var c,d,e,f=this.options,g=b.originalEvent,h=g&&g.touches,i=b;if(!this.disabled){if(h){if(e=h.length,e>1){if(!f.zoomable||!f.touchDragZoom||2!==e)return;i=h[1],this.startX2=i.pageX,this.startY2=i.pageY,c="zoom"}i=h[0]}if(c=c||a(i.target).data("drag"),q.test(c)){if(b.preventDefault(),d=a.Event(H,{originalEvent:g,dragType:c}),this.$element.trigger(d),d.isDefaultPrevented())return;this.dragType=c,this.cropping=!1,this.startX=i.pageX,this.startY=i.pageY,"crop"===c&&(this.cropping=!0,this.$dragBox.addClass(r))}}},dragmove:function(b){var c,d,e=this.options,f=b.originalEvent,g=f&&f.touches,h=b,i=this.dragType;if(!this.disabled){if(g){if(d=g.length,d>1){if(!e.zoomable||!e.touchDragZoom||2!==d)return;h=g[1],this.endX2=h.pageX,this.endY2=h.pageY}h=g[0]}if(i){if(b.preventDefault(),c=a.Event(I,{originalEvent:f,dragType:i}),this.$element.trigger(c),c.isDefaultPrevented())return;this.endX=h.pageX,this.endY=h.pageY,this.change()}}},dragend:function(b){var c,d=this.dragType;if(!this.disabled&&d){if(b.preventDefault(),c=a.Event(J,{originalEvent:b.originalEvent,dragType:d}),this.$element.trigger(c),c.isDefaultPrevented())return;this.cropping&&(this.cropping=!1,this.$dragBox.toggleClass(r,this.cropped&&this.options.modal)),this.dragType=""}}}),a.extend(U,{crop:function(){this.built&&!this.disabled&&(this.cropped||(this.cropped=!0,this.limitCropBox(!0,!0),this.options.modal&&this.$dragBox.addClass(r),this.$cropBox.removeClass(t)),this.setCropBoxData(this.initialCropBox))},reset:function(){this.built&&!this.disabled&&(this.image=a.extend({},this.initialImage),this.canvas=a.extend({},this.initialCanvas),this.cropBox=a.extend({},this.initialCropBox),this.renderCanvas(),this.cropped&&this.renderCropBox())},clear:function(){this.cropped&&!this.disabled&&(a.extend(this.cropBox,{left:0,top:0,width:0,height:0}),this.cropped=!1,this.renderCropBox(),this.limitCanvas(),this.renderCanvas(),this.$dragBox.removeClass(r),this.$cropBox.addClass(t))},destroy:function(){var a=this.$element;this.ready?(this.unbuild(),a.removeClass(t)):this.$clone&&this.$clone.remove(),a.removeData("cropper")},replace:function(a){!this.disabled&&a&&this.load(a)},enable:function(){this.built&&(this.disabled=!1,this.$cropper.removeClass(x))},disable:function(){this.built&&(this.disabled=!0,this.$cropper.addClass(x))},move:function(a,c){var d=this.canvas;this.built&&!this.disabled&&b(a)&&b(c)&&(d.left+=a,d.top+=c,this.renderCanvas(!0))},zoom:function(b){var c,d,e,f=this.canvas;if(b=T(b),b&&this.built&&!this.disabled&&this.options.zoomable){if(c=a.Event(b>0?K:L),this.$element.trigger(c),c.isDefaultPrevented())return;b=-1>=b?1/(1-b):1>=b?1+b:b,d=f.width*b,e=f.height*b,f.left-=(d-f.width)/2,f.top-=(e-f.height)/2,f.width=d,f.height=e,this.renderCanvas(!0),this.setDragMode("move")}},rotate:function(a){var b=this.image;a=T(a),a&&this.built&&!this.disabled&&this.options.rotatable&&(b.rotate=(b.rotate+a)%360,this.rotated=!0,this.renderCanvas(!0))},getData:function(){var b,c,d=this.cropBox,e=this.canvas,f=this.image;return this.built&&this.cropped?(c={x:d.left-e.left,y:d.top-e.top,width:d.width,height:d.height},b=f.width/f.naturalWidth,a.each(c,function(a,d){d/=b,c[a]=d})):c={x:0,y:0,width:0,height:0},c.rotate=this.ready?f.rotate:0,c},setData:function(c){var d,e=this.image,f=this.canvas,g={};this.built&&!this.disabled&&a.isPlainObject(c)&&(b(c.rotate)&&c.rotate!==e.rotate&&this.options.rotatable&&(e.rotate=c.rotate,this.rotated=!0,this.renderCanvas(!0)),d=e.width/e.naturalWidth,b(c.x)&&(g.left=c.x*d+f.left),b(c.y)&&(g.top=c.y*d+f.top),b(c.width)&&(g.width=c.width*d),b(c.height)&&(g.height=c.height*d),this.setCropBoxData(g))},getContainerData:function(){return this.built?this.container:{}},getImageData:function(){return this.ready?this.image:{}},getCanvasData:function(){var a,b=this.canvas;return this.built&&(a={left:b.left,top:b.top,width:b.width,height:b.height}),a||{}},setCanvasData:function(c){var d=this.canvas,e=d.aspectRatio;this.built&&!this.disabled&&a.isPlainObject(c)&&(b(c.left)&&(d.left=c.left),b(c.top)&&(d.top=c.top),b(c.width)?(d.width=c.width,d.height=c.width/e):b(c.height)&&(d.height=c.height,d.width=c.height*e),this.renderCanvas(!0))},getCropBoxData:function(){var a,b=this.cropBox;return this.built&&this.cropped&&(a={left:b.left,top:b.top,width:b.width,height:b.height}),a||{}},setCropBoxData:function(c){var d=this.cropBox,e=this.options.aspectRatio;this.built&&this.cropped&&!this.disabled&&a.isPlainObject(c)&&(b(c.left)&&(d.left=c.left),b(c.top)&&(d.top=c.top),b(c.width)&&(d.width=c.width),b(c.height)&&(d.height=c.height),e&&(b(c.width)?d.height=d.width/e:b(c.height)&&(d.width=d.height*e)),this.renderCropBox())},getCroppedCanvas:function(b){var c,d,e,f,g,h,i,k,l,m,n;if(this.built&&this.cropped&&M)return a.isPlainObject(b)||(b={}),n=this.getData(),c=n.width,d=n.height,k=c/d,a.isPlainObject(b)&&(g=b.width,h=b.height,g?(h=g/k,i=g/c):h&&(g=h*k,i=h/d)),e=g||c,f=h||d,l=a("<canvas>")[0],l.width=e,l.height=f,m=l.getContext("2d"),b.fillColor&&(m.fillStyle=b.fillColor,m.fillRect(0,0,e,f)),m.drawImage.apply(m,function(){var a,b,e,f,g,h,k=j(this.$clone[0],this.image),l=k.width,m=k.height,o=[k],p=n.x,q=n.y;return-c>=p||p>l?p=a=e=g=0:0>=p?(e=-p,p=0,a=g=O(l,c+p)):l>=p&&(e=0,a=g=O(c,l-p)),0>=a||-d>=q||q>m?q=b=f=h=0:0>=q?(f=-q,q=0,b=h=O(m,d+q)):m>=q&&(f=0,b=h=O(d,m-q)),o.push(p,q,a,b),i&&(e*=i,f*=i,g*=i,h*=i),g>0&&h>0&&o.push(e,f,g,h),o}.call(this)),l},setAspectRatio:function(a){var b=this.options;this.disabled||c(a)||(b.aspectRatio=T(a)||NaN,this.built&&(this.initCropBox(),this.cropped&&this.renderCropBox()))},setDragMode:function(a){var b=this.$dragBox,c=!1,d=!1;if(this.ready&&!this.disabled){switch(a){case"crop":this.options.dragCrop?(c=!0,b.data("drag",a)):d=!0;break;case"move":d=!0,b.data("drag",a);break;default:b.removeData("drag")}b.toggleClass(w,c).toggleClass(v,d)}}}),U.change=function(){var a,b=this.dragType,c=this.options,d=this.canvas,e=this.container,f=this.cropBox,g=f.width,h=f.height,i=f.left,j=f.top,k=i+g,l=j+h,m=0,n=0,o=e.width,p=e.height,q=!0,r=c.aspectRatio,s={x:this.endX-this.startX,y:this.endY-this.startY};switch(c.strict&&(m=f.minLeft,n=f.minTop,o=m+O(e.width,d.width),p=n+O(e.height,d.height)),r&&(s.X=s.y*r,s.Y=s.x/r),b){case"all":i+=s.x,j+=s.y;break;case"e":if(s.x>=0&&(k>=o||r&&(n>=j||l>=p))){q=!1;break}g+=s.x,r&&(h=g/r,j-=s.Y/2),0>g&&(b="w",g=0);break;case"n":if(s.y<=0&&(n>=j||r&&(m>=i||k>=o))){q=!1;break}h-=s.y,j+=s.y,r&&(g=h*r,i+=s.X/2),0>h&&(b="s",h=0);break;case"w":if(s.x<=0&&(m>=i||r&&(n>=j||l>=p))){q=!1;break}g-=s.x,i+=s.x,r&&(h=g/r,j+=s.Y/2),0>g&&(b="e",g=0);break;case"s":if(s.y>=0&&(l>=p||r&&(m>=i||k>=o))){q=!1;break}h+=s.y,r&&(g=h*r,i-=s.X/2),0>h&&(b="n",h=0);break;case"ne":if(r){if(s.y<=0&&(n>=j||k>=o)){q=!1;break}h-=s.y,j+=s.y,g=h*r}else s.x>=0?o>k?g+=s.x:s.y<=0&&n>=j&&(q=!1):g+=s.x,s.y<=0?j>n&&(h-=s.y,j+=s.y):(h-=s.y,j+=s.y);0>g&&0>h?(b="sw",h=0,g=0):0>g?(b="nw",g=0):0>h&&(b="se",h=0);break;case"nw":if(r){if(s.y<=0&&(n>=j||m>=i)){q=!1;break}h-=s.y,j+=s.y,g=h*r,i+=s.X}else s.x<=0?i>m?(g-=s.x,i+=s.x):s.y<=0&&n>=j&&(q=!1):(g-=s.x,i+=s.x),s.y<=0?j>n&&(h-=s.y,j+=s.y):(h-=s.y,j+=s.y);0>g&&0>h?(b="se",h=0,g=0):0>g?(b="ne",g=0):0>h&&(b="sw",h=0);break;case"sw":if(r){if(s.x<=0&&(m>=i||l>=p)){q=!1;break}g-=s.x,i+=s.x,h=g/r}else s.x<=0?i>m?(g-=s.x,i+=s.x):s.y>=0&&l>=p&&(q=!1):(g-=s.x,i+=s.x),s.y>=0?p>l&&(h+=s.y):h+=s.y;0>g&&0>h?(b="ne",h=0,g=0):0>g?(b="se",g=0):0>h&&(b="nw",h=0);break;case"se":if(r){if(s.x>=0&&(k>=o||l>=p)){q=!1;break}g+=s.x,h=g/r}else s.x>=0?o>k?g+=s.x:s.y>=0&&l>=p&&(q=!1):g+=s.x,s.y>=0?p>l&&(h+=s.y):h+=s.y;0>g&&0>h?(b="nw",h=0,g=0):0>g?(b="sw",g=0):0>h&&(b="ne",h=0);break;case"move":d.left+=s.x,d.top+=s.y,this.renderCanvas(!0),q=!1;break;case"zoom":this.zoom(function(a,b,c,d){var e=N(a*a+b*b),f=N(c*c+d*d);return(f-e)/e}(Q(this.startX-this.startX2),Q(this.startY-this.startY2),Q(this.endX-this.endX2),Q(this.endY-this.endY2))),this.startX2=this.endX2,this.startY2=this.endY2,q=!1;break;case"crop":s.x&&s.y&&(a=this.$cropper.offset(),i=this.startX-a.left,j=this.startY-a.top,g=f.minWidth,h=f.minHeight,s.x>0?s.y>0?b="se":(b="ne",j-=h):s.y>0?(b="sw",i-=g):(b="nw",i-=g,j-=h),this.cropped||(this.cropped=!0,this.$cropBox.removeClass(t)))}q&&(f.width=g,f.height=h,f.left=i,f.top=j,this.dragType=b,this.renderCropBox()),this.startX=this.endX,this.startY=this.endY},a.extend(k.prototype,U),k.DEFAULTS={aspectRatio:NaN,autoCropArea:.8,crop:null,data:null,preview:"",strict:!0,responsive:!0,checkImageOrigin:!0,modal:!0,guides:!0,highlight:!0,background:!0,autoCrop:!0,dragCrop:!0,movable:!0,resizable:!0,rotatable:!0,zoomable:!0,touchDragZoom:!0,mouseWheelZoom:!0,minCanvasWidth:0,minCanvasHeight:0,minCropBoxWidth:0,minCropBoxHeight:0,minContainerWidth:200,minContainerHeight:100,build:null,built:null,dragstart:null,dragmove:null,dragend:null,zoomin:null,zoomout:null},k.setDefaults=function(b){a.extend(k.DEFAULTS,b)},k.TEMPLATE=function(a,b){return b=b.split(","),a.replace(/\d+/g,function(a){return b[a]})}('<0 6="5-container"><0 6="5-canvas"></0><0 6="5-2-9" 3-2="move"></0><0 6="5-crop-9"><1 6="5-view-9"></1><1 6="5-8 8-h"></1><1 6="5-8 8-v"></1><1 6="5-face" 3-2="all"></1><1 6="5-7 7-e" 3-2="e"></1><1 6="5-7 7-n" 3-2="n"></1><1 6="5-7 7-w" 3-2="w"></1><1 6="5-7 7-s" 3-2="s"></1><1 6="5-4 4-e" 3-2="e"></1><1 6="5-4 4-n" 3-2="n"></1><1 6="5-4 4-w" 3-2="w"></1><1 6="5-4 4-s" 3-2="s"></1><1 6="5-4 4-ne" 3-2="ne"></1><1 6="5-4 4-nw" 3-2="nw"></1><1 6="5-4 4-sw" 3-2="sw"></1><1 6="5-4 4-se" 3-2="se"></1></0></0>',"div,span,drag,data,point,cropper,class,line,dashed,box"),k.other=a.fn.cropper,a.fn.cropper=function(b){var e,f=d(arguments,1);return this.each(function(){var c,d=a(this),g=d.data("cropper");g||d.data("cropper",g=new k(this,b)),"string"==typeof b&&a.isFunction(c=g[b])&&(e=c.apply(g,f))}),c(e)?this:e},a.fn.cropper.Constructor=k,a.fn.cropper.setDefaults=k.setDefaults,a.fn.cropper.noConflict=function(){return a.fn.cropper=k.other,this}});
-(function () {
+!function(t){"function"==typeof define&&define.amd?define(["jquery"],t):t("object"==typeof exports?require("jquery"):jQuery)}(function(t){"use strict";function i(t){return"number"==typeof t&&!isNaN(t)}function e(t){return"undefined"==typeof t}function s(t,e){var s=[];return i(e)&&s.push(e),s.slice.apply(t,s)}function a(t,i){var e=s(arguments,2);return function(){return t.apply(i,e.concat(s(arguments)))}}function o(t){var i=t.match(/^(https?:)\/\/([^\:\/\?#]+):?(\d*)/i);return i&&(i[1]!==C.protocol||i[2]!==C.hostname||i[3]!==C.port)}function h(t){var i="timestamp="+(new Date).getTime();return t+(-1===t.indexOf("?")?"?":"&")+i}function n(t){return t?' crossOrigin="'+t+'"':""}function r(t,i){var e;return t.naturalWidth&&!mt?i(t.naturalWidth,t.naturalHeight):(e=document.createElement("img"),e.onload=function(){i(this.width,this.height)},void(e.src=t.src))}function p(t){var e=[],s=t.rotate,a=t.scaleX,o=t.scaleY;return i(s)&&e.push("rotate("+s+"deg)"),i(a)&&i(o)&&e.push("scale("+a+","+o+")"),e.length?e.join(" "):"none"}function l(t,i){var e,s,a=Ct(t.degree)%180,o=(a>90?180-a:a)*Math.PI/180,h=bt(o),n=Bt(o),r=t.width,p=t.height,l=t.aspectRatio;return i?(e=r/(n+h/l),s=e/l):(e=r*n+p*h,s=r*h+p*n),{width:e,height:s}}function c(e,s){var a,o,h,n=t("<canvas>")[0],r=n.getContext("2d"),p=0,c=0,d=s.naturalWidth,g=s.naturalHeight,u=s.rotate,f=s.scaleX,m=s.scaleY,v=i(f)&&i(m)&&(1!==f||1!==m),w=i(u)&&0!==u,x=w||v,C=d*Ct(f||1),b=g*Ct(m||1);return v&&(a=C/2,o=b/2),w&&(h=l({width:C,height:b,degree:u}),C=h.width,b=h.height,a=C/2,o=b/2),n.width=C,n.height=b,x&&(p=-d/2,c=-g/2,r.save(),r.translate(a,o)),w&&r.rotate(u*Math.PI/180),v&&r.scale(f,m),r.drawImage(e,$t(p),$t(c),$t(d),$t(g)),x&&r.restore(),n}function d(i){var e=i.length,s=0,a=0;return e&&(t.each(i,function(t,i){s+=i.pageX,a+=i.pageY}),s/=e,a/=e),{pageX:s,pageY:a}}function g(t,i,e){var s,a="";for(s=i,e+=i;e>s;s++)a+=Lt(t.getUint8(s));return a}function u(t){var i,e,s,a,o,h,n,r,p,l,c=new D(t),d=c.byteLength;if(255===c.getUint8(0)&&216===c.getUint8(1))for(p=2;d>p;){if(255===c.getUint8(p)&&225===c.getUint8(p+1)){n=p;break}p++}if(n&&(e=n+4,s=n+10,"Exif"===g(c,e,4)&&(h=c.getUint16(s),o=18761===h,(o||19789===h)&&42===c.getUint16(s+2,o)&&(a=c.getUint32(s+4,o),a>=8&&(r=s+a)))),r)for(d=c.getUint16(r,o),l=0;d>l;l++)if(p=r+12*l+2,274===c.getUint16(p,o)){p+=8,i=c.getUint16(p,o),mt&&c.setUint16(p,1,o);break}return i}function f(t){var i,e=t.replace(G,""),s=atob(e),a=s.length,o=new B(a),h=new y(o);for(i=0;a>i;i++)h[i]=s.charCodeAt(i);return o}function m(t){var i,e=new y(t),s=e.length,a="";for(i=0;s>i;i++)a+=Lt(e[i]);return"data:image/jpeg;base64,"+$(a)}function v(i,e){this.$element=t(i),this.options=t.extend({},v.DEFAULTS,t.isPlainObject(e)&&e),this.isLoaded=!1,this.isBuilt=!1,this.isCompleted=!1,this.isRotated=!1,this.isCropped=!1,this.isDisabled=!1,this.isReplaced=!1,this.isLimited=!1,this.wheeling=!1,this.isImg=!1,this.originalUrl="",this.canvas=null,this.cropBox=null,this.init()}var w=t(window),x=t(document),C=window.location,b=window.navigator,B=window.ArrayBuffer,y=window.Uint8Array,D=window.DataView,$=window.btoa,L="cropper",T="cropper-modal",X="cropper-hide",Y="cropper-hidden",k="cropper-invisible",M="cropper-move",W="cropper-crop",H="cropper-disabled",R="cropper-bg",z="mousedown touchstart pointerdown MSPointerDown",O="mousemove touchmove pointermove MSPointerMove",E="mouseup touchend touchcancel pointerup pointercancel MSPointerUp MSPointerCancel",P="wheel mousewheel DOMMouseScroll",U="dblclick",I="load."+L,F="error."+L,j="resize."+L,A="build."+L,S="built."+L,N="cropstart."+L,_="cropmove."+L,q="cropend."+L,Z="crop."+L,K="zoom."+L,Q=/e|w|s|n|se|sw|ne|nw|all|crop|move|zoom/,V=/^data\:/,G=/^data\:([^\;]+)\;base64,/,J=/^data\:image\/jpeg.*;base64,/,tt="preview",it="action",et="e",st="w",at="s",ot="n",ht="se",nt="sw",rt="ne",pt="nw",lt="all",ct="crop",dt="move",gt="zoom",ut="none",ft=t.isFunction(t("<canvas>")[0].getContext),mt=b&&/safari/i.test(b.userAgent)&&/apple computer/i.test(b.vendor),vt=Number,wt=Math.min,xt=Math.max,Ct=Math.abs,bt=Math.sin,Bt=Math.cos,yt=Math.sqrt,Dt=Math.round,$t=Math.floor,Lt=String.fromCharCode;v.prototype={constructor:v,init:function(){var t,i=this.$element;if(i.is("img")){if(this.isImg=!0,this.originalUrl=t=i.attr("src"),!t)return;t=i.prop("src")}else i.is("canvas")&&ft&&(t=i[0].toDataURL());this.load(t)},trigger:function(i,e){var s=t.Event(i,e);return this.$element.trigger(s),s},load:function(i){var e,s,a=this.options,o=this.$element;if(i&&(o.one(A,a.build),!this.trigger(A).isDefaultPrevented())){if(this.url=i,this.image={},!a.checkOrientation||!B)return this.clone();if(e=t.proxy(this.read,this),V.test(i))return J.test(i)?e(f(i)):this.clone();s=new XMLHttpRequest,s.onerror=s.onabort=t.proxy(function(){this.clone()},this),s.onload=function(){e(this.response)},s.open("get",i),s.responseType="arraybuffer",s.send()}},read:function(t){var i,e,s,a=this.options,o=u(t),h=this.image;if(o>1)switch(this.url=m(t),o){case 2:e=-1;break;case 3:i=-180;break;case 4:s=-1;break;case 5:i=90,s=-1;break;case 6:i=90;break;case 7:i=90,e=-1;break;case 8:i=-90}a.rotatable&&(h.rotate=i),a.scalable&&(h.scaleX=e,h.scaleY=s),this.clone()},clone:function(){var i,e,s=this.options,a=this.$element,r=this.url,p="";s.checkCrossOrigin&&o(r)&&(p=a.prop("crossOrigin"),p?i=r:(p="anonymous",i=h(r))),this.crossOrigin=p,this.crossOriginUrl=i,this.$clone=e=t("<img"+n(p)+' src="'+(i||r)+'">'),this.isImg?a[0].complete?this.start():a.one(I,t.proxy(this.start,this)):e.one(I,t.proxy(this.start,this)).one(F,t.proxy(this.stop,this)).addClass(X).insertAfter(a)},start:function(){var i=this.$element,e=this.$clone;this.isImg||(e.off(F,this.stop),i=e),r(i[0],t.proxy(function(i,e){t.extend(this.image,{naturalWidth:i,naturalHeight:e,aspectRatio:i/e}),this.isLoaded=!0,this.build()},this))},stop:function(){this.$clone.remove(),this.$clone=null},build:function(){var i,e,s,a=this.options,o=this.$element,h=this.$clone;this.isLoaded&&(this.isBuilt&&this.unbuild(),this.$container=o.parent(),this.$cropper=i=t(v.TEMPLATE),this.$canvas=i.find(".cropper-canvas").append(h),this.$dragBox=i.find(".cropper-drag-box"),this.$cropBox=e=i.find(".cropper-crop-box"),this.$viewBox=i.find(".cropper-view-box"),this.$face=s=e.find(".cropper-face"),o.addClass(Y).after(i),this.isImg||h.removeClass(X),this.initPreview(),this.bind(),a.aspectRatio=xt(0,a.aspectRatio)||NaN,a.viewMode=xt(0,wt(3,Dt(a.viewMode)))||0,a.autoCrop?(this.isCropped=!0,a.modal&&this.$dragBox.addClass(T)):e.addClass(Y),a.guides||e.find(".cropper-dashed").addClass(Y),a.center||e.find(".cropper-center").addClass(Y),a.cropBoxMovable&&s.addClass(M).data(it,lt),a.highlight||s.addClass(k),a.background&&i.addClass(R),a.cropBoxResizable||e.find(".cropper-line, .cropper-point").addClass(Y),this.setDragMode(a.dragMode),this.render(),this.isBuilt=!0,this.setData(a.data),o.one(S,a.built),setTimeout(t.proxy(function(){this.trigger(S),this.isCompleted=!0},this),0))},unbuild:function(){this.isBuilt&&(this.isBuilt=!1,this.isCompleted=!1,this.initialImage=null,this.initialCanvas=null,this.initialCropBox=null,this.container=null,this.canvas=null,this.cropBox=null,this.unbind(),this.resetPreview(),this.$preview=null,this.$viewBox=null,this.$cropBox=null,this.$dragBox=null,this.$canvas=null,this.$container=null,this.$cropper.remove(),this.$cropper=null)},render:function(){this.initContainer(),this.initCanvas(),this.initCropBox(),this.renderCanvas(),this.isCropped&&this.renderCropBox()},initContainer:function(){var t=this.options,i=this.$element,e=this.$container,s=this.$cropper;s.addClass(Y),i.removeClass(Y),s.css(this.container={width:xt(e.width(),vt(t.minContainerWidth)||200),height:xt(e.height(),vt(t.minContainerHeight)||100)}),i.addClass(Y),s.removeClass(Y)},initCanvas:function(){var i,e=this.options.viewMode,s=this.container,a=s.width,o=s.height,h=this.image,n=h.naturalWidth,r=h.naturalHeight,p=90===Ct(h.rotate),l=p?r:n,c=p?n:r,d=l/c,g=a,u=o;o*d>a?3===e?g=o*d:u=a/d:3===e?u=a/d:g=o*d,i={naturalWidth:l,naturalHeight:c,aspectRatio:d,width:g,height:u},i.oldLeft=i.left=(a-g)/2,i.oldTop=i.top=(o-u)/2,this.canvas=i,this.isLimited=1===e||2===e,this.limitCanvas(!0,!0),this.initialImage=t.extend({},h),this.initialCanvas=t.extend({},i)},limitCanvas:function(t,i){var e,s,a,o,h=this.options,n=h.viewMode,r=this.container,p=r.width,l=r.height,c=this.canvas,d=c.aspectRatio,g=this.cropBox,u=this.isCropped&&g;t&&(e=vt(h.minCanvasWidth)||0,s=vt(h.minCanvasHeight)||0,n&&(n>1?(e=xt(e,p),s=xt(s,l),3===n&&(s*d>e?e=s*d:s=e/d)):e?e=xt(e,u?g.width:0):s?s=xt(s,u?g.height:0):u&&(e=g.width,s=g.height,s*d>e?e=s*d:s=e/d)),e&&s?s*d>e?s=e/d:e=s*d:e?s=e/d:s&&(e=s*d),c.minWidth=e,c.minHeight=s,c.maxWidth=1/0,c.maxHeight=1/0),i&&(n?(a=p-c.width,o=l-c.height,c.minLeft=wt(0,a),c.minTop=wt(0,o),c.maxLeft=xt(0,a),c.maxTop=xt(0,o),u&&this.isLimited&&(c.minLeft=wt(g.left,g.left+g.width-c.width),c.minTop=wt(g.top,g.top+g.height-c.height),c.maxLeft=g.left,c.maxTop=g.top,2===n&&(c.width>=p&&(c.minLeft=wt(0,a),c.maxLeft=xt(0,a)),c.height>=l&&(c.minTop=wt(0,o),c.maxTop=xt(0,o))))):(c.minLeft=-c.width,c.minTop=-c.height,c.maxLeft=p,c.maxTop=l))},renderCanvas:function(t){var i,e,s=this.canvas,a=this.image,o=a.rotate,h=a.naturalWidth,n=a.naturalHeight;this.isRotated&&(this.isRotated=!1,e=l({width:a.width,height:a.height,degree:o}),i=e.width/e.height,i!==s.aspectRatio&&(s.left-=(e.width-s.width)/2,s.top-=(e.height-s.height)/2,s.width=e.width,s.height=e.height,s.aspectRatio=i,s.naturalWidth=h,s.naturalHeight=n,o%180&&(e=l({width:h,height:n,degree:o}),s.naturalWidth=e.width,s.naturalHeight=e.height),this.limitCanvas(!0,!1))),(s.width>s.maxWidth||s.width<s.minWidth)&&(s.left=s.oldLeft),(s.height>s.maxHeight||s.height<s.minHeight)&&(s.top=s.oldTop),s.width=wt(xt(s.width,s.minWidth),s.maxWidth),s.height=wt(xt(s.height,s.minHeight),s.maxHeight),this.limitCanvas(!1,!0),s.oldLeft=s.left=wt(xt(s.left,s.minLeft),s.maxLeft),s.oldTop=s.top=wt(xt(s.top,s.minTop),s.maxTop),this.$canvas.css({width:s.width,height:s.height,left:s.left,top:s.top}),this.renderImage(),this.isCropped&&this.isLimited&&this.limitCropBox(!0,!0),t&&this.output()},renderImage:function(i){var e,s=this.canvas,a=this.image;a.rotate&&(e=l({width:s.width,height:s.height,degree:a.rotate,aspectRatio:a.aspectRatio},!0)),t.extend(a,e?{width:e.width,height:e.height,left:(s.width-e.width)/2,top:(s.height-e.height)/2}:{width:s.width,height:s.height,left:0,top:0}),this.$clone.css({width:a.width,height:a.height,marginLeft:a.left,marginTop:a.top,transform:p(a)}),i&&this.output()},initCropBox:function(){var i=this.options,e=this.canvas,s=i.aspectRatio,a=vt(i.autoCropArea)||.8,o={width:e.width,height:e.height};s&&(e.height*s>e.width?o.height=o.width/s:o.width=o.height*s),this.cropBox=o,this.limitCropBox(!0,!0),o.width=wt(xt(o.width,o.minWidth),o.maxWidth),o.height=wt(xt(o.height,o.minHeight),o.maxHeight),o.width=xt(o.minWidth,o.width*a),o.height=xt(o.minHeight,o.height*a),o.oldLeft=o.left=e.left+(e.width-o.width)/2,o.oldTop=o.top=e.top+(e.height-o.height)/2,this.initialCropBox=t.extend({},o)},limitCropBox:function(t,i){var e,s,a,o,h=this.options,n=h.aspectRatio,r=this.container,p=r.width,l=r.height,c=this.canvas,d=this.cropBox,g=this.isLimited;t&&(e=vt(h.minCropBoxWidth)||0,s=vt(h.minCropBoxHeight)||0,e=wt(e,p),s=wt(s,l),a=wt(p,g?c.width:p),o=wt(l,g?c.height:l),n&&(e&&s?s*n>e?s=e/n:e=s*n:e?s=e/n:s&&(e=s*n),o*n>a?o=a/n:a=o*n),d.minWidth=wt(e,a),d.minHeight=wt(s,o),d.maxWidth=a,d.maxHeight=o),i&&(g?(d.minLeft=xt(0,c.left),d.minTop=xt(0,c.top),d.maxLeft=wt(p,c.left+c.width)-d.width,d.maxTop=wt(l,c.top+c.height)-d.height):(d.minLeft=0,d.minTop=0,d.maxLeft=p-d.width,d.maxTop=l-d.height))},renderCropBox:function(){var t=this.options,i=this.container,e=i.width,s=i.height,a=this.cropBox;(a.width>a.maxWidth||a.width<a.minWidth)&&(a.left=a.oldLeft),(a.height>a.maxHeight||a.height<a.minHeight)&&(a.top=a.oldTop),a.width=wt(xt(a.width,a.minWidth),a.maxWidth),a.height=wt(xt(a.height,a.minHeight),a.maxHeight),this.limitCropBox(!1,!0),a.oldLeft=a.left=wt(xt(a.left,a.minLeft),a.maxLeft),a.oldTop=a.top=wt(xt(a.top,a.minTop),a.maxTop),t.movable&&t.cropBoxMovable&&this.$face.data(it,a.width===e&&a.height===s?dt:lt),this.$cropBox.css({width:a.width,height:a.height,left:a.left,top:a.top}),this.isCropped&&this.isLimited&&this.limitCanvas(!0,!0),this.isDisabled||this.output()},output:function(){this.preview(),this.isCompleted?this.trigger(Z,this.getData()):this.isBuilt||this.$element.one(S,t.proxy(function(){this.trigger(Z,this.getData())},this))},initPreview:function(){var i,e=n(this.crossOrigin),s=e?this.crossOriginUrl:this.url;this.$preview=t(this.options.preview),this.$clone2=i=t("<img"+e+' src="'+s+'">'),this.$viewBox.html(i),this.$preview.each(function(){var i=t(this);i.data(tt,{width:i.width(),height:i.height(),html:i.html()}),i.html("<img"+e+' src="'+s+'" style="display:block;width:100%;height:auto;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;image-orientation:0deg!important;">')})},resetPreview:function(){this.$preview.each(function(){var i=t(this),e=i.data(tt);i.css({width:e.width,height:e.height}).html(e.html).removeData(tt)})},preview:function(){var i=this.image,e=this.canvas,s=this.cropBox,a=s.width,o=s.height,h=i.width,n=i.height,r=s.left-e.left-i.left,l=s.top-e.top-i.top;this.isCropped&&!this.isDisabled&&(this.$clone2.css({width:h,height:n,marginLeft:-r,marginTop:-l,transform:p(i)}),this.$preview.each(function(){var e=t(this),s=e.data(tt),c=s.width,d=s.height,g=c,u=d,f=1;a&&(f=c/a,u=o*f),o&&u>d&&(f=d/o,g=a*f,u=d),e.css({width:g,height:u}).find("img").css({width:h*f,height:n*f,marginLeft:-r*f,marginTop:-l*f,transform:p(i)})}))},bind:function(){var i=this.options,e=this.$element,s=this.$cropper;t.isFunction(i.cropstart)&&e.on(N,i.cropstart),t.isFunction(i.cropmove)&&e.on(_,i.cropmove),t.isFunction(i.cropend)&&e.on(q,i.cropend),t.isFunction(i.crop)&&e.on(Z,i.crop),t.isFunction(i.zoom)&&e.on(K,i.zoom),s.on(z,t.proxy(this.cropStart,this)),i.zoomable&&i.zoomOnWheel&&s.on(P,t.proxy(this.wheel,this)),i.toggleDragModeOnDblclick&&s.on(U,t.proxy(this.dblclick,this)),x.on(O,this._cropMove=a(this.cropMove,this)).on(E,this._cropEnd=a(this.cropEnd,this)),i.responsive&&w.on(j,this._resize=a(this.resize,this))},unbind:function(){var i=this.options,e=this.$element,s=this.$cropper;t.isFunction(i.cropstart)&&e.off(N,i.cropstart),t.isFunction(i.cropmove)&&e.off(_,i.cropmove),t.isFunction(i.cropend)&&e.off(q,i.cropend),t.isFunction(i.crop)&&e.off(Z,i.crop),t.isFunction(i.zoom)&&e.off(K,i.zoom),s.off(z,this.cropStart),i.zoomable&&i.zoomOnWheel&&s.off(P,this.wheel),i.toggleDragModeOnDblclick&&s.off(U,this.dblclick),x.off(O,this._cropMove).off(E,this._cropEnd),i.responsive&&w.off(j,this._resize)},resize:function(){var i,e,s,a=this.options.restore,o=this.$container,h=this.container;!this.isDisabled&&h&&(s=o.width()/h.width,(1!==s||o.height()!==h.height)&&(a&&(i=this.getCanvasData(),e=this.getCropBoxData()),this.render(),a&&(this.setCanvasData(t.each(i,function(t,e){i[t]=e*s})),this.setCropBoxData(t.each(e,function(t,i){e[t]=i*s})))))},dblclick:function(){this.isDisabled||(this.$dragBox.hasClass(W)?this.setDragMode(dt):this.setDragMode(ct))},wheel:function(i){var e=i.originalEvent||i,s=vt(this.options.wheelZoomRatio)||.1,a=1;this.isDisabled||(i.preventDefault(),this.wheeling||(this.wheeling=!0,setTimeout(t.proxy(function(){this.wheeling=!1},this),50),e.deltaY?a=e.deltaY>0?1:-1:e.wheelDelta?a=-e.wheelDelta/120:e.detail&&(a=e.detail>0?1:-1),this.zoom(-a*s,i)))},cropStart:function(i){var e,s,a=this.options,o=i.originalEvent,h=o&&o.touches,n=i;if(!this.isDisabled){if(h){if(e=h.length,e>1){if(!a.zoomable||!a.zoomOnTouch||2!==e)return;n=h[1],this.startX2=n.pageX,this.startY2=n.pageY,s=gt}n=h[0]}if(s=s||t(n.target).data(it),Q.test(s)){if(this.trigger(N,{originalEvent:o,action:s}).isDefaultPrevented())return;i.preventDefault(),this.action=s,this.cropping=!1,this.startX=n.pageX||o&&o.pageX,this.startY=n.pageY||o&&o.pageY,s===ct&&(this.cropping=!0,this.$dragBox.addClass(T))}}},cropMove:function(t){var i,e=this.options,s=t.originalEvent,a=s&&s.touches,o=t,h=this.action;if(!this.isDisabled){if(a){if(i=a.length,i>1){if(!e.zoomable||!e.zoomOnTouch||2!==i)return;o=a[1],this.endX2=o.pageX,this.endY2=o.pageY}o=a[0]}if(h){if(this.trigger(_,{originalEvent:s,action:h}).isDefaultPrevented())return;t.preventDefault(),this.endX=o.pageX||s&&s.pageX,this.endY=o.pageY||s&&s.pageY,this.change(o.shiftKey,h===gt?t:null)}}},cropEnd:function(t){var i=t.originalEvent,e=this.action;this.isDisabled||e&&(t.preventDefault(),this.cropping&&(this.cropping=!1,this.$dragBox.toggleClass(T,this.isCropped&&this.options.modal)),this.action="",this.trigger(q,{originalEvent:i,action:e}))},change:function(t,i){var e,s,a=this.options,o=a.aspectRatio,h=this.action,n=this.container,r=this.canvas,p=this.cropBox,l=p.width,c=p.height,d=p.left,g=p.top,u=d+l,f=g+c,m=0,v=0,w=n.width,x=n.height,C=!0;switch(!o&&t&&(o=l&&c?l/c:1),this.limited&&(m=p.minLeft,v=p.minTop,w=m+wt(n.width,r.left+r.width),x=v+wt(n.height,r.top+r.height)),s={x:this.endX-this.startX,y:this.endY-this.startY},o&&(s.X=s.y*o,s.Y=s.x/o),h){case lt:d+=s.x,g+=s.y;break;case et:if(s.x>=0&&(u>=w||o&&(v>=g||f>=x))){C=!1;break}l+=s.x,o&&(c=l/o,g-=s.Y/2),0>l&&(h=st,l=0);break;case ot:if(s.y<=0&&(v>=g||o&&(m>=d||u>=w))){C=!1;break}c-=s.y,g+=s.y,o&&(l=c*o,d+=s.X/2),0>c&&(h=at,c=0);break;case st:if(s.x<=0&&(m>=d||o&&(v>=g||f>=x))){C=!1;break}l-=s.x,d+=s.x,o&&(c=l/o,g+=s.Y/2),0>l&&(h=et,l=0);break;case at:if(s.y>=0&&(f>=x||o&&(m>=d||u>=w))){C=!1;break}c+=s.y,o&&(l=c*o,d-=s.X/2),0>c&&(h=ot,c=0);break;case rt:if(o){if(s.y<=0&&(v>=g||u>=w)){C=!1;break}c-=s.y,g+=s.y,l=c*o}else s.x>=0?w>u?l+=s.x:s.y<=0&&v>=g&&(C=!1):l+=s.x,s.y<=0?g>v&&(c-=s.y,g+=s.y):(c-=s.y,g+=s.y);0>l&&0>c?(h=nt,c=0,l=0):0>l?(h=pt,l=0):0>c&&(h=ht,c=0);break;case pt:if(o){if(s.y<=0&&(v>=g||m>=d)){C=!1;break}c-=s.y,g+=s.y,l=c*o,d+=s.X}else s.x<=0?d>m?(l-=s.x,d+=s.x):s.y<=0&&v>=g&&(C=!1):(l-=s.x,d+=s.x),s.y<=0?g>v&&(c-=s.y,g+=s.y):(c-=s.y,g+=s.y);0>l&&0>c?(h=ht,c=0,l=0):0>l?(h=rt,l=0):0>c&&(h=nt,c=0);break;case nt:if(o){if(s.x<=0&&(m>=d||f>=x)){C=!1;break}l-=s.x,d+=s.x,c=l/o}else s.x<=0?d>m?(l-=s.x,d+=s.x):s.y>=0&&f>=x&&(C=!1):(l-=s.x,d+=s.x),s.y>=0?x>f&&(c+=s.y):c+=s.y;0>l&&0>c?(h=rt,c=0,l=0):0>l?(h=ht,l=0):0>c&&(h=pt,c=0);break;case ht:if(o){if(s.x>=0&&(u>=w||f>=x)){C=!1;break}l+=s.x,c=l/o}else s.x>=0?w>u?l+=s.x:s.y>=0&&f>=x&&(C=!1):l+=s.x,s.y>=0?x>f&&(c+=s.y):c+=s.y;0>l&&0>c?(h=pt,c=0,l=0):0>l?(h=nt,l=0):0>c&&(h=rt,c=0);break;case dt:this.move(s.x,s.y),C=!1;break;case gt:this.zoom(function(t,i,e,s){var a=yt(t*t+i*i),o=yt(e*e+s*s);return(o-a)/a}(Ct(this.startX-this.startX2),Ct(this.startY-this.startY2),Ct(this.endX-this.endX2),Ct(this.endY-this.endY2)),i),this.startX2=this.endX2,this.startY2=this.endY2,C=!1;break;case ct:if(!s.x||!s.y){C=!1;break}e=this.$cropper.offset(),d=this.startX-e.left,g=this.startY-e.top,l=p.minWidth,c=p.minHeight,s.x>0?h=s.y>0?ht:rt:s.x<0&&(d-=l,h=s.y>0?nt:pt),s.y<0&&(g-=c),this.isCropped||(this.$cropBox.removeClass(Y),this.isCropped=!0,this.limited&&this.limitCropBox(!0,!0))}C&&(p.width=l,p.height=c,p.left=d,p.top=g,this.action=h,this.renderCropBox()),this.startX=this.endX,this.startY=this.endY},crop:function(){this.isBuilt&&!this.isDisabled&&(this.isCropped||(this.isCropped=!0,this.limitCropBox(!0,!0),this.options.modal&&this.$dragBox.addClass(T),this.$cropBox.removeClass(Y)),this.setCropBoxData(this.initialCropBox))},reset:function(){this.isBuilt&&!this.isDisabled&&(this.image=t.extend({},this.initialImage),this.canvas=t.extend({},this.initialCanvas),this.cropBox=t.extend({},this.initialCropBox),this.renderCanvas(),this.isCropped&&this.renderCropBox())},clear:function(){this.isCropped&&!this.isDisabled&&(t.extend(this.cropBox,{left:0,top:0,width:0,height:0}),this.isCropped=!1,this.renderCropBox(),this.limitCanvas(!0,!0),this.renderCanvas(),this.$dragBox.removeClass(T),this.$cropBox.addClass(Y))},replace:function(t,i){!this.isDisabled&&t&&(this.isImg&&this.$element.attr("src",t),i?(this.url=t,this.$clone.attr("src",t),this.isBuilt&&this.$preview.find("img").add(this.$clone2).attr("src",t)):(this.isImg&&(this.isReplaced=!0),this.options.data=null,this.load(t)))},enable:function(){this.isBuilt&&(this.isDisabled=!1,this.$cropper.removeClass(H))},disable:function(){this.isBuilt&&(this.isDisabled=!0,this.$cropper.addClass(H))},destroy:function(){var t=this.$element;this.isLoaded?(this.isImg&&this.isReplaced&&t.attr("src",this.originalUrl),this.unbuild(),t.removeClass(Y)):this.isImg?t.off(I,this.start):this.$clone&&this.$clone.remove(),t.removeData(L)},move:function(t,i){var s=this.canvas;this.moveTo(e(t)?t:s.left+vt(t),e(i)?i:s.top+vt(i))},moveTo:function(t,s){var a=this.canvas,o=!1;e(s)&&(s=t),t=vt(t),s=vt(s),this.isBuilt&&!this.isDisabled&&this.options.movable&&(i(t)&&(a.left=t,o=!0),i(s)&&(a.top=s,o=!0),o&&this.renderCanvas(!0))},zoom:function(t,i){var e=this.canvas;t=vt(t),t=0>t?1/(1-t):1+t,this.zoomTo(e.width*t/e.naturalWidth,i)},zoomTo:function(t,i){var e,s,a,o,h,n=this.options,r=this.canvas,p=r.width,l=r.height,c=r.naturalWidth,g=r.naturalHeight;if(t=vt(t),t>=0&&this.isBuilt&&!this.isDisabled&&n.zoomable){if(s=c*t,a=g*t,i&&(e=i.originalEvent),this.trigger(K,{originalEvent:e,oldRatio:p/c,ratio:s/c}).isDefaultPrevented())return;e?(o=this.$cropper.offset(),h=e.touches?d(e.touches):{pageX:i.pageX||e.pageX||0,pageY:i.pageY||e.pageY||0},r.left-=(s-p)*((h.pageX-o.left-r.left)/p),r.top-=(a-l)*((h.pageY-o.top-r.top)/l)):(r.left-=(s-p)/2,r.top-=(a-l)/2),r.width=s,r.height=a,this.renderCanvas(!0)}},rotate:function(t){this.rotateTo((this.image.rotate||0)+vt(t))},rotateTo:function(t){t=vt(t),i(t)&&this.isBuilt&&!this.isDisabled&&this.options.rotatable&&(this.image.rotate=t%360,this.isRotated=!0,this.renderCanvas(!0))},scale:function(t,s){var a=this.image,o=!1;e(s)&&(s=t),t=vt(t),s=vt(s),this.isBuilt&&!this.isDisabled&&this.options.scalable&&(i(t)&&(a.scaleX=t,o=!0),i(s)&&(a.scaleY=s,o=!0),o&&this.renderImage(!0))},scaleX:function(t){var e=this.image.scaleY;this.scale(t,i(e)?e:1)},scaleY:function(t){var e=this.image.scaleX;this.scale(i(e)?e:1,t)},getData:function(i){var e,s,a=this.options,o=this.image,h=this.canvas,n=this.cropBox;return this.isBuilt&&this.isCropped?(s={x:n.left-h.left,y:n.top-h.top,width:n.width,height:n.height},e=o.width/o.naturalWidth,t.each(s,function(t,a){a/=e,s[t]=i?Dt(a):a})):s={x:0,y:0,width:0,height:0},a.rotatable&&(s.rotate=o.rotate||0),a.scalable&&(s.scaleX=o.scaleX||1,s.scaleY=o.scaleY||1),s},setData:function(e){var s,a,o,h=this.options,n=this.image,r=this.canvas,p={};t.isFunction(e)&&(e=e.call(this.element)),this.isBuilt&&!this.isDisabled&&t.isPlainObject(e)&&(h.rotatable&&i(e.rotate)&&e.rotate!==n.rotate&&(n.rotate=e.rotate,this.isRotated=s=!0),h.scalable&&(i(e.scaleX)&&e.scaleX!==n.scaleX&&(n.scaleX=e.scaleX,a=!0),i(e.scaleY)&&e.scaleY!==n.scaleY&&(n.scaleY=e.scaleY,a=!0)),s?this.renderCanvas():a&&this.renderImage(),o=n.width/n.naturalWidth,i(e.x)&&(p.left=e.x*o+r.left),i(e.y)&&(p.top=e.y*o+r.top),i(e.width)&&(p.width=e.width*o),i(e.height)&&(p.height=e.height*o),this.setCropBoxData(p))},getContainerData:function(){return this.isBuilt?this.container:{}},getImageData:function(){return this.isLoaded?this.image:{}},getCanvasData:function(){var i=this.canvas,e={};return this.isBuilt&&t.each(["left","top","width","height","naturalWidth","naturalHeight"],function(t,s){e[s]=i[s]}),e},setCanvasData:function(e){var s=this.canvas,a=s.aspectRatio;t.isFunction(e)&&(e=e.call(this.$element)),this.isBuilt&&!this.isDisabled&&t.isPlainObject(e)&&(i(e.left)&&(s.left=e.left),i(e.top)&&(s.top=e.top),i(e.width)?(s.width=e.width,s.height=e.width/a):i(e.height)&&(s.height=e.height,s.width=e.height*a),this.renderCanvas(!0))},getCropBoxData:function(){var t,i=this.cropBox;return this.isBuilt&&this.isCropped&&(t={left:i.left,top:i.top,width:i.width,height:i.height}),t||{}},setCropBoxData:function(e){var s,a,o=this.cropBox,h=this.options.aspectRatio;t.isFunction(e)&&(e=e.call(this.$element)),this.isBuilt&&this.isCropped&&!this.isDisabled&&t.isPlainObject(e)&&(i(e.left)&&(o.left=e.left),i(e.top)&&(o.top=e.top),i(e.width)&&(s=!0,o.width=e.width),i(e.height)&&(a=!0,o.height=e.height),h&&(s?o.height=o.width/h:a&&(o.width=o.height*h)),this.renderCropBox())},getCroppedCanvas:function(i){var e,s,a,o,h,n,r,p,l,d,g;return this.isBuilt&&this.isCropped&&ft?(t.isPlainObject(i)||(i={}),g=this.getData(),e=g.width,s=g.height,p=e/s,t.isPlainObject(i)&&(h=i.width,n=i.height,h?(n=h/p,r=h/e):n&&(h=n*p,r=n/s)),a=$t(h||e),o=$t(n||s),l=t("<canvas>")[0],l.width=a,l.height=o,d=l.getContext("2d"),i.fillColor&&(d.fillStyle=i.fillColor,d.fillRect(0,0,a,o)),d.drawImage.apply(d,function(){var t,i,a,o,h,n,p=c(this.$clone[0],this.image),l=p.width,d=p.height,u=this.canvas,f=[p],m=g.x+u.naturalWidth*(Ct(g.scaleX||1)-1)/2,v=g.y+u.naturalHeight*(Ct(g.scaleY||1)-1)/2;return-e>=m||m>l?m=t=a=h=0:0>=m?(a=-m,m=0,t=h=wt(l,e+m)):l>=m&&(a=0,t=h=wt(e,l-m)),0>=t||-s>=v||v>d?v=i=o=n=0:0>=v?(o=-v,v=0,i=n=wt(d,s+v)):d>=v&&(o=0,i=n=wt(s,d-v)),f.push($t(m),$t(v),$t(t),$t(i)),r&&(a*=r,o*=r,h*=r,n*=r),h>0&&n>0&&f.push($t(a),$t(o),$t(h),$t(n)),f}.call(this)),l):void 0},setAspectRatio:function(t){var i=this.options;this.isDisabled||e(t)||(i.aspectRatio=xt(0,t)||NaN,this.isBuilt&&(this.initCropBox(),this.isCropped&&this.renderCropBox()))},setDragMode:function(t){var i,e,s=this.options;this.isLoaded&&!this.isDisabled&&(i=t===ct,e=s.movable&&t===dt,t=i||e?t:ut,this.$dragBox.data(it,t).toggleClass(W,i).toggleClass(M,e),s.cropBoxMovable||this.$face.data(it,t).toggleClass(W,i).toggleClass(M,e))}},v.DEFAULTS={viewMode:0,dragMode:"crop",aspectRatio:NaN,data:null,preview:"",responsive:!0,restore:!0,checkCrossOrigin:!0,checkOrientation:!0,modal:!0,guides:!0,center:!0,highlight:!0,background:!0,autoCrop:!0,autoCropArea:.8,movable:!0,rotatable:!0,scalable:!0,zoomable:!0,zoomOnTouch:!0,zoomOnWheel:!0,wheelZoomRatio:.1,cropBoxMovable:!0,cropBoxResizable:!0,toggleDragModeOnDblclick:!0,minCanvasWidth:0,minCanvasHeight:0,minCropBoxWidth:0,minCropBoxHeight:0,minContainerWidth:200,minContainerHeight:100,build:null,built:null,cropstart:null,cropmove:null,cropend:null,crop:null,zoom:null},v.setDefaults=function(i){t.extend(v.DEFAULTS,i)},v.TEMPLATE='<div class="cropper-container"><div class="cropper-wrap-box"><div class="cropper-canvas"></div></div><div class="cropper-drag-box"></div><div class="cropper-crop-box"><span class="cropper-view-box"></span><span class="cropper-dashed dashed-h"></span><span class="cropper-dashed dashed-v"></span><span class="cropper-center"></span><span class="cropper-face"></span><span class="cropper-line line-e" data-action="e"></span><span class="cropper-line line-n" data-action="n"></span><span class="cropper-line line-w" data-action="w"></span><span class="cropper-line line-s" data-action="s"></span><span class="cropper-point point-e" data-action="e"></span><span class="cropper-point point-n" data-action="n"></span><span class="cropper-point point-w" data-action="w"></span><span class="cropper-point point-s" data-action="s"></span><span class="cropper-point point-ne" data-action="ne"></span><span class="cropper-point point-nw" data-action="nw"></span><span class="cropper-point point-sw" data-action="sw"></span><span class="cropper-point point-se" data-action="se"></span></div></div>',v.other=t.fn.cropper,t.fn.cropper=function(i){var a,o=s(arguments,1);return this.each(function(){var e,s,h=t(this),n=h.data(L);if(!n){if(/destroy/.test(i))return;e=t.extend({},h.data(),t.isPlainObject(i)&&i),h.data(L,n=new v(this,e))}"string"==typeof i&&t.isFunction(s=n[i])&&(a=s.apply(n,o))}),e(a)?this:a},t.fn.cropper.Constructor=v,t.fn.cropper.setDefaults=v.setDefaults,t.fn.cropper.noConflict=function(){return t.fn.cropper=v.other,this}});
+(function() {
+    "use strict";
 
-  var diffcount;
+    var diffcount;
 
-  var ADD_ATTRIBUTE = 0,
-    MODIFY_ATTRIBUTE = 1,
-    REMOVE_ATTRIBUTE = 2,
-    MODIFY_TEXT_ELEMENT = 3,
-    RELOCATE_GROUP = 4,
-    REMOVE_ELEMENT = 5,
-    ADD_ELEMENT = 6,
-    REMOVE_TEXT_ELEMENT = 7,
-    ADD_TEXT_ELEMENT = 8,
-    REPLACE_ELEMENT = 9,
-    MODIFY_VALUE = 10,
-    MODIFY_CHECKED = 11,
-    MODIFY_SELECTED = 12,
-    MODIFY_DATA = 13,
-    ACTION = 14,
-    ROUTE = 15,
-    OLD_VALUE = 16,
-    NEW_VALUE = 17,
-    ELEMENT = 18,
-    GROUP = 19,
-    FROM = 20,
-    TO = 21,
-    NAME = 22,
-    VALUE = 23,
-    TEXT = 24,
-    ATTRIBUTES = 25,
-    NODE_NAME = 26,
-    COMMENT = 27,
-    CHILD_NODES = 28,
-    CHECKED = 29,
-    SELECTED = 30;
+    var Diff = function (options) {
+        var diff = this;
+        Object.keys(options).forEach(function(option) {
+            diff[option] = options[option];
+        });
+    };
 
-  var Diff = function (options) {
-    var diff = this;
-    Object.keys(options).forEach(function (option) {
-      diff[option] = options[option];
-    });
-  }
-  Diff.prototype = {
-    toString: function () {
-      return JSON.stringify(this);
-    }
-  };
-
-  var SubsetMapping = function SubsetMapping(a, b) {
-    this["old"] = a;
-    this["new"] = b;
-  };
-
-  SubsetMapping.prototype = {
-    contains: function contains(subset) {
-      if (subset.length < this.length) {
-        return subset["new"] >= this["new"] && subset["new"] < this["new"] + this.length;
-      }
-      return false;
-    },
-    toString: function toString() {
-      return this.length + " element subset, first mapping: old " + this["old"] + " → new " + this["new"];
-    }
-  };
-
-  var elementDescriptors = function(el) {
-    var output = [];
-    if (el.nodeType == 1) {
-      output.push(el.tagName);
-      if (typeof(el.className) == 'string') {
-        output.push(el.tagName + '.' + el.className.replace(/ /g, '.'));
-      }
-      if (el.id) {
-        output.push(el.tagName + '#' + el.id);
-      }
-    }
-    return output;
-  }
-
-  var findUniqueDescriptors = function(li) {
-    var uniqueDescriptors = {};
-    var duplicateDescriptors = {};
-
-    for (var i = 0; i < li.length; i++) {
-      var node = li[i];
-      var descriptors = elementDescriptors(node);
-      for (var j = 0; j < descriptors.length; j++) {
-        var descriptor = descriptors[j];
-        var inUnique = descriptor in uniqueDescriptors;
-        var inDupes = descriptor in duplicateDescriptors;
-        if (!inUnique && !inDupes) {
-          uniqueDescriptors[descriptor] = true;
-        } else if (inUnique) {
-          delete uniqueDescriptors[descriptor];
-          duplicateDescriptors[descriptor] = true;
+    Diff.prototype = {
+        toString: function() {
+            return JSON.stringify(this);
         }
-      }
-    }
 
-    return uniqueDescriptors;
-  }
+        // TODO: compress diff output by replacing these keys with numbers or alike:
+        /*        'addAttribute' = 0,
+                'modifyAttribute' = 1,
+                'removeAttribute' = 2,
+                'modifyTextElement' = 3,
+                'relocateGroup' = 4,
+                'removeElement' = 5,
+                'addElement' = 6,
+                'removeTextElement' = 7,
+                'addTextElement' = 8,
+                'replaceElement' = 9,
+                'modifyValue' = 10,
+                'modifyChecked' = 11,
+                'modifySelected' = 12,
+                'modifyComment' = 13,
+                'action' = 14,
+                'route' = 15,
+                'oldValue' = 16,
+                'newValue' = 17,
+                'element' = 18,
+                'group' = 19,
+                'from' = 20,
+                'to' = 21,
+                'name' = 22,
+                'value' = 23,
+                'data' = 24,
+                'attributes' = 25,
+                'nodeName' = 26,
+                'childNodes' = 27,
+                'checked' = 28,
+                'selected' = 29;*/
+    };
 
-  var uniqueInBoth = function(l1, l2) {
-    var l1Unique = findUniqueDescriptors(l1);
-    var l2Unique = findUniqueDescriptors(l2);
-    var inBoth = {};
+    var SubsetMapping = function SubsetMapping(a, b) {
+        this.old = a;
+        this.new = b;
+    };
 
-    var key;
-    for (key in l1Unique) {
-      if (l2Unique[key]) {
-        inBoth[key] = true;
-      }
-    }
-
-    return inBoth;
-  }
-
-  var roughlyEqual = function roughlyEqual(e1, e2, uniqueDescriptors, sameSiblings, preventRecursion) {
-    if (!e1 || !e2) return false;
-    if (e1.nodeType !== e2.nodeType) return false;
-    if (e1.nodeType === 3) {
-      if (e2.nodeType !== 3) return false;
-      // Note that we initially don't care what the text content of a node is,
-      // the mere fact that it's the same tag and "has text" means it's roughly
-      // equal, and then we can find out the true text difference later.
-      return preventRecursion ? true : e1.data === e2.data;
-    }
-    if (e1.nodeName !== e2.nodeName) return false;
-    if (e1.tagName === e2.tagName) {
-      if (e1.tagName in uniqueDescriptors) return true
-      if (e1.id && e1.id === e2.id) {
-        var idDescriptor = e1.tagName + '#' + e1.id;
-        if (idDescriptor in uniqueDescriptors) return true;
-      }
-      if (e1.className && e1.className === e2.className) {
-        var classDescriptor = e1.tagName + '.' + e1.className.replace(/ /g, '.');
-        if (classDescriptor in uniqueDescriptors) return true;
-      }
-      if (sameSiblings) return true;
-    }
-    if (e1.childNodes.length !== e2.childNodes.length) return false;
-    var thesame = true;
-    var childUniqueDescriptors = uniqueInBoth(e1.childNodes, e2.childNodes);
-    for (var i = e1.childNodes.length - 1; i >= 0; i--) {
-      if (preventRecursion) {
-        thesame = thesame && (e1.childNodes[i].nodeName === e2.childNodes[i].nodeName);
-      } else {
-        // note: we only allow one level of recursion at any depth. If 'preventRecursion'
-        //       was not set, we must explicitly force it to true for child iterations.
-        thesame = thesame && roughlyEqual(e1.childNodes[i], e2.childNodes[i], childUniqueDescriptors, true, true);
-      }
-    }
-    return thesame;
-  };
-
-
-  var cleanCloneNode = function (node) {
-    // Clone a node with contents and add values manually,
-    // to avoid https://bugzilla.mozilla.org/show_bug.cgi?id=230307
-    var clonedNode = node.cloneNode(true),
-      textareas, clonedTextareas, options, clonedOptions, i;
-
-    if (node.nodeType != 8 && node.nodeType != 3) {
-
-      textareas = node.querySelectorAll('textarea');
-      clonedTextareas = clonedNode.querySelectorAll('textarea');
-      for (i = 0; i < textareas.length; i++) {
-        if (clonedTextareas[i].value !== textareas[i].value) {
-          clonedTextareas[i].value = textareas[i].value;
+    SubsetMapping.prototype = {
+        contains: function contains(subset) {
+            if (subset.length < this.length) {
+                return subset.new >= this.new && subset.new < this.new + this.length;
+            }
+            return false;
+        },
+        toString: function toString() {
+            return this.length + " element subset, first mapping: old " + this.old + " → new " + this.new;
         }
-      }
-      if (node.value && (node.value !== clonedNode.value)) {
-        clonedNode.value = node.value;
-      }
-      options = node.querySelectorAll('option');
-      clonedOptions = clonedNode.querySelectorAll('option');
-      for (i = 0; i < options.length; i++) {
-        if (options[i].selected && !(clonedOptions[i].selected)) {
-          clonedOptions[i].selected = true;
-        } else if (!(options[i].selected) && clonedOptions[i].selected) {
-          clonedOptions[i].selected = false;
+    };
+
+    var elementDescriptors = function(el) {
+        var output = [];
+        if (el.nodeName !== '#text' && el.nodeName !== '#comment') {
+            output.push(el.nodeName);
+            if (el.attributes) {
+                if (el.attributes.class) {
+                    output.push(el.nodeName + '.' + el.attributes.class.replace(/ /g, '.'));
+                }
+                if (el.attributes.id) {
+                    output.push(el.nodeName + '#' + el.attributes.id);
+                }
+            }
+
         }
-      }      
-      if (node.selected && !(clonedNode.selected)) {
-        clonedNode.selected = true;
-      } else if (!(node.selected) && clonedNode.selected) {
-        clonedNode.selected = false;
-      }
-    }
-    return clonedNode;
-  };
+        return output;
+    };
 
-  var nodeToObj = function (node) {
-    var objNode = {}, i;
+    var findUniqueDescriptors = function(li) {
+        var uniqueDescriptors = {},
+            duplicateDescriptors = {};
 
-    if (node.nodeType === 3) {
-      objNode[TEXT] = node.data;
-    } else if (node.nodeType === 8) {
-      objNode[COMMENT] = node.data;
-    } else {
-      objNode[NODE_NAME] = node.nodeName;
-      if (node.attributes && node.attributes.length > 0) {
-        objNode[ATTRIBUTES] = [];
-        for (i = 0; i < node.attributes.length; i++) {
-          objNode[ATTRIBUTES].push([node.attributes[i].name, node.attributes[i].value]);
-        }
-      }
-      if (node.childNodes && node.childNodes.length > 0) {
-        objNode[CHILD_NODES] = [];
-        for (i = 0; i < node.childNodes.length; i++) {
-          objNode[CHILD_NODES].push(nodeToObj(node.childNodes[i]));
-        }
-      }
-      if (node.value) {
-        objNode[VALUE] = node.value;
-      }
-      if (node.checked) {
-        objNode[CHECKED] = node.checked;
-      }
-      if (node.selected) {
-        objNode[SELECTED] = node.selected;
-      }
-    }
-    return objNode;
-  };
+        li.forEach(function(node) {
+            elementDescriptors(node).forEach(function(descriptor) {
+                var inUnique = descriptor in uniqueDescriptors,
+                    inDupes = descriptor in duplicateDescriptors;
+                if (!inUnique && !inDupes) {
+                    uniqueDescriptors[descriptor] = true;
+                } else if (inUnique) {
+                    delete uniqueDescriptors[descriptor];
+                    duplicateDescriptors[descriptor] = true;
+                }
+            });
 
-  var objToNode = function (objNode, insideSvg) {
-    var node, i;
-    if (objNode.hasOwnProperty(TEXT)) {
-      node = document.createTextNode(objNode[TEXT]);
-    } else if (objNode.hasOwnProperty(COMMENT)) {
-      node = document.createComment(objNode[COMMENT]);
-    } else {
-      if (objNode[NODE_NAME] === 'svg' || insideSvg) {
-        node = document.createElementNS('http://www.w3.org/2000/svg', objNode[NODE_NAME]);
-        insideSvg = true;
-      } else {
-        node = document.createElement(objNode[NODE_NAME]);
-      }
-      if (objNode[ATTRIBUTES]) {
-        for (i = 0; i < objNode[ATTRIBUTES].length; i++) {
-          node.setAttribute(objNode[ATTRIBUTES][i][0], objNode[ATTRIBUTES][i][1]);
-        }
-      }
-      if (objNode[CHILD_NODES]) {
-        for (i = 0; i < objNode[CHILD_NODES].length; i++) {
-          node.appendChild(objToNode(objNode[CHILD_NODES][i], insideSvg));
-        }
-      }
-      if (objNode[VALUE]) {
-        node.value = objNode[VALUE];
-      }
-      if (objNode[CHECKED]) {
-        node.checked = objNode[CHECKED];
-      }
-      if (objNode[SELECTED]) {
-        node.selected = objNode[SELECTED];
-      }
-    }
-    return node;
-  };
+        });
 
+        return uniqueDescriptors;
+    };
 
+    var uniqueInBoth = function(l1, l2) {
+        var l1Unique = findUniqueDescriptors(l1),
+            l2Unique = findUniqueDescriptors(l2),
+            inBoth = {};
 
-  /**
-   * based on https://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Longest_common_substring#JavaScript
-   */
-  var findCommonSubsets = function (c1, c2, marked1, marked2) {
-    var lcsSize = 0,
-      index = [],
-      len1 = c1.length,
-      len2 = c2.length;
-    // set up the matching table
-    var matches = [],
-      a, i, j, k, l;
-    for (a = 0; a < len1 + 1; a++) {
-      matches[a] = [];
-    }
+        Object.keys(l1Unique).forEach(function(key) {
+            if (l2Unique[key]) {
+                inBoth[key] = true;
+            }
+        });
 
-    var uniqueDescriptors = uniqueInBoth(c1, c2);
+        return inBoth;
+    };
 
-    // If all of the elements are the same tag, id and class, then we can
-    // consider them roughly the same even if they have a different number of
-    // children. This will reduce removing and re-adding similar elements.
-    var subsetsSame = len1 == len2;
-    if (subsetsSame) {
-      for (k = 0; k < len1; k++) {
-        var c1Desc = elementDescriptors(c1[k]);
-        var c2Desc = elementDescriptors(c2[k]);
-        if (c1Desc.length != c2Desc.length) {
-          subsetsSame = false;
-          break;
-        }
-        for (l = 0; l < c1Desc.length; l++) {
-          if (c1Desc[l] != c2Desc[l]) {
-            subsetsSame = false;
-            break;
-          }
-        }
-        if (!subsetsSame) {
-          break;
-        }
-      }
-    }
-
-    // fill the matches with distance values
-    for (i = 0; i < len1; i++) {
-      for (j = 0; j < len2; j++) {
-        if (!marked1[i] && !marked2[j] && roughlyEqual(c1[i], c2[j], uniqueDescriptors, subsetsSame)) {
-          matches[i + 1][j + 1] = (matches[i][j] ? matches[i][j] + 1 : 1);
-          if (matches[i + 1][j + 1] > lcsSize) {
-            lcsSize = matches[i + 1][j + 1];
-            index = [i + 1, j + 1];
-          }
+    var removeDone = function(tree) {
+        delete tree.outerDone;
+        delete tree.innerDone;
+        delete tree.valueDone;
+        if (tree.childNodes) {
+            return tree.childNodes.every(removeDone);
         } else {
-          matches[i + 1][j + 1] = 0;
+            return true;
         }
-      }
-    }
-    if (lcsSize === 0) {
-      return false;
-    }
-    var origin = [index[0] - lcsSize, index[1] - lcsSize];
-    var ret = new SubsetMapping(origin[0], origin[1]);
-    ret.length = lcsSize;
-    return ret;
-  };
-
-  /**
-   * This should really be a predefined function in Array...
-   */
-  var makeArray = function (n, v) {
-    var deepcopy = function (v) {
-      v.slice();
-      for (var i = 0, last = v.length; i < last; i++) {
-        if (v[i] instanceof Array) {
-          v[i] = deepcopy(v[i]);
-        }
-      }
     };
-    if (v instanceof Array) {
-      v = deepcopy(v);
-    }
-    var set = function () {
-      return v;
-    };
-    return (new Array(n)).join('.').split('.').map(set);
-  };
 
-  /**
-   * Generate arrays that indicate which node belongs to which subset,
-   * or whether it's actually an orphan node, existing in only one
-   * of the two trees, rather than somewhere in both.
-   */
-  var getGapInformation = function (t1, t2, stable) {
-    // [true, true, ...] arrays
-    var set = function (v) {
-      return function () {
-        return v;
-      }
-    },
-      gaps1 = makeArray(t1.childNodes.length, true),
-      gaps2 = makeArray(t2.childNodes.length, true),
-      group = 0;
+    var isEqual = function(e1, e2) {
 
-    // give elements from the same subset the same group number
-    stable.forEach(function (subset) {
-      var i, end;
-      for (i = subset["old"], end = i + subset.length; i < end; i++) {
-        gaps1[i] = group;
-      }
-      for (i = subset["new"], end = i + subset.length; i < end; i++) {
-        gaps2[i] = group;
-      }
-      group++;
-    });
+        var e1Attributes, e2Attributes;
 
-    return {
-      gaps1: gaps1,
-      gaps2: gaps2
-    };
-  };
-
-  /**
-   * Find all matching subsets, based on immediate child differences only.
-   */
-  var markSubTrees = function (oldTree, newTree) {
-    oldTree = cleanCloneNode(oldTree);
-    newTree = cleanCloneNode(newTree);
-    // note: the child lists are views, and so update as we update old/newTree
-    var oldChildren = oldTree.childNodes,
-      newChildren = newTree.childNodes,
-      marked1 = makeArray(oldChildren.length, false),
-      marked2 = makeArray(newChildren.length, false),
-      subsets = [],
-      subset = true,
-      i;
-    while (subset) {
-      subset = findCommonSubsets(oldChildren, newChildren, marked1, marked2);
-      if (subset) {
-        subsets.push(subset);
-        for (i = 0; i < subset.length; i++) {
-          marked1[subset.old + i] = true;
+        if (!['nodeName', 'value', 'checked', 'selected', 'data'].every(function(element) {
+                if (e1[element] !== e2[element]) {
+                    return false;
+                }
+                return true;
+            })) {
+            return false;
         }
-        for (i = 0; i < subset.length; i++) {
-          marked2[subset.new + i] = true;
+
+        if (Boolean(e1.attributes) !== Boolean(e2.attributes)) {
+            return false;
         }
-      }
-    }
-    return subsets;
-  };
 
-  var findFirstInnerDiff = function (t1, t2, subtrees, route) {
-    if (subtrees.length === 0) return false;
+        if (Boolean(e1.childNodes) !== Boolean(e2.childNodes)) {
+            return false;
+        }
 
-    var gapInformation = getGapInformation(t1, t2, subtrees),
-      gaps1 = gapInformation.gaps1,
-      gl1 = gaps1.length,
-      gaps2 = gapInformation.gaps2,
-      gl2 = gaps1.length,
-      i, j, k,
-      last = gl1 < gl2 ? gl1 : gl2;
+        if (e1.attributes) {
+            e1Attributes = Object.keys(e1.attributes);
+            e2Attributes = Object.keys(e2.attributes);
 
-    // Check for correct submap sequencing (irrespective of gaps) first:
-    var sequence = 0,
-      group, node, similarNode, testNode,
-      shortest = gl1 < gl2 ? gaps1 : gaps2;
-
-    // group relocation
-    for (i = 0, last = shortest.length; i < last; i++) {
-      if (gaps1[i] === true) {
-        node = t1.childNodes[i];
-        if (node.nodeType === 3) {
-          if (t2.childNodes[i].nodeType === 3 && node.data != t2.childNodes[i].data) {
-            testNode = node;
-            while (testNode.nextSibling && testNode.nextSibling.nodeType === 3) {
-              testNode = testNode.nextSibling;
-              if (t2.childNodes[i].data === testNode.data) {
-                similarNode = true;
-                break;
-              }
+            if (e1Attributes.length !== e2Attributes.length) {
+                return false;
             }
-            if (!similarNode) {
-              k = {};
-              k[ACTION] = MODIFY_TEXT_ELEMENT;
-              k[ROUTE] = route.concat(i);
-              k[OLD_VALUE] = node.data;
-              k[NEW_VALUE] = t2.childNodes[i].data;
-              return new Diff(k);
+            if (!e1Attributes.every(function(attribute) {
+                    if (e1.attributes[attribute] !== e2.attributes[attribute]) {
+                        return false;
+                    }
+                })) {
+                return false;
             }
-          }
-          k = {};
-          k[ACTION] = REMOVE_TEXT_ELEMENT;
-          k[ROUTE] = route.concat(i);
-          k[VALUE] = node.data;
-          return new Diff(k);
         }
-        k = {};
-        k[ACTION] = REMOVE_ELEMENT;
-        k[ROUTE] = route.concat(i);
-        k[ELEMENT] = nodeToObj(node);
-        return new Diff(k);
-      }
-      if (gaps2[i] === true) {
-        node = t2.childNodes[i];
-        if (node.nodeType === 3) {
-          k = {};
-          k[ACTION] = ADD_TEXT_ELEMENT;
-          k[ROUTE] = route.concat(i);
-          k[VALUE] = node.data;
-          return new Diff(k);
-        }
-        k = {};
-        k[ACTION] = ADD_ELEMENT;
-        k[ROUTE] = route.concat(i);
-        k[ELEMENT] = nodeToObj(node);
-        return new Diff(k);
-      }
-      if (gaps1[i] != gaps2[i]) {
-        group = subtrees[gaps1[i]];
-        var toGroup = Math.min(group["new"], (t1.childNodes.length - group.length));
-        if (toGroup != i) {
-          //Check wehther destination nodes are different than originating ones.
-          var destinationDifferent = false;
-          for (j = 0; j < group.length; j++) {
-            if (!t1.childNodes[toGroup + j].isEqualNode(t1.childNodes[i + j])) {
-              destinationDifferent = true;
+
+        if (e1.childNodes) {
+            if (e1.childNodes.length !== e2.childNodes.length) {
+                return false;
+            }
+            if (!e1.childNodes.every(function(childNode, index) {
+                    return isEqual(childNode, e2.childNodes[index]);
+                })) {
+
+                return false;
             }
 
-          }
-          if (destinationDifferent) {
-            k = {};
-            k[ACTION] = RELOCATE_GROUP;
-            k[GROUP] = group;
-            k[FROM] = i;
-            k[TO] = toGroup;
-            k[ROUTE] = route;
-            return new Diff(k);
-          }
         }
-      }
-    }
-    return false;
-  };
 
-
-  function swap(obj, p1, p2) {
-    (function (_) {
-      obj[p1] = obj[p2];
-      obj[p2] = _;
-    }(obj[p1]));
-  };
-
-
-  var DiffTracker = function () {
-    this.list = [];
-  };
-  DiffTracker.prototype = {
-    list: false,
-    add: function (difflist) {
-      var list = this.list;
-      difflist.forEach(function (diff) {
-        list.push(diff);
-      });
-    },
-    forEach: function (fn) {
-      this.list.forEach(fn);
-    }
-  };
-
-
-
-
-  var diffDOM = function (debug, diffcap) {
-    if (typeof debug === 'undefined') {
-      debug = false;
-
-    } else {
-
-      ADD_ATTRIBUTE = "add attribute",
-      MODIFY_ATTRIBUTE = "modify attribute",
-      REMOVE_ATTRIBUTE = "remove attribute",
-      MODIFY_TEXT_ELEMENT = "modify text element",
-      RELOCATE_GROUP = "relocate group",
-      REMOVE_ELEMENT = "remove element",
-      ADD_ELEMENT = "add element",
-      REMOVE_TEXT_ELEMENT = "remove text element",
-      ADD_TEXT_ELEMENT = "add text element",
-      REPLACE_ELEMENT = "replace element",
-      MODIFY_VALUE = "modify value",
-      MODIFY_CHECKED = "modify checked",
-      MODIFY_SELECTED = "modify selected",
-      ACTION = "action",
-      ROUTE = "route",
-      OLD_VALUE = "oldValue",
-      NEW_VALUE = "newValue",
-      ELEMENT = "element",
-      GROUP = "group",
-      FROM = "from",
-      TO = "to",
-      NAME = "name",
-      VALUE = "value",
-      TEXT = "text",
-      ATTRIBUTES = "attributes",
-    NODE_NAME = "nodeName",
-    COMMENT = "comment",
-    CHILD_NODES = "childNodes",
-    CHECKED = "checked",
-    SELECTED = "selected";
-    }
-
-
-
-
-    if (typeof diffcap === 'undefined')
-      diffcap = 10;
-    this.debug = debug;
-    this.diffcap = diffcap;
-  };
-  diffDOM.prototype = {
-
-    // ===== Create a diff =====
-
-    diff: function (t1, t2) {
-      diffcount = 0;
-      t1 = cleanCloneNode(t1);
-      t2 = cleanCloneNode(t2);
-      if (this.debug) {
-        this.t1Orig = nodeToObj(t1);
-        this.t2Orig = nodeToObj(t2);
-      }
-
-      this.tracker = new DiffTracker();
-      return this.findDiffs(t1, t2);
-    },
-    findDiffs: function (t1, t2) {
-      var diff;
-      do {
-        if (this.debug) {
-          diffcount++;
-          if (diffcount > this.diffcap) {
-            window.diffError = [this.t1Orig, this.t2Orig];
-            throw new Error("surpassed diffcap:" + JSON.stringify(this.t1Orig) + " -> " + JSON.stringify(this.t2Orig));
-          }
-        }
-        difflist = this.findFirstDiff(t1, t2, []);
-        if (difflist) {
-          if (!difflist.length) {
-            difflist = [difflist];
-          }
-          this.tracker.add(difflist);
-          this.apply(t1, difflist);
-        }
-      } while (difflist);
-      return this.tracker.list;
-    },
-    findFirstDiff: function (t1, t2, route) {
-      // outer differences?
-      var difflist = this.findOuterDiff(t1, t2, route);
-      if (difflist.length > 0) {
-        return difflist;
-      }
-      // inner differences?
-      var diff = this.findInnerDiff(t1, t2, route);
-      if (diff) {
-        if (typeof diff.length === "undefined") {
-          diff = [diff];
-        }
-        if (diff.length > 0) {
-          return diff;
-        }
-      }
-      // no differences
-      return false;
-    },
-    findOuterDiff: function (t1, t2, route) {
-      var k;
-      
-      if (t1.nodeName != t2.nodeName) {
-        k = {};
-        k[ACTION] = REPLACE_ELEMENT;
-        k[OLD_VALUE] = nodeToObj(t1);
-        k[NEW_VALUE] = nodeToObj(t2);
-        k[ROUTE] = route;
-        return [new Diff(k)];
-      }
-      
-      var slice = Array.prototype.slice,
-        byName = function (a, b) {
-          return a.name > b.name;
-        },
-        attr1 = t1.attributes ? slice.call(t1.attributes).sort(byName) : [],
-        attr2 = t2.attributes ? slice.call(t2.attributes).sort(byName) : [],
-        find = function (attr, list) {
-          for (var i = 0, last = list.length; i < last; i++) {
-            if (list[i].name === attr.name)
-              return i;
-          }
-          return -1;
-        },
-        diffs = [];
-      if ((t1.value || t2.value) && t1.value !== t2.value && t1.nodeName !== 'OPTION') {
-        k = {};
-        k[ACTION] = MODIFY_VALUE;
-        k[OLD_VALUE] = t1.value;
-        k[NEW_VALUE] = t2.value;
-        k[ROUTE] = route;
-        diffs.push(new Diff(k));
-      }
-      if ((t1.checked || t2.checked) && t1.checked !== t2.checked) {
-        k = {};
-        k[ACTION] = MODIFY_CHECKED;
-        k[OLD_VALUE] = t1.checked;
-        k[NEW_VALUE] = t2.checked;
-        k[ROUTE] = route;
-        diffs.push(new Diff(k));
-      }  
-
-      attr1.forEach(function (attr) {
-        var pos = find(attr, attr2),
-          k;
-        if (pos === -1) {
-          k = {};
-          k[ACTION] = REMOVE_ATTRIBUTE;
-          k[ROUTE] = route;
-          k[NAME] = attr.name;
-          k[VALUE] = attr.value;
-          diffs.push(new Diff(k));
-          return diffs;
-        }
-        var a2 = attr2.splice(pos, 1)[0];
-        if (attr.value !== a2.value) {
-          k = {};
-          k[ACTION] = MODIFY_ATTRIBUTE;
-          k[ROUTE] = route;
-          k[NAME] = attr.name;
-          k[OLD_VALUE] = attr.value;
-          k[NEW_VALUE] = a2.value;
-
-          diffs.push(new Diff(k));
-               //    console.log(diffs);
-        }
-      });
-      if (!t1.attributes && t1.data !== t2.data) {
-          k = {};
-          k[ACTION] = MODIFY_DATA;
-          k[ROUTE] = route;
-          k[OLD_VALUE] = t1.data;
-          k[NEW_VALUE] = t2.data;
-          diffs.push(new Diff(k));          
-      }
-      if (diffs.length > 0) {
-        return diffs;
-      };
-      attr2.forEach(function (attr) {
-        var k;
-        k = {};
-        k[ACTION] = ADD_ATTRIBUTE;
-        k[ROUTE] = route;
-        k[NAME] = attr.name;
-        k[VALUE] = attr.value;
-        diffs.push(new Diff(k));
-        
-      });
-      
-      if ((t1.selected || t2.selected) && t1.selected !== t2.selected) {
-        if (diffs.length > 0) {
-            return diffs;
-        }
-        k = {};
-        k[ACTION] = MODIFY_SELECTED;
-        k[OLD_VALUE] = t1.selected;
-        k[NEW_VALUE] = t2.selected;
-        k[ROUTE] = route;
-        diffs.push(new Diff(k));
-      }      
-      
-      return diffs;
-    },
-    findInnerDiff: function (t1, t2, route) {
-      var subtrees = markSubTrees(t1, t2),
-        mappings = subtrees.length,
-        k;
-      // no correspondence whatsoever
-      // if t1 or t2 contain differences that are not text nodes, return a diff. 
-
-      // two text nodes with differences
-      if (mappings === 0) {
-        if (t1.nodeType === 3 && t2.nodeType === 3 && t1.data !== t2.data) {
-          k = {};
-          k[ACTION] = MODIFY_TEXT_ELEMENT;
-          k[OLD_VALUE] = t1.data;
-          k[NEW_VALUE] = t2.data;
-          k[ROUTE] = route;
-          return new Diff(k);
-        }
-      }
-      // possibly identical content: verify
-      if (mappings < 2) {
-        var diff, difflist, i, last, e1, e2;
-        for (i = 0, last = Math.max(t1.childNodes.length, t2.childNodes.length); i < last; i++) {
-          e1 = t1.childNodes[i];
-          e2 = t2.childNodes[i];
-          // TODO: this is a similar code path to the one
-          //       in findFirstInnerDiff. Can we unify these?
-          if (e1 && !e2) {
-            if (e1.nodeType === 3) {
-              k = {};
-              k[ACTION] = REMOVE_TEXT_ELEMENT;
-              k[ROUTE] = route.concat(i);
-              k[VALUE] = e1.data;
-              return new Diff(k);
-            }
-            k = {};
-            k[ACTION] = REMOVE_ELEMENT;
-            k[ROUTE] = route.concat(i);
-            k[ELEMENT] = nodeToObj(e1);
-            return new Diff(k);
-          }
-          if (e2 && !e1) {
-            if (e2.nodeType === 3) {
-              k = {};
-              k[ACTION] = ADD_TEXT_ELEMENT;
-              k[ROUTE] = route.concat(i);
-              k[VALUE] = e2.data;
-              return new Diff(k);
-            }
-            k = {};
-            k[ACTION] = ADD_ELEMENT;
-            k[ROUTE] = route.concat(i);
-            k[ELEMENT] = nodeToObj(e2);
-            return new Diff(k);
-          }
-          if (e1.nodeType != 3 || e2.nodeType != 3) {
-            difflist = this.findOuterDiff(e1, e2, route.concat(i));
-            if (difflist.length > 0) {
-              return difflist;
-            }
-          }
-          diff = this.findInnerDiff(e1, e2, route.concat(i));
-          if (diff) {
-            return diff;
-          }
-        }
-      }
-
-      // one or more differences: find first diff
-      return this.findFirstInnerDiff(t1, t2, subtrees, route);
-    },
-
-    // imported
-    findFirstInnerDiff: findFirstInnerDiff,
-
-    // ===== Apply a diff =====
-
-    apply: function (tree, diffs) {
-      var dobj = this;
-      if (typeof diffs.length === "undefined") {
-        diffs = [diffs];
-      }
-      if (diffs.length === 0) {
         return true;
-      }
-      diffs.forEach(function (diff) {
-        if (!dobj.applyDiff(tree, diff))
-          return false;
-      });
-      return true;
-    },
-    getFromRoute: function (tree, route) {
-      route = route.slice();
-      var c, node = tree;
-      while (route.length > 0) {
-        if (!node.childNodes) {
-          return false;
-        }
-        c = route.splice(0, 1)[0];
-        node = node.childNodes[c];
-      }
-      return node;
-    },
-    // diffing text elements can be overwritten for use with diff_match_patch and alike
-    textDiff: function (node, currentValue, expectedValue, newValue) {
-      node.data = newValue;
-      return;
-    },
-    applyDiff: function (tree, diff) {
-      var node = this.getFromRoute(tree, diff[ROUTE]);
-      if (diff[ACTION] === ADD_ATTRIBUTE) {
-        if (!node || !node.setAttribute)
-          return false;
-        node.setAttribute(diff[NAME], diff[VALUE]);
-      } else if (diff[ACTION] === MODIFY_ATTRIBUTE) {
-        if (!node || !node.setAttribute)
-          return false;
-        node.setAttribute(diff[NAME], diff[NEW_VALUE]);
-      } else if (diff[ACTION] === REMOVE_ATTRIBUTE) {
-        if (!node || !node.removeAttribute)
-          return false;
-        node.removeAttribute(diff[NAME]);
-      } else if (diff[ACTION] === MODIFY_VALUE) {
-        if (!node || typeof node.value === 'undefined')
-          return false;
-        node.value = diff[NEW_VALUE];
-      } else if (diff[ACTION] === MODIFY_DATA) {
-        if (!node || typeof node.data === 'undefined')
-          return false;
-        node.data = diff[NEW_VALUE];
-      } else if (diff[ACTION] === MODIFY_CHECKED) {
-        if (!node || typeof node.checked === 'undefined')
-          return false;
-        node.checked = diff[NEW_VALUE];
-      } else if (diff[ACTION] === MODIFY_SELECTED) {
-        if (!node || typeof node.selected === 'undefined')
-          return false;
-        node.selected = diff[NEW_VALUE];     
-      } else if (diff[ACTION] === MODIFY_TEXT_ELEMENT) {
-        if (!node || node.nodeType != 3)
-          return false;
-        this.textDiff(node, node.data, diff[OLD_VALUE], diff[NEW_VALUE]);
-      } else if (diff[ACTION] === REPLACE_ELEMENT) {
-        var newNode = objToNode(diff[NEW_VALUE]);
-        node.parentNode.replaceChild(newNode, node);
-      } else if (diff[ACTION] === RELOCATE_GROUP) {
-        var group = diff[GROUP],
-          from = diff[FROM],
-          to = diff[TO],
-          child, reference;
-        reference = node.childNodes[to + group.length];
-        // slide elements up
-        if (from < to) {
-          for (var i = 0; i < group.length; i++) {
-            child = node.childNodes[from];
-            node.insertBefore(child, reference);
-          }
-        } else {
-          // slide elements down
-          reference = node.childNodes[to];
-          for (var i = 0; i < group.length; i++) {
-            child = node.childNodes[from + i];
-            node.insertBefore(child, reference);
-          }
-        }
-      } else if (diff[ACTION] === REMOVE_ELEMENT) {
-        node.parentNode.removeChild(node);
-      } else if (diff[ACTION] === REMOVE_TEXT_ELEMENT) {
-        if (!node || node.nodeType != 3)
-          return false;
-        node.parentNode.removeChild(node);
-      } else if (diff[ACTION] === ADD_ELEMENT) {
-        var route = diff[ROUTE].slice(),
-          c = route.splice(route.length - 1, 1)[0];
-        node = this.getFromRoute(tree, route);
-        var newNode = objToNode(diff[ELEMENT]);
-        if (c >= node.childNodes.length) {
-          node.appendChild(newNode);
-        } else {
-          var reference = node.childNodes[c];
-          node.insertBefore(newNode, reference);
-        }
-      } else if (diff[ACTION] === ADD_TEXT_ELEMENT) {
-        var route = diff[ROUTE].slice(),
-          c = route.splice(route.length - 1, 1)[0],
-          newNode = document.createTextNode(diff[VALUE]);
-        node = this.getFromRoute(tree, route);
-        if (!node || !node.childNodes)
-          return false;
-        if (c >= node.childNodes.length) {
-          node.appendChild(newNode);
-        } else {
-          var reference = node.childNodes[c];
-          node.insertBefore(newNode, reference);
-        }
-      }
-      return true;
-    },
 
-    // ===== Undo a diff =====
+    };
 
-    undo: function (tree, diffs) {
-      diffs = diffs.slice();
-      var dobj = this;
-      if (!diffs.length) {
-        diffs = [diffs];
-      }
-      diffs.reverse();
-      diffs.forEach(function (diff) {
-        dobj.undoDiff(tree, diff);
-      });
-    },
-    undoDiff: function (tree, diff) {
-      if (diff[ACTION] === ADD_ATTRIBUTE) {
-        diff[ACTION] = REMOVE_ATTRIBUTE;
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === MODIFY_ATTRIBUTE) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === REMOVE_ATTRIBUTE) {
-        diff[ACTION] = ADD_ATTRIBUTE;
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === MODIFY_TEXT_ELEMENT) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === MODIFY_VALUE) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === MODIFY_DATA) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);        
-      } else if (diff[ACTION] === MODIFY_CHECKED) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === MODIFY_SELECTED) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === REPLACE_ELEMENT) {
-        swap(diff, OLD_VALUE, NEW_VALUE);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === RELOCATE_GROUP) {
-        swap(diff, FROM, TO);
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === REMOVE_ELEMENT) {
-        diff[ACTION] = ADD_ELEMENT;
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === ADD_ELEMENT) {
-        diff[ACTION] = REMOVE_ELEMENT;
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === REMOVE_TEXT_ELEMENT) {
-        diff[ACTION] = ADD_TEXT_ELEMENT;
-        this.applyDiff(tree, diff);
-      } else if (diff[ACTION] === ADD_TEXT_ELEMENT) {
-        diff[ACTION] = REMOVE_TEXT_ELEMENT;
-        this.applyDiff(tree, diff);
-      }
-    },
-  };
 
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = diffDOM;
+    var roughlyEqual = function(e1, e2, uniqueDescriptors, sameSiblings, preventRecursion) {
+        var childUniqueDescriptors, nodeList1, nodeList2;
+
+        if (!e1 || !e2) {
+            return false;
+        }
+
+        if (e1.nodeName !== e2.nodeName) {
+            return false;
+        }
+
+        if (e1.nodeName === '#text') {
+            // Note that we initially don't care what the text content of a node is,
+            // the mere fact that it's the same tag and "has text" means it's roughly
+            // equal, and then we can find out the true text difference later.
+            return preventRecursion ? true : e1.data === e2.data;
+        }
+
+
+        if (e1.nodeName in uniqueDescriptors) {
+            return true;
+        }
+
+        if (e1.attributes && e2.attributes) {
+
+            if (e1.attributes.id && e1.attributes.id === e2.attributes.id) {
+                var idDescriptor = e1.nodeName + '#' + e1.attributes.id;
+                if (idDescriptor in uniqueDescriptors) {
+                    return true;
+                }
+            }
+            if (e1.attributes.class && e1.attributes.class === e2.attributes.class) {
+                var classDescriptor = e1.nodeName + '.' + e1.attributes.class.replace(/ /g, '.');
+                if (classDescriptor in uniqueDescriptors) {
+                    return true;
+                }
+            }
+        }
+
+        if (sameSiblings) {
+            return true;
+        }
+
+        nodeList1 = e1.childNodes ? e1.childNodes.slice().reverse() : [];
+        nodeList2 = e2.childNodes ? e2.childNodes.slice().reverse() : [];
+
+        if (nodeList1.length !== nodeList2.length) {
+            return false;
+        }
+
+        if (preventRecursion) {
+            return nodeList1.every(function(element, index) {
+                return element.nodeName === nodeList2[index].nodeName;
+            });
+        } else {
+            // note: we only allow one level of recursion at any depth. If 'preventRecursion'
+            // was not set, we must explicitly force it to true for child iterations.
+            childUniqueDescriptors = uniqueInBoth(nodeList1, nodeList2);
+            return nodeList1.every(function(element, index) {
+                return roughlyEqual(element, nodeList2[index], childUniqueDescriptors, true, true);
+            });
+        }
+    };
+
+
+    var cloneObj = function(obj) {
+        //  TODO: Do we really need to clone here? Is it not enough to just return the original object?
+        return JSON.parse(JSON.stringify(obj));
+        //return obj;
+    };
+
+    /**
+     * based on https://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Longest_common_substring#JavaScript
+     */
+    var findCommonSubsets = function(c1, c2, marked1, marked2) {
+        var lcsSize = 0,
+            index = [],
+            matches = Array.apply(null, new Array(c1.length + 1)).map(function() {
+                return [];
+            }), // set up the matching table
+            uniqueDescriptors = uniqueInBoth(c1, c2),
+            // If all of the elements are the same tag, id and class, then we can
+            // consider them roughly the same even if they have a different number of
+            // children. This will reduce removing and re-adding similar elements.
+            subsetsSame = c1.length === c2.length,
+            origin, ret;
+
+        if (subsetsSame) {
+
+            c1.some(function(element, i) {
+                var c1Desc = elementDescriptors(element),
+                    c2Desc = elementDescriptors(c2[i]);
+                if (c1Desc.length !== c2Desc.length) {
+                    subsetsSame = false;
+                    return true;
+                }
+                c1Desc.some(function(description, i) {
+                    if (description !== c2Desc[i]) {
+                        subsetsSame = false;
+                        return true;
+                    }
+                });
+                if (!subsetsSame) {
+                    return true;
+                }
+
+            });
+        }
+
+        // fill the matches with distance values
+        c1.forEach(function(c1Element, c1Index) {
+            c2.forEach(function(c2Element, c2Index) {
+                if (!marked1[c1Index] && !marked2[c2Index] && roughlyEqual(c1Element, c2Element, uniqueDescriptors, subsetsSame)) {
+                    matches[c1Index + 1][c2Index + 1] = (matches[c1Index][c2Index] ? matches[c1Index][c2Index] + 1 : 1);
+                    if (matches[c1Index + 1][c2Index + 1] >= lcsSize) {
+                        lcsSize = matches[c1Index + 1][c2Index + 1];
+                        index = [c1Index + 1, c2Index + 1];
+                    }
+                } else {
+                    matches[c1Index + 1][c2Index + 1] = 0;
+                }
+            });
+        });
+        if (lcsSize === 0) {
+            return false;
+        }
+        origin = [index[0] - lcsSize, index[1] - lcsSize];
+        ret = new SubsetMapping(origin[0], origin[1]);
+        ret.length = lcsSize;
+
+        return ret;
+    };
+
+    /**
+     * This should really be a predefined function in Array...
+     */
+    var makeArray = function(n, v) {
+        return Array.apply(null, new Array(n)).map(function() {
+            return v;
+        });
+    };
+
+    /**
+     * Generate arrays that indicate which node belongs to which subset,
+     * or whether it's actually an orphan node, existing in only one
+     * of the two trees, rather than somewhere in both.
+     *
+     * So if t1 = <img><canvas><br>, t2 = <canvas><br><img>.
+     * The longest subset is "<canvas><br>" (length 2), so it will group 0.
+     * The second longest is "<img>" (length 1), so it will be group 1.
+     * gaps1 will therefore be [1,0,0] and gaps2 [0,0,1].
+     *
+     * If an element is not part of any group, it will stay being 'true', which
+     * is the initial value. For example:
+     * t1 = <img><p></p><br><canvas>, t2 = <b></b><br><canvas><img>
+     *
+     * The "<p></p>" and "<b></b>" do only show up in one of the two and will
+     * therefore be marked by "true". The remaining parts are parts of the
+     * groups 0 and 1:
+     * gaps1 = [1, true, 0, 0], gaps2 = [true, 0, 0, 1]
+     *
+     */
+    var getGapInformation = function(t1, t2, stable) {
+
+        var gaps1 = t1.childNodes ? makeArray(t1.childNodes.length, true) : [],
+            gaps2 = t2.childNodes ? makeArray(t2.childNodes.length, true) : [],
+            group = 0;
+
+        // give elements from the same subset the same group number
+        stable.forEach(function(subset) {
+            var i, endOld = subset.old + subset.length,
+                endNew = subset.new + subset.length;
+            for (i = subset.old; i < endOld; i += 1) {
+                gaps1[i] = group;
+            }
+            for (i = subset.new; i < endNew; i += 1) {
+                gaps2[i] = group;
+            }
+            group += 1;
+        });
+
+        return {
+            gaps1: gaps1,
+            gaps2: gaps2
+        };
+    };
+
+    /**
+     * Find all matching subsets, based on immediate child differences only.
+     */
+    var markSubTrees = function(oldTree, newTree) {
+        // note: the child lists are views, and so update as we update old/newTree
+        var oldChildren = oldTree.childNodes ? oldTree.childNodes : [],
+            newChildren = newTree.childNodes ? newTree.childNodes : [],
+            marked1 = makeArray(oldChildren.length, false),
+            marked2 = makeArray(newChildren.length, false),
+            subsets = [],
+            subset = true,
+            returnIndex = function() {
+                return arguments[1];
+            },
+            markBoth = function(i) {
+                marked1[subset.old + i] = true;
+                marked2[subset.new + i] = true;
+            };
+
+        while (subset) {
+            subset = findCommonSubsets(oldChildren, newChildren, marked1, marked2);
+            if (subset) {
+                subsets.push(subset);
+
+                Array.apply(null, new Array(subset.length)).map(returnIndex).forEach(markBoth);
+
+            }
+        }
+        return subsets;
+    };
+
+
+    function swap(obj, p1, p2) {
+        (function(_) {
+            obj[p1] = obj[p2];
+            obj[p2] = _;
+        }(obj[p1]));
     }
-    exports.diffDOM = diffDOM;
-  } else {
-    // `window` in the browser, or `exports` on the server
-    this.diffDOM = diffDOM;
-  }
+
+
+    var DiffTracker = function() {
+        this.list = [];
+    };
+
+    DiffTracker.prototype = {
+        list: false,
+        add: function(diffs) {
+            var list = this.list;
+            diffs.forEach(function(diff) {
+                list.push(diff);
+            });
+        },
+        forEach: function(fn) {
+            this.list.forEach(fn);
+        }
+    };
+
+    var diffDOM = function(options) {
+
+        var defaults = {
+                debug: false,
+                diffcap: 10, // Limit for how many diffs are accepting when debugging. Inactive when debug is false.
+                maxDepth: false, // False or a numeral. If set to a numeral, limits the level of depth that the the diff mechanism looks for differences. If false, goes through the entire tree.
+                valueDiffing: true, // Whether to take into consideration the values of forms that differ from auto assigned values (when a user fills out a form).
+                // syntax: textDiff: function (node, currentValue, expectedValue, newValue)
+                textDiff: function() {
+                    arguments[0].data = arguments[3];
+                    return;
+                }
+            },
+            i;
+
+        if (typeof options == "undefined") {
+            options = {};
+        }
+
+        for (i in defaults) {
+            if (typeof options[i] == "undefined") {
+                this[i] = defaults[i];
+            } else {
+                this[i] = options[i];
+            }
+        }
+
+    };
+    diffDOM.prototype = {
+
+        // ===== Create a diff =====
+
+        diff: function(t1Node, t2Node) {
+
+            var t1 = this.nodeToObj(t1Node),
+                t2 = this.nodeToObj(t2Node);
+
+            diffcount = 0;
+
+            if (this.debug) {
+                this.t1Orig = this.nodeToObj(t1Node);
+                this.t2Orig = this.nodeToObj(t2Node);
+            }
+
+            this.tracker = new DiffTracker();
+            return this.findDiffs(t1, t2);
+        },
+        findDiffs: function(t1, t2) {
+            var diffs;
+            do {
+                if (this.debug) {
+                    diffcount += 1;
+                    if (diffcount > this.diffcap) {
+                        window.diffError = [this.t1Orig, this.t2Orig];
+                        throw new Error("surpassed diffcap:" + JSON.stringify(this.t1Orig) + " -> " + JSON.stringify(this.t2Orig));
+                    }
+                }
+                diffs = this.findNextDiff(t1, t2, []);
+                if (diffs.length === 0) {
+                    // Last check if the elements really are the same now.
+                    // If not, remove all info about being done and start over.
+                    // Somtimes a node can be marked as done, but the creation of subsequent diffs means that it has to be changed anyway.
+                    if (!isEqual(t1, t2)) {
+                        removeDone(t1);
+                        diffs = this.findNextDiff(t1, t2, []);
+                    }
+                }
+
+                if (diffs.length > 0) {
+                    this.tracker.add(diffs);
+                    this.applyVirtual(t1, diffs);
+                }
+            } while (diffs.length > 0);
+            return this.tracker.list;
+        },
+        findNextDiff: function(t1, t2, route) {
+            var diffs;
+
+            if (this.maxDepth && route.length > this.maxDepth) {
+                return [];
+            }
+            // outer differences?
+            if (!t1.outerDone) {
+                diffs = this.findOuterDiff(t1, t2, route);
+                if (diffs.length > 0) {
+                    t1.outerDone = true;
+                    return diffs;
+                } else {
+                    t1.outerDone = true;
+                }
+            }
+            // inner differences?
+            if (!t1.innerDone) {
+                diffs = this.findInnerDiff(t1, t2, route);
+                if (diffs.length > 0) {
+                    return diffs;
+                } else {
+                    t1.innerDone = true;
+                }
+            }
+
+            if (this.valueDiffing && !t1.valueDone) {
+                // value differences?
+                diffs = this.findValueDiff(t1, t2, route);
+
+                if (diffs.length > 0) {
+                    t1.valueDone = true;
+                    return diffs;
+                } else {
+                    t1.valueDone = true;
+                }
+            }
+
+            // no differences
+            return [];
+        },
+        findOuterDiff: function(t1, t2, route) {
+
+            var diffs = [],
+                attr1, attr2;
+
+            if (t1.nodeName !== t2.nodeName) {
+                return [new Diff({
+                    action: 'replaceElement',
+                    oldValue: cloneObj(t1),
+                    newValue: cloneObj(t2),
+                    route: route
+                })];
+            }
+
+            if (t1.data !== t2.data) {
+                // Comment or text node.
+                if (t1.nodeName === '#text') {
+                    return [new Diff({
+                        action: 'modifyComment',
+                        route: route,
+                        oldValue: t1.data,
+                        newValue: t2.data
+                    })];
+                } else {
+                    return [new Diff({
+                        action: 'modifyTextElement',
+                        route: route,
+                        oldValue: t1.data,
+                        newValue: t2.data
+                    })];
+                }
+
+            }
+
+
+            attr1 = t1.attributes ? Object.keys(t1.attributes).sort() : [];
+            attr2 = t2.attributes ? Object.keys(t2.attributes).sort() : [];
+
+            attr1.forEach(function(attr) {
+                var pos = attr2.indexOf(attr);
+                if (pos === -1) {
+                    diffs.push(new Diff({
+                        action: 'removeAttribute',
+                        route: route,
+                        name: attr,
+                        value: t1.attributes[attr]
+                    }));
+                } else {
+                    attr2.splice(pos, 1);
+                    if (t1.attributes[attr] !== t2.attributes[attr]) {
+                        diffs.push(new Diff({
+                            action: 'modifyAttribute',
+                            route: route,
+                            name: attr,
+                            oldValue: t1.attributes[attr],
+                            newValue: t2.attributes[attr]
+                        }));
+                    }
+                }
+
+            });
+
+
+            attr2.forEach(function(attr) {
+                diffs.push(new Diff({
+                    action: 'addAttribute',
+                    route: route,
+                    name: attr,
+                    value: t2.attributes[attr]
+                }));
+
+            });
+
+            return diffs;
+        },
+        nodeToObj: function(node) {
+            var objNode = {}, dobj = this;
+            objNode.nodeName = node.nodeName;
+            if (objNode.nodeName === '#text' || objNode.nodeName === '#comment') {
+                objNode.data = node.data;
+            } else {
+                if (node.attributes && node.attributes.length > 0) {
+                    objNode.attributes = {};
+                    Array.prototype.slice.call(node.attributes).forEach(
+                        function(attribute) {
+                            objNode.attributes[attribute.name] = attribute.value;
+                        }
+                    );
+                }
+                if (node.childNodes && node.childNodes.length > 0) {
+                    objNode.childNodes = [];
+                    Array.prototype.slice.call(node.childNodes).forEach(
+                        function(childNode) {
+                            objNode.childNodes.push(dobj.nodeToObj(childNode));
+                        }
+                    );
+                }
+                if (this.valueDiffing) {
+                    if (node.value) {
+                        objNode.value = node.value;
+                    }
+                    if (node.checked) {
+                        objNode.checked = node.checked;
+                    }
+                    if (node.selected) {
+                        objNode.selected = node.selected;
+                    }
+                }
+            }
+
+            return objNode;
+        },
+        objToNode: function(objNode, insideSvg) {
+            var node, dobj = this;
+            if (objNode.nodeName === '#text') {
+                node = document.createTextNode(objNode.data);
+
+            } else if (objNode.nodeName === '#comment') {
+                node = document.createComment(objNode.data);
+            } else {
+                if (objNode.nodeName === 'svg' || insideSvg) {
+                    node = document.createElementNS('http://www.w3.org/2000/svg', objNode.nodeName);
+                    insideSvg = true;
+                } else {
+                    node = document.createElement(objNode.nodeName);
+                }
+                if (objNode.attributes) {
+                    Object.keys(objNode.attributes).forEach(function(attribute) {
+                        node.setAttribute(attribute, objNode.attributes[attribute]);
+                    });
+                }
+                if (objNode.childNodes) {
+                    objNode.childNodes.forEach(function(childNode) {
+                        node.appendChild(dobj.objToNode(childNode, insideSvg));
+                    });
+                }
+                if (this.valueDiffing) {
+                    if (objNode.value) {
+                        node.value = objNode.value;
+                    }
+                    if (objNode.checked) {
+                        node.checked = objNode.checked;
+                    }
+                    if (objNode.selected) {
+                        node.selected = objNode.selected;
+                    }
+                }
+            }
+            return node;
+        },
+        findInnerDiff: function(t1, t2, route) {
+
+            var subtrees = (t1.childNodes && t2.childNodes) ? markSubTrees(t1, t2) : [],
+                t1ChildNodes = t1.childNodes ? t1.childNodes : [],
+                t2ChildNodes = t2.childNodes ? t2.childNodes : [],
+                childNodesLengthDifference, diffs = [],
+                index = 0,
+                last, e1, e2, i;
+
+            if (subtrees.length > 1) {
+                /* Two or more groups have been identified among the childnodes of t1
+                 * and t2.
+                 */
+                return this.attemptGroupRelocation(t1, t2, subtrees, route);
+            }
+
+            /* 0 or 1 groups of similar child nodes have been found
+             * for t1 and t2. 1 If there is 1, it could be a sign that the
+             * contents are the same. When the number of groups is below 2,
+             * t1 and t2 are made to have the same length and each of the
+             * pairs of child nodes are diffed.
+             */
+
+
+            last = Math.max(t1ChildNodes.length, t2ChildNodes.length);
+            if (t1ChildNodes.length !== t2ChildNodes.length) {
+                childNodesLengthDifference = true;
+            }
+
+            for (i = 0; i < last; i += 1) {
+                e1 = t1ChildNodes[i];
+                e2 = t2ChildNodes[i];
+
+                if (childNodesLengthDifference) {
+                    /* t1 and t2 have different amounts of childNodes. Add
+                     * and remove as necessary to obtain the same length */
+                    if (e1 && !e2) {
+                        if (e1.nodeName === '#text') {
+                            diffs.push(new Diff({
+                                action: 'removeTextElement',
+                                route: route.concat(index),
+                                value: e1.data
+                            }));
+                            index -= 1;
+                        } else {
+                            diffs.push(new Diff({
+                                action: 'removeElement',
+                                route: route.concat(index),
+                                element: cloneObj(e1)
+                            }));
+                            index -= 1;
+                        }
+
+                    } else if (e2 && !e1) {
+                        if (e2.nodeName === '#text') {
+                            diffs.push(new Diff({
+                                action: 'addTextElement',
+                                route: route.concat(index),
+                                value: e2.data
+                            }));
+                        } else {
+                            diffs.push(new Diff({
+                                action: 'addElement',
+                                route: route.concat(index),
+                                element: cloneObj(e2)
+                            }));
+                        }
+                    }
+                }
+                /* We are now guaranteed that childNodes e1 and e2 exist,
+                 * and that they can be diffed.
+                 */
+                /* Diffs in child nodes should not affect the parent node,
+                 * so we let these diffs be submitted together with other
+                 * diffs.
+                 */
+
+                if (e1 && e2) {
+                    diffs = diffs.concat(this.findNextDiff(e1, e2, route.concat(index)));
+                }
+
+                index += 1;
+
+            }
+            t1.innerDone = true;
+            return diffs;
+
+        },
+
+        attemptGroupRelocation: function(t1, t2, subtrees, route) {
+            /* Either t1.childNodes and t2.childNodes have the same length, or
+             * there are at least two groups of similar elements can be found.
+             * attempts are made at equalizing t1 with t2. First all initial
+             * elements with no group affiliation (gaps=true) are removed (if
+             * only in t1) or added (if only in t2). Then the creation of a group
+             * relocation diff is attempted.
+             */
+
+            var gapInformation = getGapInformation(t1, t2, subtrees),
+                gaps1 = gapInformation.gaps1,
+                gaps2 = gapInformation.gaps2,
+                shortest = Math.min(gaps1.length, gaps2.length),
+                destinationDifferent, toGroup,
+                group, node, similarNode, testI, diffs = [],
+                index1, index2, j;
+
+
+            for (index2 = 0, index1 = 0; index2 < shortest; index1 += 1, index2 += 1) {
+                if (gaps1[index2] === true) {
+                    node = t1.childNodes[index1];
+                    if (node.nodeName === '#text') {
+                        if (t2.childNodes[index2].nodeName === '#text' && node.data !== t2.childNodes[index2].data) {
+                            testI = index1;
+                            while (t1.childNodes.length > testI + 1 && t1.childNodes[testI + 1].nodeName === '#text') {
+                                testI += 1;
+                                if (t2.childNodes[index2].data === t1.childNodes[testI].data) {
+                                    similarNode = true;
+                                    break;
+                                }
+                            }
+                            if (!similarNode) {
+                                diffs.push(new Diff({
+                                    action: 'modifyTextElement',
+                                    route: route.concat(index2),
+                                    oldValue: node.data,
+                                    newValue: t2.childNodes[index2].data
+                                }));
+                            }
+                        }
+                        diffs.push(new Diff({
+                            action: 'removeTextElement',
+                            route: route.concat(index2),
+                            value: node.data
+                        }));
+                        gaps1.splice(index2, 1);
+                        shortest = Math.min(gaps1.length, gaps2.length);
+                        index2 -= 1;
+                    } else {
+                        diffs.push(new Diff({
+                            action: 'removeElement',
+                            route: route.concat(index2),
+                            element: cloneObj(node)
+                        }));
+                        gaps1.splice(index2, 1);
+                        shortest = Math.min(gaps1.length, gaps2.length);
+                        index2 -= 1;
+                    }
+
+                } else if (gaps2[index2] === true) {
+                    node = t2.childNodes[index2];
+                    if (node.nodeName === '#text') {
+                        diffs.push(new Diff({
+                            action: 'addTextElement',
+                            route: route.concat(index2),
+                            value: node.data
+                        }));
+                        gaps1.splice(index2, 0, true);
+                        shortest = Math.min(gaps1.length, gaps2.length);
+                        index1 -= 1;
+                    } else {
+                        diffs.push(new Diff({
+                            action: 'addElement',
+                            route: route.concat(index2),
+                            element: cloneObj(node)
+                        }));
+                        gaps1.splice(index2, 0, true);
+                        shortest = Math.min(gaps1.length, gaps2.length);
+                        index1 -= 1;
+                    }
+
+                } else if (gaps1[index2] !== gaps2[index2]) {
+                    if (diffs.length > 0) {
+                        return diffs;
+                    }
+                    // group relocation
+                    group = subtrees[gaps1[index2]];
+                    toGroup = Math.min(group.new, (t1.childNodes.length - group.length));
+                    if (toGroup !== group.old) {
+                        // Check whether destination nodes are different than originating ones.
+                        destinationDifferent = false;
+                        for (j = 0; j < group.length; j += 1) {
+                            if (!roughlyEqual(t1.childNodes[toGroup + j], t1.childNodes[group.old + j], [], false, true)) {
+                                destinationDifferent = true;
+                            }
+                        }
+                        if (destinationDifferent) {
+                            return [new Diff({
+                                action: 'relocateGroup',
+                                groupLength: group.length,
+                                from: group.old,
+                                to: toGroup,
+                                route: route
+                            })];
+                        }
+                    }
+                }
+            }
+            return diffs;
+        },
+
+        findValueDiff: function(t1, t2, route) {
+            // Differences of value. Only useful if the value/selection/checked value
+            // differs from what is represented in the DOM. For example in the case
+            // of filled out forms, etc.
+            var diffs = [];
+
+            if (t1.selected !== t2.selected) {
+                diffs.push(new Diff({
+                    action: 'modifySelected',
+                    oldValue: t1.selected,
+                    newValue: t2.selected,
+                    route: route
+                }));
+            }
+
+            if ((t1.value || t2.value) && t1.value !== t2.value && t1.nodeName !== 'OPTION') {
+                diffs.push(new Diff({
+                    action: 'modifyValue',
+                    oldValue: t1.value,
+                    newValue: t2.value,
+                    route: route
+                }));
+            }
+            if (t1.checked !== t2.checked) {
+                diffs.push(new Diff({
+                    action: 'modifyChecked',
+                    oldValue: t1.checked,
+                    newValue: t2.checked,
+                    route: route
+                }));
+            }
+
+            return diffs;
+        },
+
+        // ===== Apply a virtual diff =====
+
+        applyVirtual: function(tree, diffs) {
+            var dobj = this;
+            if (diffs.length === 0) {
+                return true;
+            }
+            diffs.forEach(function(diff) {
+                //                              console.log(JSON.stringify(diff));
+                //                              console.log(JSON.stringify(tree));
+                //                              console.log(this.objToNode(tree).outerHTML);
+                dobj.applyVirtualDiff(tree, diff);
+                //                                console.log(JSON.stringify(tree));
+                //                                console.log(this.objToNode(tree).outerHTML);
+            });
+            return true;
+        },
+        getFromVirtualRoute: function(tree, route) {
+            var node = tree,
+                parentNode, nodeIndex;
+
+            route = route.slice();
+            while (route.length > 0) {
+                if (!node.childNodes) {
+                    return false;
+                }
+                nodeIndex = route.splice(0, 1)[0];
+                parentNode = node;
+                node = node.childNodes[nodeIndex];
+            }
+            return {
+                node: node,
+                parentNode: parentNode,
+                nodeIndex: nodeIndex
+            };
+        },
+        applyVirtualDiff: function(tree, diff) {
+            var routeInfo = this.getFromVirtualRoute(tree, diff.route),
+                node = routeInfo.node,
+                parentNode = routeInfo.parentNode,
+                nodeIndex = routeInfo.nodeIndex,
+                newNode, route, c;
+
+            switch (diff.action) {
+                case 'addAttribute':
+                    if (!node.attributes) {
+                        node.attributes = {};
+                    }
+
+                    node.attributes[diff.name] = diff.value;
+
+                    if (diff.name === 'checked') {
+                        node.checked = true;
+                    } else if (diff.name === 'selected') {
+                        node.selected = true;
+                    } else if (node.nodeName === 'INPUT' && diff.name === 'value') {
+                        node.value = diff.value;
+                    }
+
+                    break;
+                case 'modifyAttribute':
+                    node.attributes[diff.name] = diff.newValue;
+                    if (node.nodeName === 'INPUT' && diff.name === 'value') {
+                        node.value = diff.value;
+                    }
+                    break;
+                case 'removeAttribute':
+
+                    delete node.attributes[diff.name];
+
+                    if (Object.keys(node.attributes).length === 0) {
+                        delete node.attributes;
+                    }
+
+                    if (diff.name === 'checked') {
+                        delete node.checked;
+                    } else if (diff.name === 'selected') {
+                        delete node.selected;
+                    } else if (node.nodeName === 'INPUT' && diff.name === 'value') {
+                        delete node.value;
+                    }
+
+                    break;
+                case 'modifyTextElement':
+                    node.data = diff.newValue;
+
+                    if (parentNode.nodeName === 'TEXTAREA') {
+                        parentNode.value = diff.newValue;
+                    }
+                    break;
+                case 'modifyValue':
+                    node.value = diff.newValue;
+                    break;
+                case 'modifyComment':
+                    node.data = diff.newValue;
+                    break;
+                case 'modifyChecked':
+                    node.checked = diff.newValue;
+                    break;
+                case 'modifySelected':
+                    node.selected = diff.newValue;
+                    break;
+                case 'replaceElement':
+                    newNode = cloneObj(diff.newValue);
+                    newNode.outerDone = true;
+                    newNode.innerDone = true;
+                    newNode.valueDone = true;
+                    parentNode.childNodes[nodeIndex] = newNode;
+                    break;
+                case 'relocateGroup':
+                    node.childNodes.splice(diff.from, diff.groupLength).reverse()
+                        .forEach(function(movedNode) {
+                            node.childNodes.splice(diff.to, 0, movedNode);
+                        });
+                    break;
+                case 'removeElement':
+                    parentNode.childNodes.splice(nodeIndex, 1);
+                    break;
+                case 'addElement':
+                    route = diff.route.slice();
+                    c = route.splice(route.length - 1, 1)[0];
+                    node = this.getFromVirtualRoute(tree, route).node;
+                    newNode = cloneObj(diff.element);
+                    newNode.outerDone = true;
+                    newNode.innerDone = true;
+                    newNode.valueDone = true;
+
+                    if (!node.childNodes) {
+                        node.childNodes = [];
+                    }
+
+                    if (c >= node.childNodes.length) {
+                        node.childNodes.push(newNode);
+                    } else {
+                        node.childNodes.splice(c, 0, newNode);
+                    }
+                    break;
+                case 'removeTextElement':
+                    parentNode.childNodes.splice(nodeIndex, 1);
+                    if (parentNode.nodeName === 'TEXTAREA') {
+                        delete parentNode.value;
+                    }
+                    break;
+                case 'addTextElement':
+                    route = diff.route.slice();
+                    c = route.splice(route.length - 1, 1)[0];
+                    newNode = {};
+                    newNode.nodeName = '#text';
+                    newNode.data = diff.value;
+                    node = this.getFromVirtualRoute(tree, route).node;
+                    if (!node.childNodes) {
+                        node.childNodes = [];
+                    }
+
+                    if (c >= node.childNodes.length) {
+                        node.childNodes.push(newNode);
+                    } else {
+                        node.childNodes.splice(c, 0, newNode);
+                    }
+                    if (node.nodeName === 'TEXTAREA') {
+                        node.value = diff.newValue;
+                    }
+                    break;
+                default:
+                    console.log('unknown action');
+            }
+
+            return;
+        },
+
+
+
+
+        // ===== Apply a diff =====
+
+        apply: function(tree, diffs) {
+            var dobj = this;
+
+            if (diffs.length === 0) {
+                return true;
+            }
+            diffs.forEach(function(diff) {
+                if (!dobj.applyDiff(tree, diff)) {
+                    return false;
+                }
+            });
+            return true;
+        },
+        getFromRoute: function(tree, route) {
+            route = route.slice();
+            var c, node = tree;
+            while (route.length > 0) {
+                if (!node.childNodes) {
+                    return false;
+                }
+                c = route.splice(0, 1)[0];
+                node = node.childNodes[c];
+            }
+            return node;
+        },
+        applyDiff: function(tree, diff) {
+            var node = this.getFromRoute(tree, diff.route),
+                newNode, reference, route, c;
+
+            switch (diff.action) {
+                case 'addAttribute':
+                    if (!node || !node.setAttribute) {
+                        return false;
+                    }
+                    node.setAttribute(diff.name, diff.value);
+                    break;
+                case 'modifyAttribute':
+                    if (!node || !node.setAttribute) {
+                        return false;
+                    }
+                    node.setAttribute(diff.name, diff.newValue);
+                    break;
+                case 'removeAttribute':
+                    if (!node || !node.removeAttribute) {
+                        return false;
+                    }
+                    node.removeAttribute(diff.name);
+                    break;
+                case 'modifyTextElement':
+                    if (!node || node.nodeType !== 3) {
+                        return false;
+                    }
+                    this.textDiff(node, node.data, diff.oldValue, diff.newValue);
+                    break;
+                case 'modifyValue':
+                    if (!node || typeof node.value === 'undefined') {
+                        return false;
+                    }
+                    node.value = diff.newValue;
+                    break;
+                case 'modifyComment':
+                    if (!node || typeof node.data === 'undefined') {
+                        return false;
+                    }
+                    node.data = diff.newValue;
+                    break;
+                case 'modifyChecked':
+                    if (!node || typeof node.checked === 'undefined') {
+                        return false;
+                    }
+                    node.checked = diff.newValue;
+                    break;
+                case 'modifySelected':
+                    if (!node || typeof node.selected === 'undefined') {
+                        return false;
+                    }
+                    node.selected = diff.newValue;
+                    break;
+                case 'replaceElement':
+                    node.parentNode.replaceChild(this.objToNode(diff.newValue, node.namespaceURI === 'http://www.w3.org/2000/svg'), node);
+                    break;
+                case 'relocateGroup':
+                    Array.apply(null, new Array(diff.groupLength)).map(function() {
+                        return node.removeChild(node.childNodes[diff.from]);
+                    }).forEach(function(childNode, index) {
+                        if (index === 0) {
+                            reference = node.childNodes[diff.to];
+                        }
+                        node.insertBefore(childNode, reference);
+                    });
+                    break;
+                case 'removeElement':
+                    node.parentNode.removeChild(node);
+                    break;
+                case 'addElement':
+                    route = diff.route.slice();
+                    c = route.splice(route.length - 1, 1)[0];
+                    node = this.getFromRoute(tree, route);
+                    node.insertBefore(this.objToNode(diff.element, node.namespaceURI === 'http://www.w3.org/2000/svg'), node.childNodes[c]);
+                    break;
+                case 'removeTextElement':
+                    if (!node || node.nodeType !== 3) {
+                        return false;
+                    }
+                    node.parentNode.removeChild(node);
+                    break;
+                case 'addTextElement':
+                    route = diff.route.slice();
+                    c = route.splice(route.length - 1, 1)[0];
+                    newNode = document.createTextNode(diff.value);
+                    node = this.getFromRoute(tree, route);
+                    if (!node || !node.childNodes) {
+                        return false;
+                    }
+                    node.insertBefore(newNode, node.childNodes[c]);
+                    break;
+                default:
+                    console.log('unknown action');
+            }
+
+            return true;
+        },
+
+        // ===== Undo a diff =====
+
+        undo: function(tree, diffs) {
+            diffs = diffs.slice();
+            var dobj = this;
+            if (!diffs.length) {
+                diffs = [diffs];
+            }
+            diffs.reverse();
+            diffs.forEach(function(diff) {
+                dobj.undoDiff(tree, diff);
+            });
+        },
+        undoDiff: function(tree, diff) {
+
+            switch (diff.action) {
+                case 'addAttribute':
+                    diff.action = 'removeAttribute';
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'modifyAttribute':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'removeAttribute':
+                    diff.action = 'addAttribute';
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'modifyTextElement':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'modifyValue':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'modifyComment':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'modifyChecked':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'modifySelected':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'replaceElement':
+                    swap(diff, 'oldValue', 'newValue');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'relocateGroup':
+                    swap(diff, 'from', 'to');
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'removeElement':
+                    diff.action = 'addElement';
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'addElement':
+                    diff.action = 'removeElement';
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'removeTextElement':
+                    diff.action = 'addTextElement';
+                    this.applyDiff(tree, diff);
+                    break;
+                case 'addTextElement':
+                    diff.action = 'removeTextElement';
+                    this.applyDiff(tree, diff);
+                    break;
+                default:
+                    console.log('unknown action');
+            }
+
+        }
+    };
+
+    if (typeof exports !== 'undefined') {
+        if (typeof module !== 'undefined' && module.exports) {
+            exports = module.exports = diffDOM;
+        }
+        exports.diffDOM = diffDOM;
+    } else {
+        // `window` in the browser, or `exports` on the server
+        this.diffDOM = diffDOM;
+    }
 
 }.call(this));
 

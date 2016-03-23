@@ -47,7 +47,8 @@
   padding: 5px 10px;
   color: #fff; }
 
-.noembed-arstechnica div.quotetitle, .noembed-arstechnica div.quotecontent {
+.noembed-arstechnica div.quotetitle,
+.noembed-arstechnica div.quotecontent {
   border-left: 5px solid #ccc;
   padding-left: 10px;
   color: #7E8185;
@@ -445,6 +446,7 @@
   color: #666666; }
 
 /* Literal.Number.Integer.Long */
+
 .noembed-github {
   display: block; }
 
@@ -785,6 +787,7 @@
   color: #666666; }
 
 /* Literal.Number.Integer.Long */
+
 .noembed-imdb {
   padding: 10px; }
 
@@ -847,7 +850,8 @@
 .noembed-rapgenius a {
   color: #fff !important; }
 
-.noembed-rapgenius .rapgenius-song, .noembed-rapgenius .rapgenius-artist {
+.noembed-rapgenius .rapgenius-song,
+.noembed-rapgenius .rapgenius-artist {
   color: #fff;
   font-size: 18px;
   font-weight: bold;
@@ -931,7 +935,8 @@
   font-size: 12px;
   color: #999; }
 
-.noembed-twitter div.tweet_info a, .noembed-twitter div.tweet_info {
+.noembed-twitter div.tweet_info a,
+.noembed-twitter div.tweet_info {
   font-size: 12px;
   color: #999; }
 
@@ -976,14 +981,17 @@
 .noembed-wikipedia sup {
   line-height: 0px; }
 
-.noembed-wikipedia div.tright, .noembed-wikipedia div.floatright, .noembed-wikipedia table.floattright {
+.noembed-wikipedia div.tright,
+.noembed-wikipedia div.floatright,
+.noembed-wikipedia table.floattright {
   float: right;
   clear: right; }
 
 .noembed-wikipedia div.tright {
   margin: .5em 0 1.3em 1.4em; }
 
-.noembed-giantbomb p, .noembed-youtube p {
+.noembed-giantbomb p,
+.noembed-youtube p {
   margin: 0;
   padding: 0; }
 
@@ -1012,21 +1020,27 @@
   border-top: none;
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb; }
+
 .noembed-embed .noembed-meta-info td {
   vertical-align: middle;
   line-height: 1em;
   padding-top: 2px;
   padding-bottom: 2px; }
+
 .noembed-embed .noembed-meta-info td:first-child {
   padding-left: 5px; }
+
 .noembed-embed .noembed-meta-info td:last-child {
   padding-right: 5px; }
+
 .noembed-embed .noembed-meta-info a {
   text-decoration: none;
   color: #666;
   font-weight: bold; }
+
 .noembed-embed .favicon {
   height: 16px; }
+
 .noembed-embed .favicon img {
   width: 16px;
   height: 16px;

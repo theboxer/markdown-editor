@@ -1,11 +1,14 @@
 .amazon .price-details p {
   margin-bottom: 0; }
+
 .amazon .price-details .price {
   font-size: 24px;
   display: block;
   margin-bottom: 5px; }
+
 .amazon .price-details .list-price {
   text-decoration: line-through; }
+
 .amazon .subhead {
   margin-bottom: 5px;
   color: #7f7f7f; }
