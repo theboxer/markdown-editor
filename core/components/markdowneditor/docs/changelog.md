@@ -1,3 +1,6 @@
+
+- Prevent removing uploaded images after resource quick update
+
 ## MarkdownEditor 1.1.0
 - Add HTML blocks help to docs
 - Init jQuery in noConflict mode

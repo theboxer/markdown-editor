@@ -94,9 +94,12 @@ class OnDocFormSave extends Event {
                 $this->uploadedFiles();
             }
         }
+        
+        $foundMarkdownContent = false;
 
         foreach ($resourceArray as $field => $value) {
             if (!strpos($field, '_markdown')) continue;
+            $foundMarkdownContent = true;
             $fieldName = str_replace('_markdown', '', $field);
 
             $markdown = $this->modx->fromJSON($this->resource->getProperty('markdown', 'markdowneditor', '[]'));
@@ -121,7 +124,7 @@ class OnDocFormSave extends Event {
         }
 
         if ($mode == \modSystemEvent::MODE_UPD) {
-            if ($deleteUnused && $underResource) {
+            if ($deleteUnused && $underResource && $foundMarkdownContent) {
                 $this->deleteUnusedFiles();
             }
         }
