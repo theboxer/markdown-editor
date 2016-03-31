@@ -1,4 +1,5 @@
 
+- Load MDE only for resources
 - Prevent removing uploaded images after resource quick update
 
 ## MarkdownEditor 1.1.0

@@ -29,9 +29,9 @@ abstract class Event {
 
     public function init()
     {
-        if (isset($this->sp['resource'])) {
-            if (!$this->sp['resource']->richtext) return false;
-        }
+        if (!isset($this->sp['resource'])) return false;
+        
+        if (!$this->sp['resource']->richtext) return false;
 
         $useEditor = $this->modx->getOption('use_editor', false);
         $whichEditor = $this->modx->getOption('which_editor', '');
